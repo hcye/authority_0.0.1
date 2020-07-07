@@ -12,6 +12,7 @@ import org.pcap4j.core.PcapNetworkInterface.PromiscuousMode;
 import org.pcap4j.packet.ArpPacket;
 import org.pcap4j.packet.EthernetPacket;
 import org.pcap4j.packet.Packet;
+import org.pcap4j.packet.PacketIterator;
 import org.pcap4j.packet.namednumber.ArpHardwareType;
 import org.pcap4j.packet.namednumber.ArpOperation;
 import org.pcap4j.packet.namednumber.EtherType;
@@ -66,7 +67,6 @@ public class SendArpRequest {
                             + " and ether dst "
                             + Pcaps.toBpfString(SRC_MAC_ADDR),
                     BpfCompileMode.OPTIMIZE);
-
             PacketListener listener = new PacketListener() {
                 @Override
                         public void gotPacket(PcapPacket pcapPacket) {
