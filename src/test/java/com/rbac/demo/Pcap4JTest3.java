@@ -24,20 +24,20 @@ public class Pcap4JTest3 {
     private JpaFilter jpaFilter;
     @Test
     public void test() throws PcapNativeException, NotOpenException, UnknownHostException {
-        List<String> list=new GetIps().get(jpaFilter);
+
         GetMacByIp getMacByIp = new GetMacByIp();
         ArpReply arpReply = new ArpReply();
-//        List<String > list=new ArrayList<>();
-
+        List<String > list=new ArrayList<>();
+        list.add("10.75.60.1");
         Map<String, String> dstMac = null;
         System.out.println(list);
-        dstMac = getMacByIp.GetMac(list, "10.75.60.35", "6c:4b:90:8b:42:03", "10.75.60.35", 4);
+//        dstMac = getMacByIp.GetMac(list, "10.75.60.35", "6c:4b:90:8b:42:03", "10.75.60.35", 4);
         System.out.println(dstMac);
-        if (!dstMac.isEmpty()) {
+       /* if (!dstMac.isEmpty()) {
             arpReply.createThread(dstMac, "6c:4b:90:8b:42:03", "10.75.60.1", "10.75.60.35");
         } else {
             System.out.println("主机不存活");
-        }
+        }*/
 
     }
 

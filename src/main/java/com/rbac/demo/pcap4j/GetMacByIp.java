@@ -41,11 +41,9 @@ public class GetMacByIp {
      * 通过arp包解析局域网内主机mac
      *
      * */
-    public Map<String,String> GetMac(List<String> strDstIpAddresss, String strSrcIpAddress, String srcMacAddr, String interfaceIp, int timeOutSeconds) throws PcapNativeException, UnknownHostException, NotOpenException {
+    public Map<String,String> GetMac(List<String> strDstIpAddresss,PcapNetworkInterface nif , int timeOutSeconds) throws PcapNativeException, NotOpenException {
 
-        InetAddress inetAddress = InetAddress.getByName(interfaceIp);
-        PcapNetworkInterface nif = Pcaps.getDevByAddress(inetAddress); //获得网卡
-        MacAddress SRC_MAC_ADDR = MacAddress.getByName(srcMacAddr);  //构造源mac地址对象
+        MacAddress SRC_MAC_ADDR = MacAddress.getByName(nif.getLinkLayerAddresses().get(0).toString());  //构造源mac地址对象
         PcapHandle handle = nif.openLive(SNAPLEN, PromiscuousMode.PROMISCUOUS, READ_TIMEOUT);  //接收数据包
         PcapHandle sendHandle = nif.openLive(SNAPLEN, PromiscuousMode.PROMISCUOUS, READ_TIMEOUT);  //发送数据包
         Map<String,String> res=new HashMap<>();
@@ -61,13 +59,10 @@ public class GetMacByIp {
                 PacketListener listener = new PacketListener() {
                     @Override
                     public void gotPacket(PcapPacket pcapPacket) {
-                        System.out.println(pcapPacket);
                         if (pcapPacket.contains(EthernetPacket.class)) {
-                            System.out.println("-EthernetPacket-");
                             EthernetPacket arp = pcapPacket.get(EthernetPacket.class);
                             if (arp.getHeader()!=null) {
                                 GetMacByIp.resolvedAddr = arp.getHeader().getSrcAddr();
-                                System.out.println("-EthernetPacket-"+resolvedAddr);
                             }
                         }
                     }
@@ -97,7 +92,7 @@ public class GetMacByIp {
                             .tos(IpV4Rfc791Tos.newInstance((byte) 0))
                             .ttl((byte) 100)
                             .protocol(IpNumber.IPV4)
-                            .srcAddr((Inet4Address) InetAddress.getByName(strSrcIpAddress))
+                            .srcAddr((Inet4Address) InetAddress.getByName(nif.getAddresses().get(0).toString()))
                             .dstAddr((Inet4Address) InetAddress.getByName(strDstIpAddress))
                             .payloadBuilder(icmpV4CommonBuilder)
                             .correctChecksumAtBuild(true)

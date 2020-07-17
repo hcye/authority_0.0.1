@@ -22,12 +22,8 @@ public class Pcap4JTets {
     public void test()  {
         FiltAllPacket filtAllPacket=new FiltAllPacket();
         try {
-            filtAllPacket.filtAllPacket(jpaOui,jpaFilter);
+            filtAllPacket.filtAllPacket(jpaOui,jpaFilter,"10.75.60.35");
         } catch (PcapNativeException e) {
-            e.printStackTrace();
-        } catch (NotOpenException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }

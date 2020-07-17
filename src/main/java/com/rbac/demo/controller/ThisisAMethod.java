@@ -36,19 +36,19 @@ public class ThisisAMethod {
 
         }
         GetMacByIp getMacByIp=new GetMacByIp();
-        try {
-            Map<String,String>  map=getMacByIp.GetMac(ips,"10.75.60.35", "6c:4b:90:8b:42:03", "10.75.60.35", 2);
-            if (!map.isEmpty()) {
-               /* reply.ARPSpoofing(map, "6c:4b:90:8b:42:03", "10.75.60.1", "10.75.60.35");*/
-            } else {
-                System.out.println("主机不存活");
-            }
-        } catch (PcapNativeException e) {
-            e.printStackTrace();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (NotOpenException e) {
-            e.printStackTrace();
-        }
+//        try {
+////            Map<String,String>  map=getMacByIp.GetMac(ips,"10.75.60.35", "6c:4b:90:8b:42:03", "10.75.60.35", 2);
+////            if (!map.isEmpty()) {
+//               /* reply.ARPSpoofing(map, "6c:4b:90:8b:42:03", "10.75.60.1", "10.75.60.35");*/
+////            } else {
+////                System.out.println("主机不存活");
+////            }
+////        } catch (PcapNativeException e) {
+////            e.printStackTrace();
+////        } catch (UnknownHostException e) {
+////            e.printStackTrace();
+////        } catch (NotOpenException e) {
+////            e.printStackTrace();
+//        }
     }
 }

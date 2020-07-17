@@ -1,10 +1,10 @@
 package com.rbac.demo.pcap4j;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.pcap4j.core.*;
 import org.pcap4j.core.BpfProgram.BpfCompileMode;
@@ -12,122 +12,61 @@ import org.pcap4j.core.PcapNetworkInterface.PromiscuousMode;
 import org.pcap4j.packet.ArpPacket;
 import org.pcap4j.packet.EthernetPacket;
 import org.pcap4j.packet.Packet;
-import org.pcap4j.packet.PacketIterator;
 import org.pcap4j.packet.namednumber.ArpHardwareType;
 import org.pcap4j.packet.namednumber.ArpOperation;
 import org.pcap4j.packet.namednumber.EtherType;
 import org.pcap4j.util.ByteArrays;
 import org.pcap4j.util.MacAddress;
-import org.pcap4j.util.NifSelector;
 
-@SuppressWarnings("javadoc")
 public class SendArpRequest {
-
-    private static final String COUNT_KEY = SendArpRequest.class.getName() + ".count";
-    private static final int COUNT = Integer.getInteger(COUNT_KEY, 1);
-
-    private static final String READ_TIMEOUT_KEY = SendArpRequest.class.getName() + ".readTimeout";
-    private static final int READ_TIMEOUT = Integer.getInteger(READ_TIMEOUT_KEY, 10); // [ms]
-
-    private static final String SNAPLEN_KEY = SendArpRequest.class.getName() + ".snaplen";
-    private static final int SNAPLEN = Integer.getInteger(SNAPLEN_KEY, 65536); // [bytes]
-
-    private static final MacAddress SRC_MAC_ADDR = MacAddress.getByName("6c:4b:90:8b:42:03");
-
-    private static MacAddress resolvedAddr;
-
-    private SendArpRequest() {}
-
-    public static void main(String[] args) throws PcapNativeException, NotOpenException, UnknownHostException {
-        String strSrcIpAddress = "10.75.60.35"; // for InetAddress.getByName()
-        String strDstIpAddress ="10.75.60.127"; // for InetAddress.getByName()
-
-        System.out.println(COUNT_KEY + ": " + COUNT);
-        System.out.println(READ_TIMEOUT_KEY + ": " + READ_TIMEOUT);
-        System.out.println(SNAPLEN_KEY + ": " + SNAPLEN);
-        System.out.println("\n");
-
-        System.out.println("---");
-        InetAddress inetAddress=InetAddress.getByName("10.75.60.35");
-        PcapNetworkInterface nif=Pcaps.getDevByAddress(inetAddress);
-
-
-
-
-        PcapHandle handle = nif.openLive(SNAPLEN, PromiscuousMode.PROMISCUOUS, READ_TIMEOUT);
-        PcapHandle sendHandle = nif.openLive(SNAPLEN, PromiscuousMode.PROMISCUOUS, READ_TIMEOUT);
-        ExecutorService pool = Executors.newSingleThreadExecutor();
-
+    public SendArpRequest() {
+    }
+    public String sendArp(String strDstIpAddress, PcapNetworkInterface nif, PcapHandle sendHandle,BuildArpPacket buildArpPacket)  {
+        final String srcIpAddress = nif.getAddresses().get(0).getAddress().getHostAddress();
+        ExecutorService pool=Executors.newSingleThreadExecutor();
+         MacAddress[] resolvedAddr = new MacAddress[1];
         try {
-            handle.setFilter(
-                    "arp and src host "
-                            + strDstIpAddress
-                            + " and dst host "
-                            + strSrcIpAddress
-                            + " and ether dst "
-                            + Pcaps.toBpfString(SRC_MAC_ADDR),
-                    BpfCompileMode.OPTIMIZE);
+
             PacketListener listener = new PacketListener() {
                 @Override
-                        public void gotPacket(PcapPacket pcapPacket) {
-                            if (pcapPacket.contains(ArpPacket.class)) {
-                                ArpPacket arp = pcapPacket.get(ArpPacket.class);
-                                if (arp.getHeader().getOperation().equals(ArpOperation.REPLY)) {
-                                    SendArpRequest.resolvedAddr = arp.getHeader().getSrcHardwareAddr();
-                                }
+                public void gotPacket(PcapPacket pcapPacket) {
+                    if (pcapPacket.contains(ArpPacket.class)) {
+                        ArpPacket arp = pcapPacket.get(ArpPacket.class);
+                        if (arp.getHeader().getDstProtocolAddr().getHostAddress().equals(srcIpAddress) && arp.getHeader().getSrcProtocolAddr().getHostAddress().equals(strDstIpAddress)) {
+                            try {
+                                resolvedAddr[0] = arp.getHeader().getSrcHardwareAddr();
+                                sendHandle.breakLoop();
+                            } catch (NotOpenException e) {
+                                e.printStackTrace();
                             }
-                            System.out.println(pcapPacket);
                         }
-                    };
-
-            Task t = new Task(handle, listener);
-            pool.execute(t);
-            ArpPacket.Builder arpBuilder = new ArpPacket.Builder();
-            try {
-                arpBuilder
-                        .hardwareType(ArpHardwareType.ETHERNET)
-                        .protocolType(EtherType.IPV4)
-                        .hardwareAddrLength((byte) MacAddress.SIZE_IN_BYTES)
-                        .protocolAddrLength((byte) ByteArrays.INET4_ADDRESS_SIZE_IN_BYTES)
-                        .operation(ArpOperation.REQUEST)
-                        .srcHardwareAddr(SRC_MAC_ADDR)
-                        .srcProtocolAddr(InetAddress.getByName(strSrcIpAddress))
-                        .dstHardwareAddr(MacAddress.ETHER_BROADCAST_ADDRESS)
-                        .dstProtocolAddr(InetAddress.getByName(strDstIpAddress));
-            } catch (UnknownHostException e) {
-                throw new IllegalArgumentException(e);
-            }
-
-            EthernetPacket.Builder etherBuilder = new EthernetPacket.Builder();
-            etherBuilder
-                    .dstAddr(MacAddress.ETHER_BROADCAST_ADDRESS)
-                    .srcAddr(SRC_MAC_ADDR)
-                    .type(EtherType.ARP)
-                    .payloadBuilder(arpBuilder)
-                    .paddingAtBuild(true);
-
-            for (int i = 0; i < COUNT; i++) {
-                Packet p = etherBuilder.build();
-                System.out.println(p);
-                sendHandle.sendPacket(p);
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    break;
+                    }
                 }
-            }
-        } finally {
-            if (handle != null && handle.isOpen()) {
-                handle.close();
-            }
-            if (sendHandle != null && sendHandle.isOpen()) {
-                sendHandle.close();
-            }
-            if (pool != null && !pool.isShutdown()) {
-                pool.shutdown();
-            }
+            };
+            Task t = new Task(sendHandle, listener, nif);
 
-            System.out.println(strDstIpAddress + " was resolved to " + resolvedAddr);
+            pool.execute(t);
+            Packet p = buildArpPacket.getWholePacket(strDstIpAddress, "");
+            sendHandle.sendPacket(p);
+
+        } finally {
+            pool.shutdown();
+            try {
+                pool.awaitTermination(4000, TimeUnit.MILLISECONDS);  //如果200毫秒没收到回包就中断进程
+                if (sendHandle != null && sendHandle.isOpen()) {
+                    sendHandle.breakLoop();
+                }
+                if (pool != null && !pool.isShutdown()) {
+                    pool.shutdownNow();
+                }
+            } catch (InterruptedException | NotOpenException e) {
+                return "";
+            }
+            if (resolvedAddr[0] != null) {
+                return resolvedAddr[0].toString();
+            } else {
+                return "";
+            }
         }
     }
 
@@ -135,20 +74,24 @@ public class SendArpRequest {
 
         private PcapHandle handle;
         private PacketListener listener;
+        private PcapNetworkInterface nif;
 
-        public Task(PcapHandle handle, PacketListener listener) {
+        public Task(PcapHandle handle, PacketListener listener, PcapNetworkInterface nif) {
             this.handle = handle;
             this.listener = listener;
+            this.nif = nif;
         }
 
         @Override
         public void run() {
             try {
-                handle.loop(COUNT, listener);
+                if (!handle.isOpen()) {
+                    handle = nif.openLive(65536, PromiscuousMode.PROMISCUOUS, 2000);
+                }
+                handle.loop(-1, listener);
             } catch (PcapNativeException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
-                e.printStackTrace();
             } catch (NotOpenException e) {
                 e.printStackTrace();
             }
