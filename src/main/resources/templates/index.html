@@ -71,7 +71,7 @@
 		<div class="layui-side layui-bg-black">
 			<div class="layui-side-scroll">
 				<ul  class="layui-nav layui-nav-tree" lay-filter="operate">
-
+<!--
 					<li class="layui-nav-item layui-nav-itemed">
 						<a href="javascript:void(0);"  data-id="log/log.html">开发者日志<span class='layui-badge-dot'></span></a>
 					</li>
@@ -88,7 +88,7 @@
 							<dd><a href="javascript:void(0);" data-id="case/checkbar.html">开启复选框<span data-vlog="vs257" class='layui-badge-dot'></span></a></dd>
 							<dd><a href="javascript:void(0);" data-id="case/menubar.html">开启菜单栏<span data-vlog="vs250" class='layui-badge-dot'></span></a></dd>
 							<dd><a href="javascript:void(0);" data-id="case/toolbar.html">开启工具栏<span data-vlog="vs255" class='layui-badge-dot'></span></a></dd>
-							<!-- <dd ><a href="javascript:void(0);" data-id="case/draw.html">开启拖拽<span class='layui-badge-dot'></span></a></dd> -->
+							&lt;!&ndash; <dd ><a href="javascript:void(0);" data-id="case/draw.html">开启拖拽<span class='layui-badge-dot'></span></a></dd> &ndash;&gt;
 							<dd><a href="javascript:void(0);" data-id="case/iframe.html">开启iframe<span data-vlog="vs255" class='layui-badge-dot'></span></a></dd>
 							<dd><a href="javascript:void(0);" data-id="case/select.html">使用下拉树<span data-vlog="vs257" class='layui-badge-dot'></span></a></dd>
 							<dd><a href="javascript:void(0);" data-id="case/style.html">图标及配色方案<span data-vlog="vs255" class='layui-badge-dot'></span></a></dd>
@@ -100,33 +100,41 @@
 					<li class="layui-nav-item layui-nav-itemed">
 						<a href="javascript:void(0);" data-id="other/other.html">其他可实现功能</a>
 					</li>
-					<!-- <li class="layui-nav-item layui-nav-itemed">
+					&lt;!&ndash; <li class="layui-nav-item layui-nav-itemed">
 						<a href="javascript:void(0);" data-id="example/example.html">开启全部功能</a>
-					</li> -->
-					<!-- <li class="layui-nav-item layui-nav-itemed">
+					</li> &ndash;&gt;
+					&lt;!&ndash; <li class="layui-nav-item layui-nav-itemed">
 						<a href="javascript:void(0);" data-id="question/question.html">常见问题解答</a>
-					</li> -->
+					</li> &ndash;&gt;
 					<li class="layui-nav-item layui-nav-itemed">
 						<a href="javascript:void(0);" data-id="layuiadmin/layuiadmin.html">集成到layuiAdmin</a>
 					</li> 
-					<!-- <li class="layui-nav-item layui-nav-itemed">
+					&lt;!&ndash; <li class="layui-nav-item layui-nav-itemed">
 						<a href="javascript:void(0);" data-id="test/test.html">测试</a>
-					</li> -->
+					</li> &ndash;&gt;
 					<li class="layui-nav-item layui-nav-itemed">
 						<a href="javascript:void(0);" data-id="online/online.html">在线运行</a>
 					</li>
-					<!--	自加 	-->
+					&lt;!&ndash;	自加 	&ndash;&gt;
 					<li class="layui-nav-item layui-nav-itemed">
 						<a href="javascript:void(0);" data-id="hcye/helloworld.html">自定义页面</a>
 					</li>
-					<!--	自加	-->
+					&lt;!&ndash;	自加	&ndash;&gt;
 
-					<!-- <li class="layui-nav-item layui-nav-itemed">
+					&lt;!&ndash; <li class="layui-nav-item layui-nav-itemed">
 						<a href="javascript:void(0);" data-id="finish/finish.html">小额赞赏~</a>
-					</li> -->
-					<!-- <li class="layui-nav-item layui-nav-itemed">
+					</li> &ndash;&gt;
+					&lt;!&ndash; <li class="layui-nav-item layui-nav-itemed">
 						<a href="javascript:void(0);" data-id="msg/msg.html">反馈留言（试用）</a>
-					</li> -->
+					</li> &ndash;&gt;-->
+
+					<li class="layui-nav-item layui-nav-itemed" th:each="menu :${menus}" >
+						<a href="javascript:void(0);"  th:data-id="${menu.getUrl()}" th:text="${menu.getDescription()}"><span class='layui-badge-dot'></span></a>
+						<dl class="layui-nav-child" th:each="sub :${menu.getMenusById()}">
+							<dd><a href="javascript:void(0);" th:data-id="${sub.getUrl()}" th:text="${sub.getDescription()}"><span  class='layui-badge-dot'></span></a></dd>
+						</dl>
+					</li>
+
 				</ul>
 			</div>
 		</div>

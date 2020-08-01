@@ -52,7 +52,6 @@ public class UserRealm extends AuthorizingRealm {
         }else if(!employees.get(0).getPwd().equals(new String(token.getPassword()))){
             throw new IncorrectCredentialsException();  //密码错误
         }
-
         return new SimpleAuthenticationInfo(
                 employees.get(0).getEname(),  //用户名
                 employees.get(0).getPwd(),    //密码

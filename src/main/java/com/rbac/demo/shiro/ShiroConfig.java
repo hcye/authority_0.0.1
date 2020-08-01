@@ -15,9 +15,6 @@ import java.util.Map;
 
 @Configuration
 public class ShiroConfig {
-    @Autowired
-    private UserRealm userRealm;
-
     @Bean(name="SecurityManager")    //以securityManager注入
     public DefaultWebSecurityManager getDefaultSecurityManager(@Qualifier("userRealm")UserRealm userRealm){
         DefaultWebSecurityManager defaultSecurityManager=new DefaultWebSecurityManager();
