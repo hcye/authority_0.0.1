@@ -4,16 +4,32 @@
 <script type="text/javascript" src="layui/layui.js"></script>
 <link rel="stylesheet" href="layui_ext/dtree/dtree.css">
 <link rel="stylesheet" href="layui_ext/dtree/font/dtreefont.css">
+<script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+<script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
 <head>
     <meta charset="UTF-8">
     <title>登录</title>
 </head>
+<body>
+
 <div class="layui-container">
-    <form method="post" action="/">
-    用户名：<input type="text" name="name" class="layui-input layui-input-inline" style="width: 20%" /><br/>
-    密&nbsp;&nbsp;&nbsp;码：<input type="password" name="pwd" class="layui-input layui-input-inline"  style="width: 20%" /><br/>
-    <input type="submit" class="layui-btn" value="登录" /><input type="reset" class="layui-btn"/>
-    </form>
-</body>
+    <div class="layui-row" style="margin-top: 20%">
+        <div class="layui-col-md6 layui-col-md-offset2 ">
+            <form method="post" class="layui-form" action="login" >
+                <div class="layui-form-item">
+                <label class="layui-form-label">用户名：</label><input name="username" class="layui-input" type="text" style="width: 80%"/>
+                </div>
+                <div class="layui-form-item">
+                <label  class="layui-form-label">密  码：</label><input name="pwd" class="layui-input" type="password" style="width: 80%"/>
+                </div>
+                <div class="layui-col-md4 layui-col-md-offset5">
+                <div class="layui-form-item layui-input-inline">
+                <input type="submit" class="layui-btn" value="提交"/><input type="reset" class="layui-btn layui-btn-primary" value="取消"/>
+                </div>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+</body>
 </html>

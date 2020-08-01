@@ -1,9 +1,9 @@
 package com.rbac.demo.filter;
 
-import com.rbac.demo.entity.Func;
+/*import com.rbac.demo.entity.Func;
 import com.rbac.demo.entity.Menus;
 import com.rbac.demo.entity.Role2Menus;
-import com.rbac.demo.entity.User;
+import com.rbac.demo.entity.User;*/
 import org.springframework.context.annotation.Configuration;
 
 import javax.servlet.*;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Configuration
+//@Configuration
 public class AuthorityFilter implements Filter {
 
 
@@ -25,7 +25,7 @@ public class AuthorityFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
+      /*  HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         User user= (User) request.getSession().getAttribute("user");
         String uri=((HttpServletRequest) servletRequest).getRequestURI();
@@ -62,7 +62,7 @@ public class AuthorityFilter implements Filter {
                 }
             }
 
-        }
+        }*/
 
     }
 

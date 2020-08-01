@@ -1,7 +1,5 @@
 package com.rbac.demo.dtree;
 
-import com.rbac.demo.entity.Menus;
-import com.rbac.demo.jpa.JpaMenus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +9,7 @@ import java.util.List;
 
 @Component
 public class GetDtreeList {
-    @Autowired
+      /* @Autowired
     JpaMenus jpaMenus;
     public List<Dtree> getDtrees( List<Menus> list1){
         List<Menus> list=jpaMenus.findAll();
@@ -48,5 +46,5 @@ public class GetDtreeList {
             }
         }
         return list2;
-    }
+    }*/
 }
