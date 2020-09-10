@@ -4,22 +4,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Dtree implements Comparable<Dtree>{
+
+
     @Override
     public String toString() {
         return "Dtree{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
-                ", checkArr='" + checkArr + '\'' +
                 ", parentId=" + parentId +
                 ", children=" + children +
+                ", checkArr=" + checkArr +
                 '}';
     }
 
     private int id=0;
     private String title;
-    private String checkArr="0";
     private int parentId;
     private List<Dtree> children=new ArrayList<>();
+    private String checkArr = "";
 
     public int getId() {
         return id;

@@ -1,7 +1,9 @@
 package com.rbac.demo.jpa;
 
-import com.rbac.demo.entity.Menus;
+import com.rbac.demo.entity.Resources;
 import com.rbac.demo.entity.Role;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +13,25 @@ import java.util.List;
 
 @Repository
 public interface JpaRole extends JpaRepository<Role,Integer> {
-    @Query("select rm.menusByMenusId from Role2Menus rm where rm.roleByRoleId=:role ")
-    List<Menus> findMenusByRole(@Param("role")Role role);
+    @Query("select rm.resourcesByMenusId from Role2Resources rm where rm.roleByRoleId=:role ")
+    List<Resources> findResourcesByRole(@Param("role")Role role);
+    @Query("select rm.resourcesByMenusId from Role2Resources rm  where rm.roleByRoleId=:role and rm.resourcesByMenusId.type='目录' and rm.resourcesByMenusId.resourcesByParentId is null")
+    List<Resources> findMenusByRole(@Param("role")Role role);
+
+    @Query("select role from Role role where role.deleteFlag=0")
+    List<Role> findAllRole();
+
+    Page<Role> findRolesByAvalible(Byte avalible, Pageable pageable);
+
+    @Query("select role from Role role")
+    Page<Role> findRolesByPage(Pageable pageable);
+
+    Page<Role> findRolesByRnameLikeAndAvalible(String rname,Byte avalible,Pageable pageable);
+
+    Page<Role> findRolesByRnameLike(String rname,Pageable pageable);
+
+    Role findRoleByAuthorityCode(String code);
+
+    Role findRoleByRname(String rname);
+
 }

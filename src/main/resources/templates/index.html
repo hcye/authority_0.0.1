@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html>
 <html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	  xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
 <meta charset="UTF-8">
 <title>layui.dtree帮助手册</title>
-<link rel="stylesheet" href="layui/css/layui.css">
-<script type="text/javascript" src="layui/layui.js"></script>
-<link rel="stylesheet" href="layui_ext/dtree/dtree.css">
-<link rel="stylesheet" href="layui_ext/dtree/font/dtreefont.css">
+<link rel="stylesheet" href="/layui/css/layui.css">
+<script type="text/javascript" src="/layui/layui.js"></script>
+<link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+<link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
 <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
 <!--[if lt IE 9]>
   <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
@@ -65,7 +67,7 @@
 			    </dl>
 			  </li>
 			</ul>
-			<div class="finish"><a href="JavaScript:void(0)"><img src="finish/s.png" class="layui-nav-img"></span></a></div>
+			<div class="finish"><a href="JavaScript:void(0)"><img src="../static/img/s.png" class="layui-nav-img"></span></a></div>
 		</div>
 		
 		<div class="layui-side layui-bg-black">
@@ -128,13 +130,13 @@
 						<a href="javascript:void(0);" data-id="msg/msg.html">反馈留言（试用）</a>
 					</li> &ndash;&gt;-->
 
-					<li class="layui-nav-item layui-nav-itemed" th:each="menu :${menus}" >
-						<a href="javascript:void(0);"  th:data-id="${menu.getUrl()}" th:text="${menu.getDescription()}"><span class='layui-badge-dot'></span></a>
-						<dl class="layui-nav-child" th:each="sub :${menu.getMenusById()}">
-							<dd><a href="javascript:void(0);" th:data-id="${sub.getUrl()}" th:text="${sub.getDescription()}"><span  class='layui-badge-dot'></span></a></dd>
+					<li class="layui-nav-item layui-nav-itemed" th:each="res :${resources}" >
+						<!--/*@thymesVar id="getUrl" type=""*/-->
+						<a href="javascript:void(0);" shiro:hasPermission="${res.getPermission()}" th:data-id="${res.getUrl()}" th:text="${res.getDescription()}"><span class='layui-badge-dot'></span></a>
+						<dl class="layui-nav-child" th:each="sub :${res.getResourcesById()}">
+							<dd><a href="javascript:void(0);" shiro:hasPermission="${sub.getPermission()}" th:data-id="${sub.getUrl()}" th:text="${sub.getDescription()}"><span  class='layui-badge-dot'></span></a></dd>
 						</dl>
 					</li>
-
 				</ul>
 			</div>
 		</div>
@@ -144,7 +146,8 @@
 		</div>
 		
 		<div class="layui-footer">
-			@ layui.dtree(基于layui2.5.5)     © wisdomelon.com 版权所有 许可证：湘ICP备18022885
+
+
 		</div>
 		
 	</div>
@@ -189,33 +192,6 @@
 				showEle();
 				break;
 			}
-		} else {
-			// 存在，则将version-span中的信息修改为此
-			var init = true;
-			$(".version-span").html(version[versionCls]);
-			for(var key in version){
-				if(key != versionCls) {
-					console.log(versionCls);
-					if(versionCls == "vs257") break;
-					init = false;
-					layer.confirm("当前选择文档非最新，是否切换到最新？",{icon: 3, title:'提示'}, function(index){
-						versionCls = key;
-						console.log(versionCls);
-						layui.data("dtree-version-now",{key: "versionClsNow", value: versionCls});
-						$(".version-span").html(version[versionCls]);
-						showEle();
-						layer.close(index);
-					}, function(index){
-						showEle();
-						layer.close(index);
-					});
-				}
-				break;
-			}
-			
-			if(init){
-				showEle();
-			}
 		}
 		
 		function showEle(){ 
@@ -233,8 +209,6 @@
 				flag = true;
 				
 			}
-			
-			showAuthorMsg();
 		}
 		
 		element.on("nav(version-ul)", function(elem){
@@ -248,7 +222,6 @@
 
 		
 		// 统计访问
-        $.post("http://47.105.168.195:8080/blog-service/index/visitorFromDTreeHelper");
 
 		element.on("nav(operate)", function(elem){
 			var $iframe = $("#iframe_page");
@@ -257,12 +230,7 @@
 		});
 		
 		$(".finish").click(function(){
-			layer.open({
-				type:2,
-				title:"小额赞赏",
-				content:"finish/finish.html",
-				area:["80%","90%"]
-			})
+			$(document).ready(function(){location.href="/logout"});
 		});
 		
 		$(".logo").click(function(){
@@ -275,7 +243,7 @@
 			});
 		});
 		
-		// 作者寄语
+	/*	// 作者寄语
 		function showAuthorMsg() {
 			// layui.data("dtree-author-msg", {key: "msg", remove: true});
 			var msg = layui.data("dtree-author-msg", "msg");
@@ -300,7 +268,7 @@
 					}
 				});
 			}
-		}
+		}*/
 		
 		// 搜索功能
 		/* var searchTree = dtree.render({

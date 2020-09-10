@@ -26,7 +26,7 @@ public class JpaTests {
     public void t1(){
         Employee employee =jpaEmployee.findEmployeeById(169);
 
-//        List<Role> roles=jpaEmployee.findRoleByEmployee(employee);
-//        System.out.println(roles);
+        List<Role> roles=jpaEmployee.findRoleByEmployee(employee);
+        System.out.println(roles);
     }
 }
