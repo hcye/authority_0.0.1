@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+    <script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>-->
+      <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+      <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $(document).ready(function () {
+                $.post("/getGroupTree", {},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+//------------绘制dtree-----------
+                        layui.extend({
+                            dtree: '/layui_ext/dtree/dtree'
+                        }).use(['dtree', 'layer', 'jquery'], function () {
+                            var dtree = layui.dtree, layer = layui.layer, $ = layui.jquery;
+
+                            // 初始化树，渲染树
+                            dtree.render({
+                                elem: "#depTree",
+                                data: data,
+                                scroll: "#toolbarDiv",
+                                toolbar: true,
+                                icon: "1",
+                                ficon: "8",
+                                initLevel: "3"
+                            });
+
+//------------绘制dtree-----------
+                            /**
+                             * //7是综合管理部的id，这里采用硬编码，不运行中动态获得，以后再改
+                             *
+                             * */
+                            $("#selectedDepId").val(7);
+                            queryDepUser(7, 1, 'noAction', '');
+
+                            // 绑定节点点击
+                            dtree.on("node('depTree')", function (obj) {
+                                $("#selectedDepId").val(obj.param.nodeId);
+                                queryDepUser(obj.param.nodeId, 1, 'noAction','',"noAction");
+                                $("#searchInput").val("");
+                            });
+                        });
+                        }, "json");
+            })
+        })
+
+
+
+            function queryDepUser(id, pageNum, turn,keyWord,refreshFlag) {
+                var tbody = $("#userTable");
+                $.post("/user/getPage", {depId: id, pageInput: pageNum, turnFlag: turn,keyWord:keyWord,refreshFlag:refreshFlag},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+                        tbody.find("tr").remove();
+                        employees = data.content;
+                        for (var key in employees) {
+                            var status = "";
+                            if (employees[key].status == 1) {
+                                status = "<span style='color: #00FFFF'>账号停用</span>";
+                            } else if (employees[key].status == 0) {
+                                status = "账号正常";
+                            }
+                            tbody.append("<tr><td>" + employees[key].ename + "<input  value="+employees[key].id+"  type='hidden'/></td><td>"+employees[key].email+ "</td><td>" + employees[key].sex + "</td>" +
+                                "<td>" + status + "</td><td style='align-content: center'><button class='layui-btn' name='edit' shiro:hasPermission='asm:user:edit' >编辑</button></td></tr>");
+                        }
+                        editUser();
+                        //此处重置页码值,和总页码值
+                        $("#pageInput").val(data.number+1);
+                        $("#PageCount").html('共 '+data.totalPages+' 页');
+
+                    }, "json");
+            };
+
+            function editUser(){
+                $("#userTable").find("button").click(function () {
+                    window.location.href="/user/edit?id="+$(this).parent().parent().find("input")[0].value;
+                });
+            }
+
+            //翻页
+            $(function () {
+                //前页
+                $("#pre").click(function () {
+                    queryDepUser($("#selectedDepId").val(),$("#pageInput").val(),'pre',$("#searchInput").val(),"noAction");
+                });
+                //后页
+                $("#next").click(function () {
+                    queryDepUser($("#selectedDepId").val(),$("#pageInput").val(),'next',$("#searchInput").val(),"noAction");
+                });
+                //跳转
+                $("#jump").click(function () {
+                    queryDepUser($("#selectedDepId").val(),$("#pageInput").val(),'noAction',$("#searchInput").val(),"noAction");
+                });
+                //查询
+                $("#searchUser").click(function () {
+                     queryDepUser($("#selectedDepId").val(),$("#pageInput").val(),'noAction',$("#searchInput").val(),"noAction");
+
+                });
+                //刷新用户列表
+                $("#refresh").click(function () {
+                    queryDepUser($("#selectedDepId").val(),$("#pageInput").val(),'noAction',$("#searchInput").val(),"refresh");
+                    layer.msg("刷新用户列表完成");
+                });
+
+
+            })
+
+
+
+    </script>
+    <body>
+<div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
+    <p>用户管理</p>
+</div>
+        <div class="layui-container">
+            <div class="layui-row" style="margin-top: 5%">
+                <div class="layui-col-md-offset4 layui-col-md2 layui-input-inline">
+                    <input type="text" class="layui-input" id="searchInput"/>
+                </div>
+                <div class="layui-col-md1">
+                   <button class="layui-btn" id="searchUser">查找用户</button>
+                </div>
+                <div class="layui-col-md1">
+                    <button class="layui-btn" id="refresh">刷新用户列表</button>
+                </div>
+            </div>
+            <div class="layui-row" style="margin-top: 2%">
+             <!--部门列表-->
+                <div class="layui-col-md3">
+                    <div style="height: 600px;overflow: auto;">   <!--高度不能使用百分比否则会显示异常-->
+                        <ul id="depTree" class="dtree" data-id="0"></ul>
+                    </div>
+                </div>
+            <!--人员列表-->
+                <div class="layui-col-md9">
+                    <table class="layui-table" id="myTable">
+                        <thead class="layui-table-header">
+                        <tr>
+                            <td>用户名</td>
+                            <td>邮箱</td>
+                            <td>性别</td>
+                            <td>状态</td>
+                            <td>管理</td>
+                        </tr>
+                        </thead>
+                        <tbody id="userTable">
+
+                        </tbody>
+                    </table>
+                    <div class="layui-row">
+                        <input type="hidden" id="selectedDepId"/>
+                        <div class="layui-col-md-offset2 layui-col-md2">
+                            <button class="layui-btn" id="pre" style="float: right">-</button>
+                        </div>
+                        <div class="layui-col-md2 layui-input-inline">
+                            <input type="text" class="layui-input" id="pageInput" />
+                        </div>
+                        <div class="layui-col-md1">
+                            <button class="layui-btn" id="next">+</button>
+                        </div>
+                        <div class="layui-col-md2">
+                            <button class="layui-btn" id="jump">跳转</button>
+                            <span id="PageCount"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>角色管理</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+    <script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>-->
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <script type="text/javascript">
+        layui.use('form', function(){
+            var form = layui.form;
+        });
+
+        $(function () {
+            $(document).ready(function () {
+                $.post("/resource/getResourceTree", {},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+//------------绘制dtree-----------
+                        layui.extend({
+                            dtree: '/layui_ext/dtree/dtree'
+                        }).use(['dtree', 'layer', 'jquery'], function () {
+                            var dtree = layui.dtree, layer = layui.layer, $ = layui.jquery;
+
+                            // 初始化树，渲染树
+                            dtree.render({
+                                elem: "#ResourceTree",
+                                data: data,
+                                scroll: "#toolbarDiv",
+                                toolbar: true,
+                                checkbar: true  //开启复选框
+                            });
+
+//------------绘制dtree-----------
+
+                            dtree.on("node('depTree')", function (obj) {
+                          /*      $("#selectedDepId").val(obj.param.nodeId);
+                                queryDepUser(obj.param.nodeId, 1, 'noAction','',"noAction");
+                                $("#searchInput").val("");*/
+                            });
+                        });
+                    }, "json");
+            })
+        })
+        $(function () {
+            $("#conform").click(function () {
+                var dtree=layui.dtree;
+                if($("#name").val()==''||$("#code").val()==''|| dtree.getCheckbarNodesParam("ResourceTree").length==0){
+                    layer.alert("角色名称和权限字符是必填项,角色必须拥有至少一个权限！");
+                }else {
+                    var powers=dtree.getCheckbarNodesParam("ResourceTree");
+                    var powerString="";
+                    for (var key in powers){
+                        powers[key].nodeId;
+                        powerString=powerString+powers[key].nodeId+'-';
+                    }
+                    $.post("/role/addRole", {name:$("#name").val(),code:$("#code").val(),status:$("#status").val(),powers:powerString,remarks:$("#remarks").val()},    //把name数据提交到ajaxRes action内，
+                        function (data) {
+
+                            if(data["error"]!=null){
+                                layer.alert("保存失败,角色名或权限字符重复！");
+                            }
+                            if(data["ok"]!=null){
+                                document.location.href="/role/role";
+                            }
+                        }, "json");
+                };
+            });
+            $("#reset").click(function () {
+                document.location.href="/role/role";
+            });
+        })
+    </script>
+</head>
+<body>
+<div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
+    <p>添加角色</p>
+</div>
+    <div class="layui-container" >
+        <div class="layui-row">
+            <div class="layui-form">
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><span style="color: red">*</span>角色名称:</label>
+                    <div class="layui-input-block">
+                        <input class="layui-input" id="name" />
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><span style="color: red">*</span>权限字符:</label>
+                    <div class="layui-input-block">
+                        <input class="layui-input" id="code" />
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">状态:</label>
+                    <div class="layui-input-block">
+                        <select  id="status" >
+                            <option>可用</option>
+                            <option>禁用</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">备注:</label>
+                    <div class="layui-input-block">
+                        <input class="layui-input" id="remarks" />
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">菜单权限:</label>
+                <div style="height: 600px;overflow: auto;">   <!--高度不能使用百分比否则会显示异常-->
+                    <ul id="ResourceTree" class="dtree" data-id="0"></ul>
+                </div>
+            </div>
+            <div class="layui-row">
+                <div class="layui-col-md-offset4">
+                    <button class="layui-btn" type="button" id="conform">确定</button>
+                    <button class="layui-btn" type="button" id="reset">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

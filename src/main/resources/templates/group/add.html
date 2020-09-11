@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<link rel="stylesheet" href="/layui/css/layui.css">
+<script type="text/javascript" src="/layui/layui.js"></script>
+<link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+<link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+<script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+<!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+<!--[if lt IE 9]>-->
+<script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+<script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+<script type="text/javascript">
+    layui.use('form', function(){
+        var form = layui.form;
+        //监听提交
+    });
+    $(function () {
+        $("#choiceLeader").click(function () {
+            layer.open({
+                type: 2,
+                title: "设置部长",
+                area: ['1000px','500px'],
+                content: ['/group/layer_edit_groupLeader.html', 'no']
+                //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                //实现弹出层间不同frame的传值
+            });
+        })
+        $("#depName").click(function () {
+            $("#valid").text("");
+        })
+    })
+
+</script>
+<head>
+    <meta charset="UTF-8">
+    <title>增加部门</title>
+</head>
+<body>
+<div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
+    <p>增加部门</p>
+</div>
+    <div class="layui-container">
+        <form class="layui-form" action="/group/add">
+            <div class="layui-form-item">
+                <label class="layui-form-label">上级部门:</label>
+                <div class="layui-input-block">
+                    <select name="upperDep">
+                        <option th:each="name : ${names}" th:text="${name}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span id="valid" style="color: firebrick;font-size: x-large" th:text="${flag}"></span>部门名称:</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="depName" th:placeholder="${errPrompt}" name="depName" />
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">负责人:</label>
+                <div class="layui-input-inline">
+                    <input class="layui-input" name="leader" id="leader" />
+                </div>
+                <button id="choiceLeader" type="button" class="layui-btn">选择</button>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">部门状态:</label>
+                <div class="layui-input-block">
+                    <select name="status">
+                        <option>正常</option>
+                        <option>停用</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-row">
+                <div class="layui-col-md-offset5 layui-col-md3">
+                    <button class="layui-btn" type="submit">确定</button><button  class="layui-btn" type="reset">取消</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

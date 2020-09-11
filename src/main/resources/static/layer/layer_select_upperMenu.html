@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <link rel="stylesheet" href="../layui/css/layui.css">
+    <script type="text/javascript" src="../layui/layui.js"></script>
+    <link rel="stylesheet" href="../layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" href="../layui_ext/dtree/font/dtreefont.css">
+    <script type="text/javascript" src="../layui/jquery-3.5.1.min.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>-->
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <script>
+        $(function () {
+            $(document).ready(function () {
+                $.post("/resource/getResourceTree", {},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+//------------绘制dtree-----------
+                        layui.extend({
+                            dtree: '/layui_ext/dtree/dtree'
+                        }).use(['dtree', 'layer', 'jquery'], function () {
+                            var dtree = layui.dtree, layer = layui.layer, $ = layui.jquery;
+
+                            // 初始化树，渲染树
+                            dtree.render({
+                                elem: "#menuTree",
+                                data: data,
+                                scroll: "#toolbarDiv",
+                                toolbar: true,
+                                icon: "9",
+                                initLevel: "3"
+                            });
+
+
+                            // 绑定节点点击
+                            dtree.on("node('menuTree')", function (obj) {
+                                $("#mid").val(obj.param.context);  //设置id
+                            });
+                        });
+                    }, "json");
+            })
+        })
+
+        $(function () {
+            $("#conform").click(function () {
+                $(window.parent.document).find("#upperMenu").val($("#mid").val());
+                var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                parent.layer.close(index);
+            })
+        })
+
+    </script>
+</head>
+<body>
+    <div class="layui-container">
+        <input type="hidden" id="mid">
+        <div class="layui-row">
+            <div style="height: 700px;overflow: auto;">   <!--高度不能使用百分比否则会显示异常-->
+                <ul id="menuTree" class="dtree" data-id="0"></ul>
+            </div>
+        </div>
+    </div>
+    <div class="layui-row" >
+        <button class="layui-btn" id="conform" style="margin-left: 70%">确定</button>
+    </div>
+</body>
+
+</html>

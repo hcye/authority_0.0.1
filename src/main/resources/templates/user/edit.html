@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑用户</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+    <script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>-->
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <script type="text/javascript">
+        layui.use('form', function(){
+            var form = layui.form;
+            form.on('checkbox()', function(data){
+                var a=$("#roles").val();
+                a=a+","+data.value;
+                $("#roles").val(a);
+            });
+        });
+
+
+        $(function () {
+            $("#save").click(function () {
+                if($("#pwd").val().trim().length<8){
+                    layer.alert("密码长度必须大于8位");
+                    return;
+                }
+                $.post("/user/doEdit", {id:$("#eid").val(),email:$("#email").val(),sex:$("#usex").val(),status:$("#status").val(),group:$("#group").val(),pwd:$("#pwd").val(),roles:$("#roles").val()},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+                        // int id,String name,String email,String sex,String status,String group,String pwd,String roles
+                        document.location.href="/user/user";
+                    }, "json");
+            });
+
+            $("#reset").click(function () {
+                document.location.href="/user/user";
+            });
+        })
+
+
+    </script>
+</head>
+<body>
+<div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
+    <p>编辑用户</p>
+</div>
+    <div class="layui-container">
+            <form class="layui-form" action="/doEdit" style="margin-top: 10%">
+
+                <input type="hidden" id="eid" th:value="${employee.id}" />
+                <input type="hidden" id="roles" value="" />
+                <div class="layui-form-item">
+                    <label class="layui-form-label">用户名</label>
+                    <div class="layui-input-block">
+                    <input class="layui-input" id="name" th:value="${employee.ename}" readonly="readonly" />
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">邮箱</label>
+                    <div class="layui-input-block">
+                    <input class="layui-input" id="email" th:value="${employee.email}" width="100%" />
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">性别</label>
+                    <div class="layui-input-block">
+                    <select id="usex"  lay-verify="required">
+                        <option>男</option>
+                        <option>女</option>
+                    </select>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">状态</label>
+                    <div class="layui-input-block">
+                    <select  id="status" lay-verify="required">
+                        <option th:each="statu : ${status}" th:text="${statu}"></option>
+                    </select>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">部门</label>
+                    <div class="layui-input-block">
+                        <select  id="group" lay-verify="required">
+                            <option th:each="dep : ${group}" th:text="${dep}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">登录密码</label>
+                    <div class="layui-input-block">
+                        <input class="layui-input" type="password" id="pwd" width="100%" />
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">角色</label>
+                    <div class="layui-input-block">
+                        <input type="checkbox" th:each="role : ${roles}" name="role" th:value="${role.getId()}" th:title="${role.getDescription()}">
+                    </div>
+                </div>
+
+                <div class="layui-row">
+                    <div class="layui-col-md-offset5 layui-col-md4">
+                        <button type="button" id="save" class="layui-btn" >保存</button>&nbsp;&nbsp;<button type="reset" id="reset" class="layui-btn layui-btn-normal">取消</button>
+                    </div>
+                </div>
+
+            </form>
+    </div>
+</body>
+</html>
