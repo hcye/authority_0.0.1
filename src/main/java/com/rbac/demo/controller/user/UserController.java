@@ -14,6 +14,7 @@ import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
+import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -76,56 +77,50 @@ public class UserController {
         return "login.html";
     }
     //登录
-    @RequestMapping("/login")
-    public String login(String  username, String pwd, Model model){
-
+    @RequestMapping("/index")
+    public String login(String  username, String pwd, Model model) {
         /**
-         * 测试环境手动清除缓存
+         * 刷新是判断session是否有值。如果没有则认为用户在执行登录，进行密码校验，
+         * 如果没值则认为用户执行刷新。
          *
          * */
+
+
+
+        Subject subject = SecurityUtils.getSubject();
+        Session session = subject.getSession();
         ShiroUtils.clearCachedAuthorizationInfo();
-        UsernamePasswordToken token=new UsernamePasswordToken(username,pwd);
-        Subject subject= SecurityUtils.getSubject();
-        try {
-            subject.login(token);
-        }catch (UnknownAccountException e){
-            System.out.println("用户名错误");
-            return "login";
-        }catch (LockedAccountException e ){
-            System.out.println("账户锁定");
-            return "login";
-        }catch (IncorrectCredentialsException e){
-            System.out.println("密码错误");
-            return "login";
-        }
-        /**
-         * 调用subject.hasRole  触发realm授权函数，使进入首页后的shiro 标签有效
-         * */
-        /**
-         * 这样做不优雅，暂时不知道怎么做
-         * */
-        Employee e=jpaEmployee.findEmployeesByEname(username).get(0);
-        List<Role> roles=jpaEmployee.findRoleByEmployee(e);
-        Set<Resources> resourcesSet=new HashSet<>();
-
-        if(roles!=null){
-            for (Role role:roles){
-
-                resourcesSet.addAll(jpaRole.findMenusByRole(role));
+        Set<Resources> resourcesSet;
+        if (session.getAttribute("user") == null) {
+            if(username==null){
+                //session过期
+                return "login";
             }
-        }
+            Employee e = jpaEmployee.findEmployeesByEname(username).get(0);
+            resourcesSet=userService.getRolesByEmployee(e);
+            UsernamePasswordToken token = new UsernamePasswordToken(username, pwd);
+            try {
+                subject.login(token);
+            } catch (UnknownAccountException b) {
+                System.out.println("用户名错误");
+                return "login";
+            } catch (LockedAccountException b) {
+                System.out.println("账户锁定");
+                return "login";
+            } catch (IncorrectCredentialsException b) {
+                System.out.println("密码错误");
+                return "login";
+            }
 
-        for (Resources resources:resourcesSet){
-            System.out.println(resources.getDescription());
-        }
-        subject.hasRole("超级管理员");
-        model.addAttribute("resources",resourcesSet);
-        return "redirect:/index";
+            subject.hasRole("超级管理员");
+            session.setAttribute("user", e);
 
-    }
-    //用户翻页
-    @RequestMapping("/index")
-    public String index(){
+        }else {
+
+            Employee employee= (Employee) session.getAttribute("user");
+            resourcesSet=userService.getRolesByEmployee(employee);
+        }
+        model.addAttribute("resources", resourcesSet);
         return "index";
     }
 

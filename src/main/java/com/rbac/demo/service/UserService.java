@@ -148,4 +148,13 @@ public class UserService {
         return names;
     }
 
+    public Set<Resources> getRolesByEmployee(Employee e){
+        List<Role> roles = jpaEmployee.findRoleByEmployee(e);
+        Set<Resources> resourcesSet = new HashSet<>();
+        for (Role role : roles) {
+            resourcesSet.addAll(jpaRole.findMenusByRole(role));
+        }
+        return resourcesSet;
+    }
+
 }
