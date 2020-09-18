@@ -1,6 +1,10 @@
 package com.rbac.demo.service;
+import com.rbac.demo.entity.Resources;
 import com.rbac.demo.entity.Role;
+import com.rbac.demo.entity.Role2Resources;
+import com.rbac.demo.entity.User2Role;
 import com.rbac.demo.jpa.JpaRole;
+import com.rbac.demo.jpa.JpaRole2Resources;
 import com.rbac.demo.tool.ConvertStrForSearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -10,11 +14,15 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 @Repository
 public class RoleService {
     @Autowired
     private JpaRole jpaRole;
+    @Autowired
+    private JpaRole2Resources jpaRole2Resources;
     private final static int pageSize = 8;
 
     public Page<Role> getRolesPage(String name, String status, String pre, String next, int pageNow) {
@@ -61,6 +69,17 @@ public class RoleService {
                 }
 
             }
+
+            //超级管理员不可管理
+            Iterator<Role> roleIterator =roles.iterator();
+            while (roleIterator.hasNext()){
+                Role role=roleIterator.next();
+                if(role.getAuthorityCode().equals("administrator")){
+                    roleIterator.remove();
+                    break;
+                }
+            }
+
             return roles;
         //搜索
 
@@ -94,5 +113,26 @@ public class RoleService {
         }
         Role savedRole=jpaRole.saveAndFlush(role);
         return role;
+    }
+    //为超级管理员删除权限
+    public  void adminRemoveMenu(Resources resources){
+        Role role=jpaRole.findRoleByAuthorityCode("administrator");
+        List<Role2Resources>  role2ResourcesList= (List<Role2Resources>) role.getRole2ResourcesById();
+        for (Role2Resources role2Resources:role2ResourcesList){
+            Resources resources1=role2Resources.getResourcesByMenusId();
+            if (resources.getId()==resources1.getId()){
+                jpaRole2Resources.delete(role2Resources);
+                break;
+            }
+        }
+    }
+
+    //为超级管理员添加新增权限
+    public void adminAddMenu(Resources resources){
+        Role role=jpaRole.findRoleByAuthorityCode("administrator");
+        Role2Resources role2Resources=new Role2Resources();
+        role2Resources.setResourcesByMenusId(resources);
+        role2Resources.setRoleByRoleId(role);
+        jpaRole2Resources.saveAndFlush(role2Resources);
     }
 }

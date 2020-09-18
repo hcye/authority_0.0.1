@@ -21,13 +21,17 @@
                 type: 2,
                 title: "设置部长",
                 area: ['1000px','500px'],
-                content: ['/group/layer_edit_groupLeader.html', 'no']
+                content: ['/layer/layer_edit_groupLeader.html', 'no']
                 //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
                 //实现弹出层间不同frame的传值
             });
         })
         $("#depName").click(function () {
             $("#valid").text("");
+        })
+
+        $("#reset").click(function () {
+            window.location.href="/group/group";
         })
     })
 
@@ -77,7 +81,7 @@
             </div>
             <div class="layui-row">
                 <div class="layui-col-md-offset5 layui-col-md3">
-                    <button class="layui-btn" type="submit">确定</button><button  class="layui-btn" type="reset">取消</button>
+                    <button class="layui-btn" type="submit">确定</button><button  class="layui-btn" type="reset" id="reset">取消</button>
                 </div>
             </div>
         </form>

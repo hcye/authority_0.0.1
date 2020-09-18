@@ -30,13 +30,24 @@ public class Test1 {
     JpaEmployee jpaEmployee;
     @Autowired
     JpaResources jpaResources;
+
+    @Autowired
+    JpaAssert jpaAssert;
+    @Autowired
+    JpaAssertType jpaAssertType;
     @Test
     public void t(){
 
+        AssertType assertType=jpaAssertType.findById(2).get();
+        List<Assert> asserts=jpaAssert.findAll();
+        for (Assert assert1:asserts){
+            if(assert1.getAssertTypeByAssertType()==null){
+                assert1.setAssertTypeByAssertType(assertType);
+                jpaAssert.save(assert1);
+            }
+        }
 
-        Employee employee=jpaEmployee.findById(169).get();
-        employee.setPwd(ShiroUtils.encryption("Yhc14253666", ByteSource.Util.bytes("yehangcheng").toHex()));
-        jpaEmployee.saveAndFlush(employee);
+
 
     }
 }

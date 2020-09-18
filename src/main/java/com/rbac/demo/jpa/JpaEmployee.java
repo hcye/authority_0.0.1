@@ -23,11 +23,15 @@ public interface JpaEmployee extends JpaRepository<Employee,Integer> {
     @Query("select employees from Employee employees where employees.sysGroupByGroupId=:sysGroup and employees.onjob='0'  ")
     Page<Employee> findEmployeesBySysGroupByGroupId(@Param("sysGroup") SysGroup sysGroup, Pageable pageable);
     @Query("select employee from Employee employee where  employee.onjob='0' and employee.ename like :name ")
-    Page<Employee> findEmployeesByEname(@Param("name") String name,Pageable pageable);
+    Page<Employee> findEmployeesByEnameLike(@Param("name") String name,Pageable pageable);
     @Query("select employee from Employee employee where   employee.onjob='0' and employee.pingyin like :py")
-    Page<Employee> findEmployeesByPingyin(@Param("py") String py,Pageable pageable);
-    @Query("select employee from Employee employee where employee.ename like :name")
-    List<Employee> findEmployeesByEnameLike(@Param("name") String name);
-    @Query("select employee from Employee employee where employee.pingyin like :pingyin")
-    List<Employee> findEmployeesByPingyinLike(@Param("pingyin") String pingyin);
+    Page<Employee> findEmployeesByPingyinLike(@Param("py") String py,Pageable pageable);
+
+
+    @Query("select employee.ename from Employee employee where employee.onjob='0' and employee.ename like :name")
+    List<String> findEmployeesNameByNameLike(@Param("name")String name);
+
+
+    @Query("select employee.ename from Employee employee where  employee.onjob='0' and employee.pingyin like :py")
+    List<String> findEmployeesNameByPinyinLike(@Param("py")String name);
 }

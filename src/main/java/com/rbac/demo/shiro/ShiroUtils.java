@@ -15,7 +15,7 @@ import org.apache.shiro.util.ByteSource;
 /**
  * shiro 工具类
  * 
- * @author ruoyi
+ *
  */
 public class ShiroUtils
 {
@@ -44,7 +44,7 @@ public class ShiroUtils
         // 重新加载Principal
         subject.runAs(newPrincipalCollection);
     }
-
+    //清除授权缓存
     public static void clearCachedAuthorizationInfo()
     {
         RealmSecurityManager rsm = (RealmSecurityManager) SecurityUtils.getSecurityManager();
@@ -64,16 +64,8 @@ public class ShiroUtils
         return String.valueOf(getSubject().getSession().getId());
     }
 
-    /**
-     * 生成随机盐
-     */
-    public static ByteSource salt(Employee employee)
-    {
-        // 一个Byte占两个字节，此处生成的3字节，字符串长度为6
-
-        return ByteSource.Util.bytes(employee.getPingyin());
-    }
-    public static String encryption(Object srcPwd, String saltValue){
-        return new SimpleHash("MD5", srcPwd, saltValue, 256).toString();
+    public static String encryption(String credentials, String salt) {
+        String hashedStr = new SimpleHash("MD5", credentials, salt, 256).toString();
+        return hashedStr;
     }
 }

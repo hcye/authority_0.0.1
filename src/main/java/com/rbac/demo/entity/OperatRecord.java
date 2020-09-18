@@ -13,7 +13,8 @@ public class OperatRecord {
     private Timestamp actionTime;
     private Employee employeeByDealer;
     private Employee employeeByAssertEmp;
-    private Othermeans othermeansByAssertAsset;
+    private Assert assertByAssertAsset;
+
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
@@ -66,6 +67,7 @@ public class OperatRecord {
         result = 31 * result + (actionTime != null ? actionTime.hashCode() : 0);
         return result;
     }
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "dealer", referencedColumnName = "id")
@@ -76,6 +78,7 @@ public class OperatRecord {
     public void setEmployeeByDealer(Employee employeeByDealer) {
         this.employeeByDealer = employeeByDealer;
     }
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "assert_emp", referencedColumnName = "id")
@@ -86,14 +89,15 @@ public class OperatRecord {
     public void setEmployeeByAssertEmp(Employee employeeByAssertEmp) {
         this.employeeByAssertEmp = employeeByAssertEmp;
     }
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "assert_asset", referencedColumnName = "id")
-    public Othermeans getOthermeansByAssertAsset() {
-        return othermeansByAssertAsset;
+    public Assert getAssertByAssertAsset() {
+        return assertByAssertAsset;
     }
 
-    public void setOthermeansByAssertAsset(Othermeans othermeansByAssertAsset) {
-        this.othermeansByAssertAsset = othermeansByAssertAsset;
+    public void setAssertByAssertAsset(Assert assertByAssertAsset) {
+        this.assertByAssertAsset = assertByAssertAsset;
     }
 }

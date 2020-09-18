@@ -105,11 +105,7 @@ public class ShiroConfig {
         filter.put("/layui_ext/**","anon");
         filter.put("/login","anon");  //登录界面不需要认证即可访问
         filter.put("/","anon");  //登录界面不需要认证即可访问
-//        filter.put("/add","perms[user:add]");
-//        filter.put("/delete","perms[user:delete]");
-//        filter.put("/update","perms[user:update]");
         filter.put("/user/**","authc");
-/*        filter.put("/**","authc");   //拦截所有*/
 
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filter);
         return shiroFilterFactoryBean;

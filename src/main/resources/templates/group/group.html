@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <meta charset="UTF-8">
     <title>部门管理</title>
@@ -150,9 +151,9 @@
                         </div>
                     </div>
                     <div class="layui-form-item">
-                        <button class="layui-btn" id="edit" style="margin-left: 25%">编辑</button>
-                        <button class="layui-btn" id="add" style="margin-left: 4%">新增</button>
-                        <button class="layui-btn" id="delete" style="margin-left: 4%">删除</button>
+                        <button class="layui-btn" id="edit" shiro:hasPermission="asm:group:edit" style="margin-left: 25%">编辑</button>
+                        <button class="layui-btn" id="add" shiro:hasPermission="asm:group:add" style="margin-left: 4%">新增</button>
+                        <button class="layui-btn" id="delete" shiro:hasPermission="asm:group:delete" style="margin-left: 4%">删除</button>
                     </div>
                 </div>
             </div>

@@ -7,24 +7,24 @@ import java.sql.Date;
 import java.util.Collection;
 
 @Entity
-public class Othermeans {
+public class Assert {
     private Integer id;
     private String aname;
     private String assestnum;
     private String labelpic;
     private String model;
-    private String position;
     private Date putintime;
     private String remarks;
     private String snnum;
     private String workless;
     private String price;
-    private String project;
     private Date brotime;
     private Date damagetime;
     private Date returntime;
-    private Collection<OperatRecord> operatRecordsById;
+    private String assertPic;
     private Employee employeeByBorrower;
+    private AssertType assertTypeByAssertType;
+    private Collection<OperatRecord> operatRecordsById;
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
@@ -74,16 +74,6 @@ public class Othermeans {
 
     public void setModel(String model) {
         this.model = model;
-    }
-
-    @Basic
-    @Column(name = "position", nullable = true, length = 64)
-    public String getPosition() {
-        return position;
-    }
-
-    public void setPosition(String position) {
-        this.position = position;
     }
 
     @Basic
@@ -137,16 +127,6 @@ public class Othermeans {
     }
 
     @Basic
-    @Column(name = "project", nullable = true, length = 64)
-    public String getProject() {
-        return project;
-    }
-
-    public void setProject(String project) {
-        this.project = project;
-    }
-
-    @Basic
     @Column(name = "brotime", nullable = true)
     public Date getBrotime() {
         return brotime;
@@ -176,28 +156,37 @@ public class Othermeans {
         this.returntime = returntime;
     }
 
+    @Basic
+    @Column(name = "assert_pic", nullable = true, length = 255)
+    public String getAssertPic() {
+        return assertPic;
+    }
+
+    public void setAssertPic(String assertPic) {
+        this.assertPic = assertPic;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Othermeans that = (Othermeans) o;
+        Assert anAssert = (Assert) o;
 
-        if (id != null ? !id.equals(that.id) : that.id != null) return false;
-        if (aname != null ? !aname.equals(that.aname) : that.aname != null) return false;
-        if (assestnum != null ? !assestnum.equals(that.assestnum) : that.assestnum != null) return false;
-        if (labelpic != null ? !labelpic.equals(that.labelpic) : that.labelpic != null) return false;
-        if (model != null ? !model.equals(that.model) : that.model != null) return false;
-        if (position != null ? !position.equals(that.position) : that.position != null) return false;
-        if (putintime != null ? !putintime.equals(that.putintime) : that.putintime != null) return false;
-        if (remarks != null ? !remarks.equals(that.remarks) : that.remarks != null) return false;
-        if (snnum != null ? !snnum.equals(that.snnum) : that.snnum != null) return false;
-        if (workless != null ? !workless.equals(that.workless) : that.workless != null) return false;
-        if (price != null ? !price.equals(that.price) : that.price != null) return false;
-        if (project != null ? !project.equals(that.project) : that.project != null) return false;
-        if (brotime != null ? !brotime.equals(that.brotime) : that.brotime != null) return false;
-        if (damagetime != null ? !damagetime.equals(that.damagetime) : that.damagetime != null) return false;
-        if (returntime != null ? !returntime.equals(that.returntime) : that.returntime != null) return false;
+        if (id != null ? !id.equals(anAssert.id) : anAssert.id != null) return false;
+        if (aname != null ? !aname.equals(anAssert.aname) : anAssert.aname != null) return false;
+        if (assestnum != null ? !assestnum.equals(anAssert.assestnum) : anAssert.assestnum != null) return false;
+        if (labelpic != null ? !labelpic.equals(anAssert.labelpic) : anAssert.labelpic != null) return false;
+        if (model != null ? !model.equals(anAssert.model) : anAssert.model != null) return false;
+        if (putintime != null ? !putintime.equals(anAssert.putintime) : anAssert.putintime != null) return false;
+        if (remarks != null ? !remarks.equals(anAssert.remarks) : anAssert.remarks != null) return false;
+        if (snnum != null ? !snnum.equals(anAssert.snnum) : anAssert.snnum != null) return false;
+        if (workless != null ? !workless.equals(anAssert.workless) : anAssert.workless != null) return false;
+        if (price != null ? !price.equals(anAssert.price) : anAssert.price != null) return false;
+        if (brotime != null ? !brotime.equals(anAssert.brotime) : anAssert.brotime != null) return false;
+        if (damagetime != null ? !damagetime.equals(anAssert.damagetime) : anAssert.damagetime != null) return false;
+        if (returntime != null ? !returntime.equals(anAssert.returntime) : anAssert.returntime != null) return false;
+        if (assertPic != null ? !assertPic.equals(anAssert.assertPic) : anAssert.assertPic != null) return false;
 
         return true;
     }
@@ -209,26 +198,16 @@ public class Othermeans {
         result = 31 * result + (assestnum != null ? assestnum.hashCode() : 0);
         result = 31 * result + (labelpic != null ? labelpic.hashCode() : 0);
         result = 31 * result + (model != null ? model.hashCode() : 0);
-        result = 31 * result + (position != null ? position.hashCode() : 0);
         result = 31 * result + (putintime != null ? putintime.hashCode() : 0);
         result = 31 * result + (remarks != null ? remarks.hashCode() : 0);
         result = 31 * result + (snnum != null ? snnum.hashCode() : 0);
         result = 31 * result + (workless != null ? workless.hashCode() : 0);
         result = 31 * result + (price != null ? price.hashCode() : 0);
-        result = 31 * result + (project != null ? project.hashCode() : 0);
         result = 31 * result + (brotime != null ? brotime.hashCode() : 0);
         result = 31 * result + (damagetime != null ? damagetime.hashCode() : 0);
         result = 31 * result + (returntime != null ? returntime.hashCode() : 0);
+        result = 31 * result + (assertPic != null ? assertPic.hashCode() : 0);
         return result;
-    }
-
-    @OneToMany(mappedBy = "othermeansByAssertAsset")
-    public Collection<OperatRecord> getOperatRecordsById() {
-        return operatRecordsById;
-    }
-
-    public void setOperatRecordsById(Collection<OperatRecord> operatRecordsById) {
-        this.operatRecordsById = operatRecordsById;
     }
     @JsonIgnore
     @ManyToOne
@@ -239,5 +218,24 @@ public class Othermeans {
 
     public void setEmployeeByBorrower(Employee employeeByBorrower) {
         this.employeeByBorrower = employeeByBorrower;
+    }
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "assert_type", referencedColumnName = "id")
+    public AssertType getAssertTypeByAssertType() {
+        return assertTypeByAssertType;
+    }
+
+    public void setAssertTypeByAssertType(AssertType assertTypeByAssertType) {
+        this.assertTypeByAssertType = assertTypeByAssertType;
+    }
+
+    @OneToMany(mappedBy = "assertByAssertAsset")
+    public Collection<OperatRecord> getOperatRecordsById() {
+        return operatRecordsById;
+    }
+
+    public void setOperatRecordsById(Collection<OperatRecord> operatRecordsById) {
+        this.operatRecordsById = operatRecordsById;
     }
 }

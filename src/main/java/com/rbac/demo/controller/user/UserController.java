@@ -50,6 +50,7 @@ public class UserController {
     @RequestMapping("/user/edit")
     public String turnToEditPage(int id, Model model){
         Employee employee=jpaEmployee.findById(id).get();
+        List<Role> rolesUserHas= userService.getRolesByEmployee(employee);
         List<String> groupsName=jpaGroup.getDistinctGourpName();
         List<Role> roles=jpaRole.findAllRole();
         //普通用户不能成为超级管理员
@@ -69,6 +70,7 @@ public class UserController {
         model.addAttribute("status",status);
         model.addAttribute("group",groupsName);
         model.addAttribute("roles",roles);
+        model.addAttribute("rolesBind",rolesUserHas);
         return "user/edit";
     }
     //进入登录页面
@@ -97,7 +99,7 @@ public class UserController {
                 return "login";
             }
             Employee e = jpaEmployee.findEmployeesByEname(username).get(0);
-            resourcesSet=userService.getRolesByEmployee(e);
+            resourcesSet=userService.getResourcesByEmployee(e);
             UsernamePasswordToken token = new UsernamePasswordToken(username, pwd);
             try {
                 subject.login(token);
@@ -118,12 +120,13 @@ public class UserController {
         }else {
 
             Employee employee= (Employee) session.getAttribute("user");
-            resourcesSet=userService.getRolesByEmployee(employee);
+            resourcesSet=userService.getResourcesByEmployee(employee);
         }
         model.addAttribute("resources", resourcesSet);
         return "index";
     }
 
+    @RequiresPermissions("asm:user:view")
     @RequestMapping("/user/user")
     public String user(){
         return "/user/user";

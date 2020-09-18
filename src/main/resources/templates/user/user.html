@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-<html xmlns:th="http://www.thymeleaf.org">
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
       xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
@@ -15,7 +14,7 @@
     <!--[if lt IE 9]>-->
       <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
       <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
-    <script type="text/javascript">
+    <script th:inline="javascript">
         $(function () {
             $(document).ready(function () {
                 $.post("/getGroupTree", {},    //把name数据提交到ajaxRes action内，
@@ -38,17 +37,13 @@
                             });
 
 //------------绘制dtree-----------
-                            /**
-                             * //7是综合管理部的id，这里采用硬编码，不运行中动态获得，以后再改
-                             *
-                             * */
-                            $("#selectedDepId").val(7);
-                            queryDepUser(7, 1, 'noAction', '');
+
+                            queryDepUser("","","","","");
 
                             // 绑定节点点击
                             dtree.on("node('depTree')", function (obj) {
                                 $("#selectedDepId").val(obj.param.nodeId);
-                                queryDepUser(obj.param.nodeId, 1, 'noAction','',"noAction");
+                                queryDepUser(obj.param.nodeId, '', '','','');
                                 $("#searchInput").val("");
                             });
                         });
@@ -62,6 +57,11 @@
                 var tbody = $("#userTable");
                 $.post("/user/getPage", {depId: id, pageInput: pageNum, turnFlag: turn,keyWord:keyWord,refreshFlag:refreshFlag},    //把name数据提交到ajaxRes action内，
                     function (data) {
+                        var editflag =  [[${@permission.getPermi('asm:user:edit')}]];
+                        var isDisabled="";
+                        if(editflag=="layui-btn-disabled"){
+                            isDisabled="disabled='true'";
+                        }
                         tbody.find("tr").remove();
                         employees = data.content;
                         for (var key in employees) {
@@ -72,7 +72,7 @@
                                 status = "账号正常";
                             }
                             tbody.append("<tr><td>" + employees[key].ename + "<input  value="+employees[key].id+"  type='hidden'/></td><td>"+employees[key].email+ "</td><td>" + employees[key].sex + "</td>" +
-                                "<td>" + status + "</td><td style='align-content: center'><button class='layui-btn' name='edit' shiro:hasPermission='asm:user:edit' >编辑</button></td></tr>");
+                                "<td>" + status + "</td><td style='align-content: center'><button class='layui-btn "+editflag+"'  "+isDisabled+"  name='edit'  >编辑</button></td></tr>");
                         }
                         editUser();
                         //此处重置页码值,和总页码值
@@ -92,24 +92,24 @@
             $(function () {
                 //前页
                 $("#pre").click(function () {
-                    queryDepUser($("#selectedDepId").val(),$("#pageInput").val(),'pre',$("#searchInput").val(),"noAction");
+                    queryDepUser($("#selectedDepId").val(),$("#pageInput").val(),'pre',$("#searchInput").val(),"");
                 });
                 //后页
                 $("#next").click(function () {
-                    queryDepUser($("#selectedDepId").val(),$("#pageInput").val(),'next',$("#searchInput").val(),"noAction");
+                    queryDepUser($("#selectedDepId").val(),$("#pageInput").val(),'next',$("#searchInput").val(),"");
                 });
                 //跳转
                 $("#jump").click(function () {
-                    queryDepUser($("#selectedDepId").val(),$("#pageInput").val(),'noAction',$("#searchInput").val(),"noAction");
+                    queryDepUser($("#selectedDepId").val(),$("#pageInput").val(),'jump',$("#searchInput").val(),"");
                 });
                 //查询
                 $("#searchUser").click(function () {
-                     queryDepUser($("#selectedDepId").val(),$("#pageInput").val(),'noAction',$("#searchInput").val(),"noAction");
+                     queryDepUser('','','',$("#searchInput").val(),'');
 
                 });
                 //刷新用户列表
                 $("#refresh").click(function () {
-                    queryDepUser($("#selectedDepId").val(),$("#pageInput").val(),'noAction',$("#searchInput").val(),"refresh");
+                    queryDepUser("","","","","refresh");
                     layer.msg("刷新用户列表完成");
                 });
 
@@ -132,7 +132,7 @@
                    <button class="layui-btn" id="searchUser">查找用户</button>
                 </div>
                 <div class="layui-col-md1">
-                    <button class="layui-btn" id="refresh">刷新用户列表</button>
+                    <button class="layui-btn" shiro:hasPermission="asm:user:refresh" id="refresh">刷新用户列表</button>
                 </div>
             </div>
             <div class="layui-row" style="margin-top: 2%">

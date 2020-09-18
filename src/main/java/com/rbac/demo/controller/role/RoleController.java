@@ -6,6 +6,8 @@ import com.rbac.demo.entity.User2Role;
 import com.rbac.demo.jpa.JpaRole;
 import com.rbac.demo.jpa.JpaRole2Resources;
 import com.rbac.demo.jpa.JpaUser2Role;
+import com.rbac.demo.shiro.ShiroUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,11 +23,14 @@ public class RoleController {
     private JpaRole jpaRole;
     @Autowired
     private JpaRole2Resources jpaRole2Resources;
+
+    @RequiresPermissions("asm:role:add")
     @RequestMapping("/role/add")
     public String toAddPage(){
         return "/role/add";
     }
 
+    @RequiresPermissions("asm:role:edit")
     @RequestMapping("/role/edit")
     public String edit(int id, Model model){
         Role role=jpaRole.findById(id).get();
@@ -40,8 +45,11 @@ public class RoleController {
         }
         model.addAttribute("role",role);
         model.addAttribute("avalible",avalible);
+        ShiroUtils.clearCachedAuthorizationInfo(); //清除缓存
         return "/role/edit";
     }
+
+    @RequiresPermissions("asm:role:delete")
     @GetMapping("/role/delete")
     public String delete(int id){
         Role role=jpaRole.findById(id).get();
@@ -50,6 +58,8 @@ public class RoleController {
         jpaRole.delete(role);
         return "/role/role";
     }
+
+    @RequiresPermissions("asm:role:view")
     @GetMapping("/role/role")
     public String role(){
         return "/role/role";

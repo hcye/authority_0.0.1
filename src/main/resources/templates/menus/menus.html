@@ -63,6 +63,21 @@
             $("#add").click(function () {
                 document.location.href="/menus/add";
             });
+
+            $("#edit").click(function () {
+                document.location.href="/menus/edit?id="+$("#mid").val();
+            });
+
+            $("#delete").click(function () {
+                $.post("/resource/delete", {id:$("#mid").val()},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+                        if(data["error"]!=null){
+                            layer.alert(data["error"]);
+                        }else {
+                            document.location.href="/menus/menus";
+                        }
+                    }, "json");
+            });
         })
     </script>
 </head>
@@ -115,9 +130,9 @@
 
                         <div class="layui-row">
                             <div class="layui-col-lg-offset5  layui-btn-group">
-                                <button class="layui-btn" id="edit">编辑</button>
-                                <button class="layui-btn" id="add">新增</button>
-                                <button class="layui-btn" id="delete">删除</button>
+                                <button class="layui-btn" id="edit" shiro:hasPermission="asm:menus:edit">编辑</button>
+                                <button class="layui-btn" id="add" shiro:hasPermission="asm:menus:add">新增</button>
+                                <button class="layui-btn" id="delete" shiro:hasPermission="asm:menus:delete">删除</button>
                             </div>
                         </div>
                 </div>

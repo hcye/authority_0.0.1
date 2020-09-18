@@ -1,10 +1,217 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>资产借用</title>
 </head>
+<link rel="stylesheet" href="/layui/css/layui.css">
+<link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+<link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+<script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+<script type="text/javascript" src="/layui/layui.js"></script>
+<!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+<!--[if lt IE 9]>-->
+<script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+<script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+<script type="text/javascript">
+    layui.use('form', function(){
+        var form = layui.form;
+        //监听提交
+        //checkbox 点击事件
+    });
+
+    $(function () {
+        $("#doSearch").click(function () {
+            queryPage($("#devName").val(),$("#search").val(),"","",$("#pageInput").val(),"");
+        })
+        $("#next").click(function () {
+            queryPage($("#devName").val(),$("#search").val(),"","next",$("#pageInput").val(),"");
+        })
+        $("#jump").click(function () {
+            queryPage($("#devName").val(),$("#search").val(),"","",$("#pageInput").val(),"jump");
+        })
+        $("#pre").click(function () {
+            queryPage($("#devName").val(),$("#search").val(),"pre","",$("#pageInput").val(),"");
+        })
+
+            $("#select").click(function () {
+                layer.open({
+                    type: 2,
+                    title: "选择借用人",
+                    area: ['1000px','500px'],
+                    content: ['/layer/layer_edit_groupLeader.html', 'no'],
+                    //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                    //实现弹出层间不同frame的传值
+                });
+            })
+
+        $("#conform").click(function () {
+            if($("#name").val()==''){
+                layer.alert("借用人必填！");
+                return;
+            }
+            layer.confirm('确定出库！', {
+                btn: ['确定', '取消'] //可以无限个按钮
+            }, function(index, layero){
+
+                var checkboxlist=$("#tb").find("input:checkbox:checked");
+                var checkedItemId='';
+                var i=0;
+                while (i<checkboxlist.length){
+                    checkedItemId+=$(checkboxlist[i]).parent().parent().find("input:hidden")[0].value+",";
+                    i++;
+                }
+                if(checkedItemId==''){
+                    layer.alert("请至少勾选一个归还设备！");
+                }
+                $.post("/asm/operat", {name:$("#name").val(),selectDevIds:checkedItemId,actionFlag:'bo'},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+                        var devList=data["allDev"];
+                        layer.open({
+                            type: 2,
+                            scrollbar: true,
+                            title: $("#name").val()+"关联的资产",
+                            area: ['1000px','800px'] ,
+                            content: ['/layer/layer_show_dev_borrowed.html', 'no'],
+                            success: function(layero, index){
+                                var body = layer.getChildFrame('body', index);
+                                var tb=body.find('#tb');
+                                body.find("#label").html("");
+                                for (var key in devList){
+                                    tb.append("<tr><td>"+devList[key].aname+"</td><td>"+devList[key].model+"</td><td>"+devList[key].assestnum+"" +
+                                        "</td><td>"+devList[key].remarks+"</td></tr>");
+                                }
+
+                            }
+                            //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                            //实现弹出层间不同frame的传值
+                        });
+                        layer.close(index);
+                        $("#doSearch").trigger("click");  //模拟点击
+                    }, "json");
+            }, function(index){
+                //关闭弹出层
+                layer.close(index);
+            });
+
+
+        })
+    })
+
+    function queryPage(name,searchKey,pre,next,pageIndex,jumpFlag) {
+        $.post("/asm/queryPage", {name:name,search:searchKey,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag},    //把name数据提交到ajaxRes action内，
+            function(data) {
+                var astList=data.content;
+                $("#tb").find("tr").remove();
+                for (var key in astList){
+                    $("#tb").append("<tr><td><input type='hidden' value='"+astList[key].id+"' />"+astList[key].aname+"</td><td>"+astList[key].model+"</td><td>"+astList[key].assestnum+"" +
+                        "</td><td>"+astList[key].remarks+"</td><td><input type='checkbox' lay-skin='primary' /></td></tr>");
+                }
+                var form = layui.form;
+                form.render();//重新渲染
+                $("#pageInput").val(data.number+1);
+                $("#PageCount").html(' 共 '+data.totalPages+' 页');
+            }, "json");
+    }
+
+</script>
+<!--model.addAttribute("operator",loginUser);-->
+<!--model.addAttribute("assertTypes",assertTypes);-->
+<!--model.addAttribute("asserts",asserts);-->
 <body>
-    <p2>借用</p2>
+<div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
+    <p>资产借用</p>
+</div>
+<div class="layui-container">
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">借用人:</label>
+                <div class="layui-input-inline">
+                    <input class="layui-input" disabled="disabled" id="name"/>
+                </div>
+                <button class="layui-btn" id="select">选择</button>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">操作人:</label>
+                <div class="layui-input-inline">
+                    <input class="layui-input" disabled="disabled" th:value="${operator}"  id="operator"/>
+                </div>
+            </div>
+            <div class="layui-inline layui-btn-group">
+                <button class="layui-btn layui-btn-normal" id="conform">借用</button>
+
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-row">
+                <div class="layui-inline">
+                    <label class="layui-form-label">资产分类:</label>
+                    <div class="layui-input-inline">
+                        <select id="astType" class="layui-form-select">
+                            <option th:each="tp : ${assertTypes}" th:text="${tp.getTypeName()}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">资产名称:</label>
+                    <div class="layui-input-inline">
+                        <select id="devName" class="layui-form-select">
+                            <option th:each="devname : ${assertNames}" th:text="${devname}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input  class="layui-input" id="search" placeholder="搜索可借用资产" />
+                    </div>
+                    <button class="layui-btn" id="doSearch">查找</button>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <table class="layui-table">
+                <thead class="layui-table-header">
+                    <tr>
+                        <td>名称</td>
+                        <td>型号</td>
+                        <td>编号</td>
+                        <td>备注</td>
+                        <td>操作</td>
+                    </tr>
+                </thead>
+                <tbody class="layui-table-body" id="tb">
+                    <tr th:each="ast : ${assertList}">
+                        <td th:text="${ast.getAname()}"></td>
+                        <td th:text="${ast.getModel()}"></td>
+                        <td th:text="${ast.getAssestnum()}"></td>
+                        <td th:text="${ast.getRemarks()}"></td>
+                        <td><input type="hidden" th:value="${ast.getId()}" /><input type="checkbox" lay-skin="primary"/></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-row">
+                <input type="hidden" id="selectedDepId"/>
+                <div class="layui-col-md-offset2 layui-col-md2">
+                    <button class="layui-btn" id="pre" style="float: right">-</button>
+                </div>
+                <div class="layui-col-md2 layui-input-inline" style="margin: 0">
+                    <input type="text" class="layui-input" id="pageInput" th:value="${asserts.getNumber()+1}" />
+                </div>
+                <div class="layui-col-md1">
+                    <button class="layui-btn" id="next">+</button>
+                </div>
+                <div class="layui-col-md2">
+                    <button class="layui-btn" id="jump">跳转</button>
+                    <span id="PageCount" th:text="${' 共 '+asserts.getTotalPages()+' 页'}"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

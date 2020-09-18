@@ -1,19 +1,19 @@
 package com.rbac.demo.controller.restController;
 
-import com.rbac.demo.entity.Resources;
-import com.rbac.demo.entity.Role;
-import com.rbac.demo.entity.Role2Resources;
-import com.rbac.demo.entity.User2Role;
+import com.rbac.demo.entity.*;
 import com.rbac.demo.jpa.JpaResources;
 import com.rbac.demo.jpa.JpaRole;
 import com.rbac.demo.jpa.JpaRole2Resources;
+import com.rbac.demo.service.PermissionService;
 import com.rbac.demo.service.RoleService;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
@@ -27,12 +27,16 @@ public class RoleRestController {
     @Autowired
     private JpaRole jpaRole;
     @Autowired
+    private PermissionService permissionService;
+    @Autowired
     private JpaResources jpaResources;
     @Autowired
     private RoleService roleService;
     @PostMapping("/role/getRoles")
-    public Page<Role> getRoles(String name,String status,String pre,String next,int pageNow){
-        return roleService.getRolesPage(name,status,pre,next,pageNow);
+    public Page<Role> getRoles(String name, String status, String pre, String next, int pageNow){
+        Page<Role> page =roleService.getRolesPage(name,status,pre,next,pageNow);
+        return page;
+
     }
     @PostMapping("/role/addRole")
     public Map<String,String> add(String name, String code, String status, String powers,String remarks){

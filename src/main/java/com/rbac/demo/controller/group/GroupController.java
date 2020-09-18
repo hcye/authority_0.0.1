@@ -5,10 +5,12 @@ import com.rbac.demo.entity.SysGroup;
 import com.rbac.demo.jpa.JpaEmployee;
 import com.rbac.demo.jpa.JpaGroup;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpSession;
@@ -17,11 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-public class EditGroupController {
+public class GroupController {
     @Autowired
     private JpaEmployee jpaEmployee;
     @Autowired
     private JpaGroup jpaGroup;
+    @RequiresPermissions("asm:group:edit")
     @RequestMapping("/group/edit")
     public String edit(int id, Model model){
         //本部门
@@ -66,7 +69,8 @@ public class EditGroupController {
         jpaGroup.saveAndFlush(group);
         return "redirect:/group/edit?id="+id;
     }*/
-    @RequestMapping("/group/edit/saveChange")
+  @RequiresPermissions("asm:group:edit")
+    @PostMapping("/group/edit/saveChange")
     public String save(int did,String upperDep,String depName,String leader,String status){
         SysGroup group=jpaGroup.findById(did).get();
         SysGroup uppergroup=jpaGroup.findSysGroupByGname(upperDep);
@@ -82,6 +86,7 @@ public class EditGroupController {
         jpaGroup.saveAndFlush(group);
         return "/group/group";
     }
+    @RequiresPermissions("asm:group:delete")
     @RequestMapping("/group/delete")
     public String delete(int id, Model model){
         SysGroup group =jpaGroup.findById(id).get();
@@ -93,12 +98,14 @@ public class EditGroupController {
         jpaGroup.saveAndFlush(group);
         return "/group/group";
     }
+    @RequiresPermissions("asm:group:add")
     @RequestMapping("/group/addPage")
     public String jumpToAddPage(Model model){
         List<String> names = jpaGroup.getDistinctGourpName();
         model.addAttribute("names",names);
         return "/group/add";
     }
+    @RequiresPermissions("asm:group:add")
     @RequestMapping("/group/add")
     public String add(String upperDep, String depName, String leader, String status, Model model, HttpSession session){
         if(depName==null||depName.equals("")||jpaGroup.findSysGroupByGname(depName)!=null){
@@ -128,13 +135,16 @@ public class EditGroupController {
         jpaGroup.saveAndFlush(newGroup);
         return "/group/group";
     }
+
+    @RequiresPermissions("asm:group:view")
     @GetMapping("/group/group")
     public String group(){
         return "/group/group";
     }
 
+    @RequiresPermissions("asm:group:view")
     @GetMapping("/group/selectGroupLeader")
     public String getLeader(){
-        return "/group/layer_edit_groupLeader";
+        return "/layer/layer_edit_groupLeader";
     }
 }

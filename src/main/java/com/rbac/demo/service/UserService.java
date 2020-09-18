@@ -61,74 +61,103 @@ public class UserService {
         return stringSet;
     }
     //根据部门id获得部门的用户
-    public Page<Employee> getPage(int depid,int pageInput,String turnFlag,String keyWord,String refreshFlag){
+    public Page<Employee> getPage(String depid,String pageInputStr,String turnFlag,String keyWord,String refreshFlag){
+        int pageInput;
+        if(pageInputStr.equals("")){
+            pageInput=Integer.parseInt("1");
+        }else {
+            pageInput=Integer.parseInt(pageInputStr);
+        }
+
         pageInput=pageInput-1;   //pageable 的页码序号从0开始
-        Page<Employee> employees=null;
+        Page<Employee> employees = null;
+        Pageable pageable=PageRequest.of(pageInput,pageSize);
+
 
         /**
          *
-         * 刷新用户列表
+         * 初始化页面
          *
          * */
-        if(refreshFlag!=null&&refreshFlag.equals("refresh")){
-            userService.updateUserTable();
-            Pageable pageable=PageRequest.of(0,pageSize);
-            /**
-             * //7是综合管理部的id，这里采用硬编码，不运行中动态获得，以后再改
-             *
-             * */
-            SysGroup group =jpaGroup.findById(7).get();
+        if(turnFlag.equals("")&&keyWord.equals("")&&refreshFlag.equals("")&&depid.equals("")){
+            pageable=PageRequest.of(0,pageSize);
+            List<SysGroup> groups=jpaGroup.findAllExcludDeleted();
+            SysGroup group = groups.get(2);
             employees=jpaEmployee.findEmployeesBySysGroupByGroupId(group,pageable);
             return employees;
         }
+
         /**
          *
-         * 搜索关键字不为空
+         * 树切换部门
+         *
+         * */
+        if(!depid.equals("")&&turnFlag.equals("")){
+            pageable=PageRequest.of(0,pageSize);
+            SysGroup group =jpaGroup.findById(Integer.parseInt(depid)).get();
+            employees=jpaEmployee.findEmployeesBySysGroupByGroupId(group,pageable);
+            return employees;
+        }
+
+        /**
+         *
+         * 刷新列表
+         *
+         * */
+        if(!refreshFlag.equals("")){
+            userService.updateUserTable();
+            pageable=PageRequest.of(0,pageSize);
+
+            List<SysGroup> groups=jpaGroup.findAllExcludDeleted();
+            SysGroup group =groups.get(2);
+            employees=jpaEmployee.findEmployeesBySysGroupByGroupId(group,pageable);
+            return employees;
+        }
+
+
+
+        /**
+         * 获得搜索数据
+         * */
+        if(!keyWord.equals("")&&turnFlag.equals("")){
+            pageable=PageRequest.of(0,pageSize);
+            keyWord=ConvertStrForSearch.getFormatedString(keyWord);
+            employees=jpaEmployee.findEmployeesByEnameLike(keyWord,pageable);
+            if(employees.isEmpty()){
+                employees=jpaEmployee.findEmployeesByPingyinLike(keyWord,pageable);
+            }
+            return employees;
+        }
+
+        /**
+         *
+         * 切换页面
          *
          * */
 
-        if(keyWord!=null&&keyWord.length()>0&&turnFlag.equals("noAction")){
-            Pageable pageable=PageRequest.of(0,pageSize);
-            keyWord=ConvertStrForSearch.getFormatedString(keyWord);
-            employees= jpaEmployee.findEmployeesByEname(keyWord,pageable);
-            if(employees.isEmpty()){
-                employees= jpaEmployee.findEmployeesByPingyin(keyWord,pageable);
-            }
-            return employees;
-        }else if(keyWord!=null&&keyWord.length()>0&&!turnFlag.equals("noAction")){
-            Pageable pageable=PageRequest.of(pageInput,pageSize);
-            keyWord=ConvertStrForSearch.getFormatedString(keyWord);
+        if(!turnFlag.equals("")){
+
+
+            System.out.println("---");
             if(turnFlag.equals("pre")){
-                if(pageable.hasPrevious()){
-                    pageable=PageRequest.of(pageInput-1,pageSize);
-                }
+                pageable=pageable.previousOrFirst();
             }else if(turnFlag.equals("next")){
                 pageable=pageable.next();
             }
-            employees= jpaEmployee.findEmployeesByEname(keyWord,pageable);
-            if(employees.isEmpty()){
-                employees=jpaEmployee.findEmployeesByPingyin(keyWord,pageable);
+            if(!keyWord.equals("")){
+                keyWord=ConvertStrForSearch.getFormatedString(keyWord);
+                employees=jpaEmployee.findEmployeesByEnameLike(keyWord,pageable);
+                if(employees.isEmpty()){
+                    employees=jpaEmployee.findEmployeesByPingyinLike(keyWord,pageable);
+                }
+            }else if(!depid.equals("")){
+                SysGroup group =jpaGroup.findById(Integer.parseInt(depid)).get();
+                employees=jpaEmployee.findEmployeesBySysGroupByGroupId(group,pageable);
             }
-            return employees;
         }
-        /**-------------------------------------------------------------------------------------**/
 
-        /**
-         *
-         * 关键字为空
-         *
-         * */
-        SysGroup group =jpaGroup.findById(depid).get();
-        Pageable pageable= PageRequest.of(pageInput,pageSize);
-        if(turnFlag.equals("pre")){
-            if(pageable.hasPrevious()){
-                pageable=PageRequest.of(pageInput-1,pageSize);
-            }
-        }else if(turnFlag.equals("next")){
-            pageable=pageable.next();
-        }
-        employees=jpaEmployee.findEmployeesBySysGroupByGroupId(group,pageable);
         return employees;
+
     }
     /**
      *
@@ -148,13 +177,17 @@ public class UserService {
         return names;
     }
 
-    public Set<Resources> getRolesByEmployee(Employee e){
+    public Set<Resources> getResourcesByEmployee(Employee e){
         List<Role> roles = jpaEmployee.findRoleByEmployee(e);
         Set<Resources> resourcesSet = new HashSet<>();
         for (Role role : roles) {
             resourcesSet.addAll(jpaRole.findMenusByRole(role));
         }
         return resourcesSet;
+    }
+
+    public List<Role> getRolesByEmployee(Employee e){
+        return jpaEmployee.findRoleByEmployee(e);
     }
 
 }

@@ -16,21 +16,25 @@
     <script type="text/javascript">
         layui.use('form', function(){
             var form = layui.form;
-            form.on('checkbox()', function(data){
-                var a=$("#roles").val();
-                a=a+","+data.value;
-                $("#roles").val(a);
-            });
+            form.render();
         });
-
-
         $(function () {
             $("#save").click(function () {
-                if($("#pwd").val().trim().length<8){
+
+
+                if($("#pwdChangeFlag").val()=='1'&&$("#pwd").val().trim().length<8){
                     layer.alert("密码长度必须大于8位");
                     return;
                 }
-                $.post("/user/doEdit", {id:$("#eid").val(),email:$("#email").val(),sex:$("#usex").val(),status:$("#status").val(),group:$("#group").val(),pwd:$("#pwd").val(),roles:$("#roles").val()},    //把name数据提交到ajaxRes action内，
+                var checkboxs=$("#role").find("input:checkbox:checked");
+                var i=0;
+                var ids="";
+                while(i<checkboxs.length){
+                    var key=checkboxs[i].value;
+                    ids=ids+key+",";
+                    i++;
+                }
+                $.post("/user/doEdit", {id:$("#eid").val(),email:$("#email").val(),sex:$("#usex").val(),status:$("#status").val(),group:$("#group").val(),pwd:$("#pwd").val(),roles:ids},    //把name数据提交到ajaxRes action内，
                     function (data) {
                         // int id,String name,String email,String sex,String status,String group,String pwd,String roles
                         document.location.href="/user/user";
@@ -40,9 +44,12 @@
             $("#reset").click(function () {
                 document.location.href="/user/user";
             });
+            $("#resetPwd").click(function () {
+                $("#pwdDiv").find("input").remove();
+                $("#pwdDiv").append("<input class='layui-input' type='password' id='pwd' width='100%' placeholder='输入密码' />");
+                $("#pwdChangeFlag").val("1");
+            })
         })
-
-
     </script>
 </head>
 <body>
@@ -50,10 +57,9 @@
     <p>编辑用户</p>
 </div>
     <div class="layui-container">
-            <form class="layui-form" action="/doEdit" style="margin-top: 10%">
-
+            <div class="layui-form" action="/doEdit" style="margin-top: 10%">
+                <input type="hidden" id="pwdChangeFlag" />
                 <input type="hidden" id="eid" th:value="${employee.id}" />
-                <input type="hidden" id="roles" value="" />
                 <div class="layui-form-item">
                     <label class="layui-form-label">用户名</label>
                     <div class="layui-input-block">
@@ -98,25 +104,24 @@
 
                 <div class="layui-form-item">
                     <label class="layui-form-label">登录密码</label>
-                    <div class="layui-input-block">
-                        <input class="layui-input" type="password" id="pwd" width="100%" />
+                    <div class="layui-input-inline" id="pwdDiv">
+                        <input class="layui-input" style="background-color: #D0D0D0" type="password" id="pwd" width="100%" disabled="disabled" placeholder="点击重置密码可编辑" />
                     </div>
+                    <button class="layui-btn" id="resetPwd">设置密码</button>
                 </div>
 
-                <div class="layui-form-item">
-                    <label class="layui-form-label">角色</label>
-                    <div class="layui-input-block">
-                        <input type="checkbox" th:each="role : ${roles}" name="role" th:value="${role.getId()}" th:title="${role.getDescription()}">
+                <div class="layui-form-item" id="role">
+                    <label class="layui-form-label" >角色</label>
+                    <div class="layui-input-inline" th:each="role : ${roles}" >
+                        <input type="checkbox"  th:checked="${rolesBind.contains(role)?'true':'false'}" name="role" th:value="${role.getId()}" th:title="${role.getRname()}">
                     </div>
                 </div>
-
                 <div class="layui-row">
                     <div class="layui-col-md-offset5 layui-col-md4">
                         <button type="button" id="save" class="layui-btn" >保存</button>&nbsp;&nbsp;<button type="reset" id="reset" class="layui-btn layui-btn-normal">取消</button>
                     </div>
                 </div>
-
-            </form>
+            </div>
     </div>
 </body>
 </html>

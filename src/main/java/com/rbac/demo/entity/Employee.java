@@ -17,13 +17,13 @@ public class Employee {
     private String salt;
     private Collection<OperatRecord> operatRecordsById;
     private Collection<OperatRecord> operatRecordsById_0;
-    private Collection<Othermeans> othermeansById;
     private Collection<User2Role> user2RolesById;
     private String role;
     private SysGroup sysGroupByGroupId;
     private Collection<SysGroup> sysGroupsById;
     private Byte status=0;
     private String sex="";
+    private Collection<Assert> assertsById;
 
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
@@ -96,7 +96,6 @@ public class Employee {
         this.pwd = pwd;
     }
 
-
     @Basic
     @Column(name = "salt", nullable = true, length = 64)
     public String getSalt() {
@@ -157,14 +156,7 @@ public class Employee {
         this.operatRecordsById_0 = operatRecordsById_0;
     }
 
-    @OneToMany(mappedBy = "employeeByBorrower")
-    public Collection<Othermeans> getOthermeansById() {
-        return othermeansById;
-    }
 
-    public void setOthermeansById(Collection<Othermeans> othermeansById) {
-        this.othermeansById = othermeansById;
-    }
 
     @OneToMany(mappedBy = "employeeByUserId")
     public Collection<User2Role> getUser2RolesById() {
@@ -225,4 +217,12 @@ public class Employee {
         this.sex = sex;
     }
 
+    @OneToMany(mappedBy = "employeeByBorrower")
+    public Collection<Assert> getAssertsById() {
+        return assertsById;
+    }
+
+    public void setAssertsById(Collection<Assert> assertsById) {
+        this.assertsById = assertsById;
+    }
 }

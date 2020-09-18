@@ -34,14 +34,14 @@
 
 
             $("#confirm").click(function () {
-                $.post("/resource/validAddInfo", {name:$("#name").val(),identify:$("#identify").val()},    //把name数据提交到ajaxRes action内，
+                $.post("/resource/validAddInfo", {id:0,name:$("#name").val(),identify:$("#identify").val()},    //把name数据提交到ajaxRes action内，
                     function(data) {
                         var errMsg;
                         if(data["error"]!=null){
                             errMsg=data["error"];
                             layer.alert("参数校验失败："+errMsg);
                         }else if(data["ok"]!=null){
-                            $.post("/resource/saveNewRes", {name:$("#name").val(),identify:$("#identify").val(),url:$("#url").val(),type:$("#type").val(),upperMenu:$("#upperMenu").val()},    //把name数据提交到ajaxRes action内，
+                            $.post("/resource/saveNewRes", {id:0,name:$("#name").val(),identify:$("#identify").val(),url:$("#url").val(),type:$("#type").val(),upperMenu:$("#upperMenu").val()},    //把name数据提交到ajaxRes action内，
                                 function(data) {
                                 if(data["info"]!=null){
                                     document.location.href="/menus/menus";
