@@ -9,11 +9,16 @@ public class User2Role {
     private Integer id;
     private Employee employeeByUserId;
     private Role roleByRoleId;
+
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public Integer getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void setId(Integer id) {

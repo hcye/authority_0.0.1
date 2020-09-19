@@ -19,13 +19,24 @@
         var form = layui.form;
         //监听提交
         //checkbox 点击事件
+        form.on("select(astType)", function(data){
+            console.log(data.value);
+            $.post("/asm/getDevNames", {devType:data.value},    //把name数据提交到ajaxRes action内，
+                function(dt) {
+                    console.log(dt["name"]);
+                    $("#name").find("option").remove();
+                    var names=dt["name"];
+                    for(var key in names){
+                        $("#name").append("<option>"+names[key]+"</option>");
+                    }
+                }, "json");
+            form.render('select');//修改select后需要重新渲染
+        });
+
+
     });
 
-    $(function () {
-        $("#astType").change(function () {
-            ase
-        });
-    })
+
 
 </script>
 <body>
@@ -37,7 +48,7 @@
                 <div class="layui-form-item">
                      <label class="layui-form-label">类型</label>
                      <div class="layui-input-inline">
-                        <select class="layui-form-select" id="astType">
+                        <select class="layui-form-select"  lay-filter="astType" id="tp">
                             <option th:each="type : ${types}" th:text="${type}"></option>
                         </select>
                     </div>
@@ -59,7 +70,9 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">名称</label>
                     <div class="layui-input-inline">
-                        <select class="layui-form-select" id="name">
+                        <select class="layui-form-select" lay-filter="astName"  id="name">
+                            <option>11</option>
+                            <option>22</option>
                         </select>
                     </div>
                 </div>

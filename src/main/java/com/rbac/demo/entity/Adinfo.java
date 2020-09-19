@@ -9,11 +9,16 @@ public class Adinfo {
     private String adip;
     private String domainadminname;
     private String domainadminpwd;
+
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public Integer getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void setId(Integer id) {

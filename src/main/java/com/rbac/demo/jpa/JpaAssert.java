@@ -19,6 +19,8 @@ public interface JpaAssert extends JpaRepository<Assert,Integer> {
     Page<Assert> findAssertsByAname(@Param("name")String name,Pageable pageable);
     @Query("select ast from Assert ast where ast.workless='0' and ast.assestnum like :searchKey and ast.employeeByBorrower is null")
     Page<Assert> findAssertsByAssestnum(@Param("searchKey")String searchKey,Pageable pageable);
+    @Query("select distinct ast.aname from Assert ast where ast.assertTypeByAssertType.typeName=:tp")
+    List<String> findDistinctNamesByType(@Param("tp") String tp);
 
 
 }

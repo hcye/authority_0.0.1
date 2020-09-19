@@ -16,11 +16,16 @@ public class Resources {
     private Resources resourcesByParentId;
     private Collection<Resources> resourcesById;
     private Collection<Role2Resources> role2ResourcesById;
+
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public Integer getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void setId(Integer id) {

@@ -9,11 +9,16 @@ public class Role2Resources {
     private Integer id;
     private Role roleByRoleId;
     private Resources resourcesByMenusId;
+
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public Integer getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void setId(Integer id) {

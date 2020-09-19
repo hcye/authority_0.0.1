@@ -1,6 +1,5 @@
 package com.rbac.demo.controller.restController;
 
-import com.rbac.demo.entity.AsmAction;
 import com.rbac.demo.entity.Assert;
 import com.rbac.demo.entity.Employee;
 import com.rbac.demo.jpa.JpaAssert;
@@ -14,7 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,5 +95,15 @@ public class AsmRestController {
         map.put("devs",asserts);
         return map;
     }
+
+    @PostMapping("/asm/getDevNames")
+    public Map<String, List<String>> getDevsNames(String devType){
+        Map<String,List<String>> map=new HashMap<>();
+        List<String> names=jpaAssert.findDistinctNamesByType(devType);
+        map.put("name",names);
+        return map;
+    }
+
+
 
 }
