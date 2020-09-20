@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 import java.util.Collection;
 
 @Entity
-@Table(name = "assert_type", schema = "mydb1", catalog = "")
+@Table(name = "assert_type", schema = "mydb1")
 public class AssertType {
     private Integer id;
     private String typeName;

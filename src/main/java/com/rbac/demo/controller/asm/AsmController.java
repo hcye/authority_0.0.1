@@ -51,4 +51,13 @@ public class AsmController {
 
         return "/asm/inp";
     }
+
+    @GetMapping("/asm/list")
+    public String listPage(Model model){
+
+        List<String> types=jpaAssertType.findAssertTypeNames();
+        model.addAttribute("types",types);
+
+        return "/asm/list";
+    }
 }

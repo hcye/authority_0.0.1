@@ -117,6 +117,72 @@
 
 </script>
 <body>
+<div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
+    <p>资产列表</p>
+</div>
+    <div class="layui-container"  style="width: 90%">
+        <div class="layui-form">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">资产类型</label>
+                    <div class="layui-input-inline">
+                        <select class="layui-form-select" id="dev_type">
+                            <option th:each="tp : ${types}" th:text="${tp}"></option>
+                        </select>
+                    </div>
+                </div>
 
+                <div class="layui-inline">
+                    <label class="layui-form-label">是否损坏</label>
+                    <div class="layui-input-inline">
+                        <select class="layui-form-select" id="is_damage">
+                            <option>完好</option>
+                            <option>损坏</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input class="layui-input" placeholder="按编号、借用人、设备名检索" id="keywords"/>
+                    </div>
+                    <button class="layui-btn" id="search">查找</button>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <table class="layui-table">
+                    <thead>
+                        <tr>
+                            <td>名称</td>
+                            <td>型号</td>
+                            <td>编号</td>
+                            <td>sn号</td>
+                            <td>价格</td>
+                            <td>入库时间</td>
+                            <td>借用人</td>
+                            <td>借用时间</td>
+                            <td>备注</td>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        <div class="layui-row">
+            <input type="hidden" id="selectedDepId"/>
+            <div class="layui-col-md-offset2 layui-col-md2">
+                <button class="layui-btn" id="pre" style="float: right">-</button>
+            </div>
+            <div class="layui-col-md2 layui-input-inline">
+                <input type="text" class="layui-input" id="pageInput" />
+            </div>
+            <div class="layui-col-md1">
+                <button class="layui-btn" id="next">+</button>
+            </div>
+            <div class="layui-col-md2">
+                <button class="layui-btn" id="jump">跳转</button>
+                <span id="PageCount"></span>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
