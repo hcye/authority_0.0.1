@@ -15,7 +15,8 @@ import java.util.List;
 public interface JpaRole extends JpaRepository<Role,Integer> {
     @Query("select rm.resourcesByMenusId from Role2Resources rm where rm.roleByRoleId=:role ")
     List<Resources> findResourcesByRole(@Param("role")Role role);
-    @Query("select rm.resourcesByMenusId from Role2Resources rm  where rm.roleByRoleId=:role and rm.resourcesByMenusId.type='目录' and rm.resourcesByMenusId.resourcesByParentId is null")
+
+    @Query("select rm.resourcesByMenusId from Role2Resources rm  where rm.roleByRoleId=:role and rm.resourcesByMenusId.type='菜单' and rm.resourcesByMenusId.resourcesByParentId is null")
     List<Resources> findMenusByRole(@Param("role")Role role);
 
     @Query("select role from Role role where role.deleteFlag=0")

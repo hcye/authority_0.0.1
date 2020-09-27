@@ -16,15 +16,17 @@ public class Assert {
     private Date putintime;
     private String remarks;
     private String snnum;
-    private String workless;
+    private String workless="0";
     private String price;
     private Date brotime;
     private Date damagetime;
     private Date returntime;
     private String assertPic;
     private Employee employeeByBorrower;
-    private AssertType assertTypeByAssertType;
+
     private Collection<OperatRecord> operatRecordsById;
+    private AssetType assetTypeByAssertType;
+
 
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
@@ -224,16 +226,7 @@ public class Assert {
     public void setEmployeeByBorrower(Employee employeeByBorrower) {
         this.employeeByBorrower = employeeByBorrower;
     }
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "assert_type", referencedColumnName = "id")
-    public AssertType getAssertTypeByAssertType() {
-        return assertTypeByAssertType;
-    }
 
-    public void setAssertTypeByAssertType(AssertType assertTypeByAssertType) {
-        this.assertTypeByAssertType = assertTypeByAssertType;
-    }
 
     @OneToMany(mappedBy = "assertByAssertAsset")
     public Collection<OperatRecord> getOperatRecordsById() {
@@ -242,5 +235,15 @@ public class Assert {
 
     public void setOperatRecordsById(Collection<OperatRecord> operatRecordsById) {
         this.operatRecordsById = operatRecordsById;
+    }
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "assert_type", referencedColumnName = "id")
+    public AssetType getAssetTypeByAssertType() {
+        return assetTypeByAssertType;
+    }
+
+    public void setAssetTypeByAssertType(AssetType assetTypeByAssertType) {
+        this.assetTypeByAssertType = assetTypeByAssertType;
     }
 }

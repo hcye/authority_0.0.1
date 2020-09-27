@@ -1,22 +1,15 @@
 package com.rbac.demo;
 
-import com.rbac.demo.entity.*;
+import com.rbac.demo.entity.AssetType;
 import com.rbac.demo.jpa.*;
-import com.rbac.demo.shiro.ShiroUtils;
-import com.rbac.demo.tool.ConvertStrForSearch;
-import org.apache.shiro.util.ByteSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.util.DigestUtils;
 
-import javax.sql.rowset.spi.SyncResolver;
-import java.util.EnumMap;
-import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @SpringBootTest
 public class Test1 {
@@ -30,24 +23,20 @@ public class Test1 {
     JpaEmployee jpaEmployee;
     @Autowired
     JpaResources jpaResources;
-
+    @Autowired
+    JpaDevType jpaDevType;
     @Autowired
     JpaAssert jpaAssert;
     @Autowired
-    JpaAssertType jpaAssertType;
+    JpaAssetType jpaAssetType;
     @Test
     public void t(){
 
-        AssertType assertType=jpaAssertType.findById(2).get();
-        List<Assert> asserts=jpaAssert.findAll();
-        for (Assert assert1:asserts){
-            if(assert1.getAssertTypeByAssertType()==null){
-                assert1.setAssertTypeByAssertType(assertType);
-                jpaAssert.save(assert1);
-            }
+
+        String a="x-0-x-1";
+        for (String str:a.split("-")){
+            System.out.println(str+"---");
         }
-
-
 
     }
 }

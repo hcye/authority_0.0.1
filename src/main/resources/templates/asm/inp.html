@@ -20,23 +20,62 @@
         //监听提交
         //checkbox 点击事件
         form.on("select(astType)", function(data){
-            console.log(data.value);
             $.post("/asm/getDevNames", {devType:data.value},    //把name数据提交到ajaxRes action内，
                 function(dt) {
-                    console.log(dt["name"]);
                     $("#name").find("option").remove();
                     var names=dt["name"];
                     for(var key in names){
                         $("#name").append("<option>"+names[key]+"</option>");
                     }
+                    var codes=dt["code"];
+                    $("#encode").attr("placeholder",'编码格式:'+codes[0]);
+                    $("#code").val(codes[0]);
+                    var form = layui.form;
+                    form.render('select');//修改select后需要重新渲染
                 }, "json");
-            form.render('select');//修改select后需要重新渲染
+
         });
-
-
     });
 
 
+    $(function () {
+        $("#add_dev_type").click(function () {
+            layer.open({
+                type: 2,
+                title: "增加种类",
+                area: ['1000px','500px'],
+                content: ['/layer/layer_add_devType', 'no'],
+                //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                //实现弹出层间不同frame的传值
+                success: function(layero, index){
+                    var body = layer.getChildFrame('body', index);
+                    body.find('#type_name').val($("#tp").val());
+                },
+                end:function () {
+                    var form = layui.form;
+                    form.render('select');//修改select后需要重新渲染
+                }
+            });
+        })
+
+
+
+        $("#conform").click(function () {
+
+            $.post("/asm/validInputAssetNum", {inputCode:$("#encode").val(),tep:$("#code").val(),num:$("#num").val(),model:$("#model").val(),price:$("#price").val()},    //把name数据提交到ajaxRes action内，
+                function(data) {
+                    if(data["error"]!=null){
+                        $("#encode").val("");
+                        layer.alert(data["error"]);
+                    }else {
+                        document.location.href="/asm/putin?type="+$("#tp").val()+"&model="+$("#model").val().trim()+"&price="+$("#price").val().trim()+"&name="+$("#name").val().trim()
+                            +"&encode="+$("#encode").val().trim()+"&num="+$("#num").val().trim();
+                    }
+                }, "json");
+
+
+        })
+    })
 
 </script>
 <body>
@@ -44,6 +83,7 @@
     <p>资产入库</p>
 </div>
     <div class="layui-container">
+        <input type="hidden" id="code" th:value="${code}" />
         <div class="layui-form">
                 <div class="layui-form-item">
                      <label class="layui-form-label">类型</label>
@@ -52,10 +92,9 @@
                             <option th:each="type : ${types}" th:text="${type}"></option>
                         </select>
                     </div>
-                    <button class="layui-btn" id="add_type">增加类型</button>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">型号</label>
+                    <label class="layui-form-label"><span style="color: red">*</span>型号</label>
                     <div class="layui-input-inline">
                         <textarea class="layui-textarea" id="model" ></textarea>
                     </div>
@@ -72,32 +111,29 @@
                     <label class="layui-form-label">名称</label>
                     <div class="layui-input-inline">
                         <select class="layui-form-select" lay-filter="astName"  id="name">
-                            <option>11</option>
-                            <option>22</option>
+                            <option th:each="name: ${names}" th:text="${name}"></option>
                         </select>
                     </div>
-                    <button class="layui-btn" id="add_dev_type">增加名称</button>
+                    <button class="layui-btn" id="add_dev_type">增加种类</button>
                 </div>
-
                 <div class="layui-form-item">
-                    <label class="layui-form-label">数量</label>
+                    <p style="margin-left: 10%">&nbsp;&nbsp;资产编码按照企业资产编码规范编写。x代表英文字符，0代表数字；例如某办公设备编码是 HS-BG-01005,则编码模板是x-x-0</p>
+                    <p style="margin-left: 10%">某信息化设备编码是 XXH-01005,则编码模板是x-0。<span style="color: firebrick">英文和数字必须用‘-’隔开。</span></p>
+                    <p style="margin-left: 10%">数量大于1的情况入库时设备编码按输入编码末尾数字递增。例如 输入 xx-00 那么下一个设备编码是xx-01</span></p>
+                    <br/>
+                    <label class="layui-form-label"><span style="color: red">*</span>编号</label>
+                    <div class="layui-input-inline">
+                        <input class="layui-input" id="encode" th:placeholder="${code}" />
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><span style="color: red">*</span>数量</label>
                     <div class="layui-input-inline">
                         <input class="layui-input" id="num" />
                     </div>
                 </div>
 
-                <div class="layui-form-item">
-                    <label class="layui-form-label">编号</label>
-                    <div class="layui-input-inline">
-                        <input class="layui-input" id="num_eng" placeholder="英文前缀" />
-                    </div>
-                    <div class="layui-form-mid">
-                        <span>-</span>
-                    </div>
-                    <div class="layui-input-inline">
-                        <input class="layui-input" id="num_num" placeholder="数字编码"/>
-                    </div>
-                </div>
+
                 <div class="layui-form-item">
                     <button class="layui-btn" id="conform" style="margin-left: 10%">提交</button>
                     <button class="layui-btn" id="cancel">取消</button>

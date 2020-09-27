@@ -11,16 +11,20 @@ import java.util.Objects;
 public class DevType {
     private int id;
     private String devName;
-    private String desc;
+    private String remarks;
     private Timestamp createTime;
     private String creator;
-    private AssertType assertTypeByAssertTypeId;
+    private AssetType assetTypeByAssertTypeId;
 
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public int getId() {
         return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public void setId(int id) {
@@ -38,13 +42,13 @@ public class DevType {
     }
 
     @Basic
-    @Column(name = "desc", nullable = true, length = 255)
-    public String getDesc() {
-        return desc;
+    @Column(name = "remarks", nullable = true, length = 255)
+    public String getRemarks() {
+        return remarks;
     }
 
-    public void setDesc(String desc) {
-        this.desc = desc;
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
     }
 
     @Basic
@@ -74,24 +78,23 @@ public class DevType {
         DevType devType = (DevType) o;
         return id == devType.id &&
                 Objects.equals(devName, devType.devName) &&
-                Objects.equals(desc, devType.desc) &&
                 Objects.equals(createTime, devType.createTime) &&
                 Objects.equals(creator, devType.creator);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, devName, desc, createTime, creator);
+        return Objects.hash(id, devName, remarks, createTime, creator);
     }
 
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "assert_type_id", referencedColumnName = "id")
-    public AssertType getAssertTypeByAssertTypeId() {
-        return assertTypeByAssertTypeId;
+    public AssetType getAssetTypeByAssertTypeId() {
+        return assetTypeByAssertTypeId;
     }
 
-    public void setAssertTypeByAssertTypeId(AssertType assertTypeByAssertTypeId) {
-        this.assertTypeByAssertTypeId = assertTypeByAssertTypeId;
+    public void setAssetTypeByAssertTypeId(AssetType assetTypeByAssertTypeId) {
+        this.assetTypeByAssertTypeId = assetTypeByAssertTypeId;
     }
 }

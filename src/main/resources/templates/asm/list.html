@@ -14,7 +14,7 @@
 <!--[if lt IE 9]>-->
 <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
 <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
-<script type="text/javascript">
+<script th:inline="javascript">
     layui.use('form', function(){
         var form = layui.form;
         //监听提交
@@ -22,17 +22,22 @@
     });
 
     $(function () {
-        $("#doSearch").click(function () {
-            queryPage($("#devName").val(),$("#search").val(),"","",$("#pageInput").val(),"");
+        $(document).ready(function () {
+            // type,search,pre,next,pageIndex,jumpFlag,isDam
+            queryPage($("#dev_type").val(),"","","","1","","完好");
+        });
+        // type:type,search:search,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag,isDam:isDam
+        $("#search").click(function () {
+            queryPage($("#dev_type").val(),$("#keywords").val(),"","",$("#pageInput").val(),"",$("#is_damage").val());
         })
         $("#next").click(function () {
-            queryPage($("#devName").val(),$("#search").val(),"","next",$("#pageInput").val(),"");
+            queryPage($("#dev_type").val(),$("#keywords").val(),"","next",$("#pageInput").val(),"",$("#is_damage").val());
         })
         $("#jump").click(function () {
-            queryPage($("#devName").val(),$("#search").val(),"","",$("#pageInput").val(),"jump");
+            queryPage($("#dev_type").val(),$("#keywords").val(),"","",$("#pageInput").val(),"jump",$("#is_damage").val());
         })
         $("#pre").click(function () {
-            queryPage($("#devName").val(),$("#search").val(),"pre","",$("#pageInput").val(),"");
+            queryPage($("#dev_type").val(),$("#keywords").val(),"pre","",$("#pageInput").val(),"",$("#is_damage").val());
         })
 
         $("#select").click(function () {
@@ -99,14 +104,23 @@
         })
     })
 
-    function queryPage(name,searchKey,pre,next,pageIndex,jumpFlag) {
-        $.post("/asm/queryPage", {name:name,search:searchKey,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag},    //把name数据提交到ajaxRes action内，
+    function queryPage(type,search,pre,next,pageIndex,jumpFlag,isDam) {
+        $.post("/asm/queryListPage", {type:type,search:search,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag,isDam:isDam},    //把name数据提交到ajaxRes action内，
+            // String type,String isDam,String search,String pre,String next,int pageIndex,String jumpFlag
             function(data) {
+                var editflag = [[${@permission.getPermi('asm:edit:btn')}]];
+                var badflag =  [[${@permission.getPermi('asm:dem:btn')}]];
+                var editDisable="";
+                var badDisable="";
                 var astList=data.content;
                 $("#tb").find("tr").remove();
                 for (var key in astList){
-                    $("#tb").append("<tr><td><input type='hidden' value='"+astList[key].id+"' />"+astList[key].aname+"</td><td>"+astList[key].model+"</td><td>"+astList[key].assestnum+"" +
-                        "</td><td>"+astList[key].remarks+"</td><td><input type='checkbox' lay-skin='primary' /></td></tr>");
+                    $("#tb").append("<tr><td><input type='hidden' value='"+astList[key].id+"' />"+astList[key].aname+"" +
+                        "</td><td>"+astList[key].model+"</td><td>"+astList[key].assestnum+"" +
+                        "</td><td>"+astList[key].snnum+"</td><td>"+astList[key].price+"</td><td>"+astList[key].putintime+
+                        "</td><td>"+astList[key].remarks+"</td><td>" +
+                        "<button class='layui-btn layui-btn-xs "+editflag+"' "+editDisable+"  name='edit'>编辑</button>" +
+                        "<button class='layui-btn layui-btn-xs "+badflag+"' "+badDisable+"  name='bad'>报损</button></td></tr>");
                 }
                 var form = layui.form;
                 form.render();//重新渲染
@@ -159,11 +173,13 @@
                             <td>sn号</td>
                             <td>价格</td>
                             <td>入库时间</td>
-                            <td>借用人</td>
                             <td>借用时间</td>
                             <td>备注</td>
                         </tr>
                     </thead>
+                    <tbody id="tb">
+
+                    </tbody>
                 </table>
             </div>
         </div>
