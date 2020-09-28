@@ -21,7 +21,7 @@ public class SysGroup {
     private Timestamp creatTime=new Timestamp(new Date().getTime());
     private Employee employeeByCreatorId;
     private Byte deleteFlag=0;
-    private String leader;
+    private String leader="";
 
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id

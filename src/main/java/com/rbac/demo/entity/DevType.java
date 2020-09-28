@@ -11,9 +11,9 @@ import java.util.Objects;
 public class DevType {
     private int id;
     private String devName;
-    private String remarks;
+    private String remarks="";
     private Timestamp createTime;
-    private String creator;
+    private String creator="";
     private AssetType assetTypeByAssertTypeId;
 
     @GeneratedValue(strategy=GenerationType.IDENTITY)

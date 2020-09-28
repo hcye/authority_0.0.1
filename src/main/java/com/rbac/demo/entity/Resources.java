@@ -8,11 +8,11 @@ import java.util.Collection;
 @Entity
 public class Resources {
     private Integer id;
-    private String description;
+    private String description="";
     private Integer priority;
-    private String url;
-    private String permission;
-    private String type;
+    private String url="";
+    private String permission="";
+    private String type="";
     private Resources resourcesByParentId;
     private Collection<Resources> resourcesById;
     private Collection<Role2Resources> role2ResourcesById;

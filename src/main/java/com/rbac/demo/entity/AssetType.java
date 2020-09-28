@@ -11,13 +11,15 @@ import java.util.Collection;
 public class AssetType {
     private Integer id;
     private String typeName;
-    private String assetCode;
-    private String remarks;
+    private String assetCode="";
+    private String remarks="";
     private Timestamp createTime;
-    private String creator;
+    private String creator="";
     private Collection<Assert> assertsById;
     private Collection<DevType> devTypesById;
+    private String permiCode;
 
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public Integer getId() {
@@ -105,6 +107,7 @@ public class AssetType {
         result = 31 * result + (creator != null ? creator.hashCode() : 0);
         return result;
     }
+
     @JsonIgnore
     @OneToMany(mappedBy = "assetTypeByAssertType")
     public Collection<Assert> getAssertsById() {
@@ -114,6 +117,7 @@ public class AssetType {
     public void setAssertsById(Collection<Assert> assertsById) {
         this.assertsById = assertsById;
     }
+
     @JsonIgnore
     @OneToMany(mappedBy = "assetTypeByAssertTypeId")
     public Collection<DevType> getDevTypesById() {
@@ -122,5 +126,15 @@ public class AssetType {
 
     public void setDevTypesById(Collection<DevType> devTypesById) {
         this.devTypesById = devTypesById;
+    }
+
+    @Basic
+    @Column(name = "permi_code", nullable = true, length = 255)
+    public String getPermiCode() {
+        return permiCode;
+    }
+
+    public void setPermiCode(String permiCode) {
+        this.permiCode = permiCode;
     }
 }

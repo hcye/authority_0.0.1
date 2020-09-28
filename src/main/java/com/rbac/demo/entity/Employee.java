@@ -9,12 +9,12 @@ import java.util.Collection;
 public class Employee {
     private Integer id;
     private String edepart;
-    private String email;
+    private String email="";
     private String ename;
-    private String onjob;
-    private String pingyin;
-    private String pwd;
-    private String salt;
+    private String onjob="";
+    private String pingyin="";
+    private String pwd="";
+    private String salt="";
     private Collection<OperatRecord> operatRecordsById;
     private Collection<OperatRecord> operatRecordsById_0;
     private Collection<User2Role> user2RolesById;

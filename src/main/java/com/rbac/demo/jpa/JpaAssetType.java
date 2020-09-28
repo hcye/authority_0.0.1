@@ -11,8 +11,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 @Repository
 public interface JpaAssetType extends JpaRepository<AssetType,Integer> {
-        @Query("select spname.typeName from AssetType spname")
-        List<String> findAssertTypeNames();
+        @Query("select spname from AssetType spname")
+        List<AssetType> findAssertType();
         @Query("select spname from AssetType spname where spname.typeName=:name")
         AssetType findAssetTypeByName(@Param("name") String name);
 

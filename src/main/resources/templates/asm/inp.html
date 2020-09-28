@@ -89,7 +89,7 @@
                      <label class="layui-form-label">类型</label>
                      <div class="layui-input-inline">
                         <select class="layui-form-select"  lay-filter="astType" id="tp">
-                            <option th:each="type : ${types}" th:text="${type}"></option>
+                            <option th:each="type : ${types}" th:text="${type.getTypeName()}"></option>
                         </select>
                     </div>
                 </div>

@@ -134,7 +134,7 @@
 						<!--/*@thymesVar id="getUrl" type=""*/-->
 						<a href="javascript:void(0);" shiro:hasPermission="${res.getPermission()}" th:data-id="${res.getUrl()}" th:text="${res.getDescription()}"><span class='layui-badge-dot'></span></a>
 						<dl class="layui-nav-child" th:each="sub :${res.getResourcesById()}">
-							<dd><a href="javascript:void(0);" shiro:hasPermission="${sub.getPermission()}" th:data-id="${sub.getUrl()}" th:text="${sub.getDescription()}"><span  class='layui-badge-dot'></span></a></dd>
+							<dd th:if="${sub.getType()=='菜单'}"><a href="javascript:void(0);" shiro:hasPermission="${sub.getPermission()}" th:data-id="${sub.getUrl()}" th:text="${sub.getDescription()}"><span  class='layui-badge-dot'></span></a></dd>
 						</dl>
 					</li>
 				</ul>

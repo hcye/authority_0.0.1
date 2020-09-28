@@ -12,6 +12,7 @@ import com.rbac.demo.service.TypeService;
 import com.rbac.demo.service.WriteLog;
 import com.rbac.demo.tool.ConvertStrForSearch;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -111,7 +112,7 @@ public class AsmRestController {
     }
 
     @PostMapping("/asm/addAssetType")
-    public Map<String, String> getDevsNames(String devType,String template,String desc){
+    public Map<String, String> getDevsNames(String devType,String template,String desc,String authority){
         Map<String ,String> map=new HashMap<>();
         devType=devType.trim();
         AssetType type = jpaAssetType.findAssetTypeByName(devType);
@@ -127,6 +128,7 @@ public class AsmRestController {
         assertType.setCreator(usname);
         assertType.setRemarks(desc);
         assertType.setTypeName(devType);
+        assertType.setPermiCode(authority);
         jpaAssetType.save(assertType);
         map.put("ok","新增成功!");
         return map;
@@ -134,9 +136,13 @@ public class AsmRestController {
 
 
     @PostMapping("/asm/saveAssetType")
-    public Map<String, String> saveType(int id,String devType,String template,String desc){
+    public Map<String, String> saveType(int id,String devType,String template,String desc,String authority){
         Map<String ,String> map=new HashMap<>();
         devType=devType.trim();
+        if(authority.equals("")){
+            map.put("error","权限字符不能为空!");
+            return map;
+        }
         AssetType type = jpaAssetType.findAssetTypeByName(devType);
         AssetType assertTypeOld= jpaAssetType.findById(id).get();
         if(type!=null&&type.getId()!=id){
@@ -146,6 +152,7 @@ public class AsmRestController {
         assertTypeOld.setAssetCode(template);
         assertTypeOld.setRemarks(desc);
         assertTypeOld.setTypeName(devType);
+        assertTypeOld.setPermiCode(authority);
         jpaAssetType.save(assertTypeOld);
         map.put("ok","修改成功!");
         return map;
@@ -163,7 +170,6 @@ public class AsmRestController {
         map.put("code",codes);
         return map;
     }
-
 
     @PostMapping("/asm/addDevType")
     public Map<String, String> addDevType(String devType,String dev_name,String desc){
@@ -198,7 +204,7 @@ public class AsmRestController {
         return  typeService.getPage( name, pre, next, pageNow);
     }
 
-
+    @RequiresPermissions("asm:type:delete")
     @PostMapping("/asm/deleteType")
     public Map<String,String> deleteType(int id){
         Map<String,String> map=new HashMap<>();
@@ -270,7 +276,6 @@ public class AsmRestController {
          *
          * */
 
-        System.out.println(type+" "+isDam+" "+search+" "+pre+" "+next+" "+pageIndex+" "+jumpFlag+" ");
 
 
         Page<Assert> page;
@@ -308,4 +313,16 @@ public class AsmRestController {
         return page;
     }
 
+
+    @PostMapping("/asm/validForBad")
+    public Map<String,String> validForBad(int id){
+        Map<String,String> map=new HashMap<>();
+        Employee borrower=jpaAssert.findById(id).get().getEmployeeByBorrower();
+        if(borrower!=null){
+            map.put("error","设备被借出！归还后才能报损");
+        }else {
+            map.put("ok","校验成功");
+        }
+        return map;
+    }
 }

@@ -11,17 +11,17 @@ public class Assert {
     private Integer id;
     private String aname;
     private String assestnum;
-    private String labelpic;
-    private String model;
-    private Date putintime;
-    private String remarks;
-    private String snnum;
+    private String labelpic="";
+    private String model="";
+    private Date putintime=new Date(new java.util.Date().getTime());
+    private String remarks="";
+    private String snnum="";
     private String workless="0";
-    private String price;
-    private Date brotime;
-    private Date damagetime;
-    private Date returntime;
-    private String assertPic;
+    private String price="";
+    private Date brotime=new Date(new java.util.Date().getTime());
+    private Date damagetime=new Date(new java.util.Date().getTime());
+    private Date returntime=new Date(new java.util.Date().getTime());
+    private String assertPic="";
     private Employee employeeByBorrower;
 
     private Collection<OperatRecord> operatRecordsById;

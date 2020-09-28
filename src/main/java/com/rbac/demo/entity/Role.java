@@ -8,15 +8,15 @@ import java.util.Collection;
 public class Role {
     private Integer id;
     private String rname;
-    private String description;
+    private String description="";
     private Byte avalible=1;
     private Collection<Role2Resources> role2ResourcesById;
     private Collection<User2Role> user2RolesById;
     private Timestamp createTime;
-    private String creatorName;
-    private String authorityCode;
+    private String creatorName="";
+    private String authorityCode="";
     private Short deleteFlag=0;
-    private String remarks;
+    private String remarks="";
 
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id

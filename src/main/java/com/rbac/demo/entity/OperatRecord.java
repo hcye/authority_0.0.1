@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 @Table(name = "operat_record", schema = "mydb1", catalog = "")
 public class OperatRecord {
     private Integer id;
-    private String action;
+    private String action="";
     private Timestamp actionTime;
     private Employee employeeByDealer;
     private Employee employeeByAssertEmp;
