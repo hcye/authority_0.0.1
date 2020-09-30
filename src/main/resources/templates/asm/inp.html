@@ -58,6 +58,12 @@
             });
         })
 
+        $("#cancel").click(function () {
+            $("#encode").val("");
+            $("#num").val("");
+            $("#model").val("");
+            $("#price").val("");
+        });
 
 
         $("#conform").click(function () {
@@ -68,8 +74,18 @@
                         $("#encode").val("");
                         layer.alert(data["error"]);
                     }else {
-                        document.location.href="/asm/putin?type="+$("#tp").val()+"&model="+$("#model").val().trim()+"&price="+$("#price").val().trim()+"&name="+$("#name").val().trim()
-                            +"&encode="+$("#encode").val().trim()+"&num="+$("#num").val().trim();
+
+                        $.post("/asm/putin", {type:$("#tp").val(),model:$("#model").val().trim(),price:$("#price").val().trim(),name:$("#name").val(),
+                                encode:$("#encode").val().trim(),num:$("#num").val().trim()},    //把name数据提交到ajaxRes action内，
+                            function(data) {
+                                if(data["error"]!=null){
+                                    layer.alert(data["error"]);
+                                }else {
+                                    layer.alert(data["ok"]);
+                                    document.location.href="/asm/inp"
+                                }
+                            }, "json");
+
                     }
                 }, "json");
 

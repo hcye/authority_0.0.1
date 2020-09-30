@@ -7,7 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.util.ResourceUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -30,13 +33,9 @@ public class Test1 {
     @Autowired
     JpaAssetType jpaAssetType;
     @Test
-    public void t(){
+    public void t() throws IOException {
 
-
-        String a="x-0-x-1";
-        for (String str:a.split("-")){
-            System.out.println(str+"---");
-        }
-
+        String url = ResourceUtils.getURL("classpath:").getPath();
+        System.out.println(url);
     }
 }

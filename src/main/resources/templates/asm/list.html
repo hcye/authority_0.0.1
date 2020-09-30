@@ -21,11 +21,43 @@
         //checkbox 点击事件
     });
 
+
+
+    layui.use('upload',function () {
+        var upload = layui.upload; //得到 upload 对象
+
+        //创建一个上传组件
+        upload.render({
+            elem: '#in'
+            ,url: '/asm/input'
+            ,done: function(res, index, upload){ //上传后的回调
+                layer.alert("上传成功");
+            }
+            ,error:function () {
+                layer.alert("上传错误");
+            }
+            ,acceptMime: 'file/xlsx'
+            ,accept: 'file' //允许上传的文件类型
+            ,size:10000
+            //,size: 50 //最大允许上传的文件大小
+            //,……
+        });
+    });
+
+
+
+
     $(function () {
         $(document).ready(function () {
             // type,search,pre,next,pageIndex,jumpFlag,isDam
             queryPage($("#dev_type").val(),"","","","1","","完好");
         });
+
+
+        $("#outPutTemplate").click(function () {
+            document.location.href="/asm/outputTemplate";
+        })
+
         // type:type,search:search,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag,isDam:isDam
         $("#search").click(function () {
             queryPage($("#dev_type").val(),$("#keywords").val(),"","",$("#pageInput").val(),"",$("#is_damage").val());
@@ -190,7 +222,12 @@
                     <div class="layui-input-inline">
                         <input class="layui-input" placeholder="按编号、借用人、设备名检索" id="keywords"/>
                     </div>
-                    <button class="layui-btn" id="search">查找</button>
+                    <button class="layui-btn" id="search"> <i class="layui-icon">&#xe615;</i> 查找</button>
+                    <div class="layui-btn-group">
+                        <button class="layui-btn" id="in" lay-filter="upload"> <i class="layui-icon">&#xe67c;</i>导入</button>
+                        <button class="layui-btn " id="out" ><i class="layui-icon">&#xe601;</i>导出</button>
+                        <button class="layui-btn" id="outPutTemplate">下载模板</button>
+                    </div>
                 </div>
             </div>
             <div class="layui-form-item">

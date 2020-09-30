@@ -115,47 +115,7 @@ public class AsmController {
         return "/asm/edit_type";
     }
 
-    @RequiresPermissions("asm:inp:view")
-    @GetMapping("/asm/putin")
-    public String putin(String type, String model, String price, String name, String encode, String num, Model model1){
-        String[] encodes=encode.split("-");
-        String zeroInhead="";
-        if(encodes[encodes.length-1].charAt(0)=='0'){
-            char[] chars=encodes[encodes.length-1].toCharArray();
-            for (char c:chars){
-                if(c=='0'){
-                    zeroInhead=zeroInhead+"0";
-                }else {
-                    break;
-                }
-            }
-        }
-        if(zeroInhead.equals(encodes[encodes.length-1])){
-            model1.addAttribute("error","出现未知错误");
-            return "redirect:/asm/inp";
-        }
-        int nu=Integer.parseInt(num);
-        AssetType assetType=jpaAssetType.findAssetTypeByName(type);
 
-        String head="";
-        int lastIndexof=encode.lastIndexOf("-")+1;
-        head=encode.substring(0,lastIndexof);
-        int tail=Integer.parseInt(encodes[encodes.length-1]);
-
-        for (int i=0;i<nu;i++){
-            Assert ast=new Assert();
-            ast.setAname(name);
-            ast.setPrice(price);
-            ast.setModel(model);
-            ast.setAssetTypeByAssertType(assetType);
-            String code=head+zeroInhead+tail;
-            ast.setAssestnum(code);
-            tail++;
-            jpaAssert.save(ast);
-        }
-
-        return "redirect:/asm/inp";
-    }
 
     @RequiresPermissions("asm:type:edit")
     @GetMapping("/asm/edit_dev")
