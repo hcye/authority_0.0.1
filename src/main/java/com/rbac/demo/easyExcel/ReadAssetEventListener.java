@@ -21,17 +21,19 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Component
-public class ReadAssetEventListener extends AnalysisEventListener<EasyExcelMapedModel> {
+public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadModel> {
     private JpaAssert jpaAssert;
     private JpaEmployee jpaEmployee;
     private JpaAssetType jpaAssetType;
     private AsmService asmService;
     private JpaOperatRecord jpaOperatRecord;
     private List<Assert> listOthermeans = new ArrayList<>();
+    private Map<String,String> analysisInfo=new HashMap<>();
 
     public ReadAssetEventListener(JpaAssert jpaAssert,JpaEmployee jpaEmployee,JpaAssetType jpaAssetType,AsmService asmService,JpaOperatRecord jpaOperatRecord) {
         this.jpaAssert=jpaAssert;
@@ -42,32 +44,30 @@ public class ReadAssetEventListener extends AnalysisEventListener<EasyExcelMaped
     }
 
     @Override
-    public void invoke(EasyExcelMapedModel easyExcelMapedModel, AnalysisContext analysisContext) {
-        String devName=easyExcelMapedModel.getDevName();
-        String assetNum=easyExcelMapedModel.getAssetNum();
-        String borrower=easyExcelMapedModel.getBorrower();
-        String borTime=easyExcelMapedModel.getBorTime();
-        String model=easyExcelMapedModel.getModel();
-        String putinTime=easyExcelMapedModel.getPutinTime();
-        String remarks=easyExcelMapedModel.getRemarks();
-        String workless=easyExcelMapedModel.getWorkless();
-        String assetType=easyExcelMapedModel.getAssetType();
-        String snNum=easyExcelMapedModel.getSnNum();
+    public void invoke(AssetDownloadModel assetDownloadModel, AnalysisContext analysisContext) {
+        String devName= assetDownloadModel.getDevName();
+        String assetNum= assetDownloadModel.getAssetNum();
+        String borrower= assetDownloadModel.getBorrower();
+        String borTime= assetDownloadModel.getBorTime();
+        String price= assetDownloadModel.getPrice();
+        String model= assetDownloadModel.getModel();
+        String putinTime= assetDownloadModel.getPutinTime();
+        String remarks= assetDownloadModel.getRemarks();
+        String workless= assetDownloadModel.getWorkless();
+        String assetTypeStr= assetDownloadModel.getAssetType();
+        String snNum= assetDownloadModel.getSnNum();
         String templat = "";
         Assert anAssert = new Assert();
         DateFormat format1 = new SimpleDateFormat("yyyy.MM.dd");
         int num=analysisContext.readRowHolder().getRowIndex();
-
-        System.out.println(num+"行编号");
-        System.out.println(easyExcelMapedModel+"自动封装类");
-/*        if (easyExcelMapedModel.getDevName()!= null) {
-            anAssert.setAname(strings.get(1).trim());
+        if (assetDownloadModel.getDevName()!= null) {
+            anAssert.setAname(devName.trim());
             AssetType assetType = null;
-            if (strings.get(10) != null && strings.get(10).length() > 0) {
+            if (assetTypeStr != null && assetTypeStr.trim().length() > 0) {
                 List<AssetType> types = jpaAssetType.findAll();
                 boolean flag = false;
                 for (AssetType s : types) {
-                    if (s.getTypeName().equals(strings.get(10).trim())) {
+                    if (s.getTypeName().equals(assetTypeStr.trim())) {
                         assetType = s;
                         flag = true;
                         break;
@@ -82,57 +82,63 @@ public class ReadAssetEventListener extends AnalysisEventListener<EasyExcelMaped
             } else {
                 throw new ExcelAnalysisException(num + "行" + "类型 不能为空");
             }
-            if (strings.get(0) != null && strings.get(0).length() > 0) {
-                if (jpaAssert.findAssertByAssestnum(strings.get(0).trim()) != null) {
+            if (assetNum != null && assetNum.trim().length() > 0) {
+                if (jpaAssert.findAssertByAssestnum(assetNum.trim()) != null) {
                     throw new ExcelAnalysisException(num + "行的资产编号重复");
                 } else {
-                    Map<String, String> res = asmService.valid(strings.get(0), templat);
+                    Map<String, String> res = asmService.valid(assetNum, templat);
                     if (res.get("error") == null) {
-                        anAssert.setAssestnum(strings.get(0).trim());
+                        anAssert.setAssestnum(assetNum.trim());
                     } else {
                         throw new ExcelAnalysisException(num + "行的资产编号不匹配模板要求");
                     }
                 }
             }
-            if (strings.get(2) != null) {
-                anAssert.setModel(strings.get(2).trim());
+            if (model != null) {
+                anAssert.setModel(model.trim());
             }
-            if (strings.get(3) != null) {
-                anAssert.setSnnum(strings.get(3).trim());
+            if (snNum != null) {
+                anAssert.setSnnum(snNum.trim());
             }
-            if (strings.get(4) != null) {
-                anAssert.setPrice(strings.get(4).trim());
-            }
-            if (strings.get(5) != null) {   //到库时间
+            if (price!= null) {
                 try {
-                    anAssert.setPutintime(new Date(format1.parse(strings.get(5).trim()).getTime()));
+                    float pri=Float.parseFloat(price);
+                }catch (Exception e){
+                    throw new ExcelAnalysisException(num + "价格只能是数字或者小数");
+                }
+                anAssert.setPrice(price.trim());
+            }
+            if (putinTime != null) {   //到库时间
+                try {
+                    anAssert.setPutintime(new Date(format1.parse(putinTime.trim()).getTime()));
                 } catch (ParseException e) {
                     throw new ExcelAnalysisException(num + "行的入库时间格式错误");
                 }
             }
-            if (strings.get(6) != null) {  //借用人
-                List<Employee> employees = jpaEmployee.findEmployeesByEname(strings.get(6).trim());
+            if (borrower != null) {  //借用人
+                List<Employee> employees = jpaEmployee.findEmployeesByEname(borrower.trim());
+
                 if (employees.size() > 0) {
                     anAssert.setEmployeeByBorrower(employees.get(0));
                 } else {
-                    throw new ExcelAnalysisException(num + "行的用户 " + strings.get(6) + " 不存在");
+                    throw new ExcelAnalysisException(num + "行的用户 " + borrower + " 不存在");
                 }
             }
-            if (strings.get(7) != null) {
+            if (borTime != null) {
                 try {
-                    anAssert.setBrotime(new Date(format1.parse(strings.get(7).trim()).getTime()));
+                    anAssert.setBrotime(new Date(format1.parse(borTime.trim()).getTime()));
                 } catch (ParseException e) {
                     throw new ExcelAnalysisException(num + "行的借用是时间格式错误");
                 }
             }
-            if (strings.get(8) != null) {
-                anAssert.setRemarks(strings.get(8).trim());
+            if (remarks != null) {
+                anAssert.setRemarks(remarks.trim());
             }
-            if (strings.get(9) != null) {
+            if (workless != null) {
 
-                if (strings.get(9).trim().equals("报废")) {
+                if (workless.trim().equals("报废")) {
                     anAssert.setWorkless("1");
-                } else if (strings.get(9).trim().equals("完好")) {
+                } else if (workless.trim().equals("完好")) {
                     anAssert.setWorkless("0");
                 } else {
                     throw new ExcelAnalysisException(num + "行" + "只能填写 报废或者完好");
@@ -149,7 +155,7 @@ public class ReadAssetEventListener extends AnalysisEventListener<EasyExcelMaped
             if (o.getAssestnum().equals(anAssert.getAssestnum())) {
                 throw new ExcelAnalysisException(num + "行" + "资产编号表格内重复");
             }
-        }*/
+        }
         listOthermeans.add(anAssert);
     }
 

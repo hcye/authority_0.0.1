@@ -26,12 +26,8 @@ public interface JpaEmployee extends JpaRepository<Employee,Integer> {
     Page<Employee> findEmployeesByEnameLike(@Param("name") String name,Pageable pageable);
     @Query("select employee from Employee employee where   employee.onjob='0' and employee.pingyin like :py")
     Page<Employee> findEmployeesByPingyinLike(@Param("py") String py,Pageable pageable);
-
-
     @Query("select employee.ename from Employee employee where employee.onjob='0' and employee.ename like :name")
     List<String> findEmployeesNameByNameLike(@Param("name")String name);
-
-
     @Query("select employee.ename from Employee employee where  employee.onjob='0' and employee.pingyin like :py")
     List<String> findEmployeesNameByPinyinLike(@Param("py")String name);
 }

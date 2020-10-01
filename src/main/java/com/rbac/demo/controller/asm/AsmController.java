@@ -1,11 +1,7 @@
 package com.rbac.demo.controller.asm;
-import com.rbac.demo.entity.Assert;
-import com.rbac.demo.entity.AssetType;
-import com.rbac.demo.entity.Resources;
-import com.rbac.demo.jpa.JpaAssert;
-import com.rbac.demo.jpa.JpaAssetType;
-import com.rbac.demo.jpa.JpaDevType;
-import com.rbac.demo.jpa.JpaResources;
+import com.rbac.demo.entity.*;
+import com.rbac.demo.jpa.*;
+import com.rbac.demo.service.AsmRecordService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Controller
@@ -30,6 +27,10 @@ public class AsmController {
     private JpaResources jpaResources;
     @Autowired
     private JpaDevType jpaDevType;
+    @Autowired
+    private AsmRecordService asmRecordService;
+
+
     @RequiresPermissions("asm:bro:view")
     @GetMapping("/asm/bro")
     public String broPage(Model model){
@@ -73,10 +74,8 @@ public class AsmController {
     @RequiresPermissions("asm:list:view")
     @GetMapping("/asm/list")
     public String listPage(Model model){
-
         List<AssetType> types= jpaAssetType.findAssertType();
         model.addAttribute("types",types);
-
         return "/asm/list";
     }
 
@@ -149,6 +148,11 @@ public class AsmController {
         anAssert.setRemarks(remarks);
         anAssert.setSnnum(sn);
         jpaAssert.save(anAssert);
+        asmRecordService.write(AsmAction.dev_edit,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert);
+
+
+
+
         return "redirect:/asm/list";
     }
 
@@ -159,6 +163,7 @@ public class AsmController {
         anAssert.setWorkless("1");
         anAssert.setDamagetime(new Date(new java.util.Date().getTime()));
         jpaAssert.save(anAssert);
+        asmRecordService.write(AsmAction.dev_dam,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert);
         return "redirect:/asm/list";
     }
 }

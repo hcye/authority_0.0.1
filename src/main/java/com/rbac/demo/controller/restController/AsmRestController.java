@@ -1,24 +1,18 @@
 package com.rbac.demo.controller.restController;
 
 import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.ExcelReader;
-import com.alibaba.excel.metadata.Sheet;
-import com.alibaba.excel.read.builder.ExcelReaderBuilder;
 import com.alibaba.excel.read.metadata.ReadSheet;
 import com.alibaba.excel.support.ExcelTypeEnum;
-import com.rbac.demo.easyExcel.EasyExcelMapedModel;
+import com.rbac.demo.easyExcel.AssetDownloadModel;
 import com.rbac.demo.easyExcel.ReadAssetEventListener;
-import com.rbac.demo.entity.Assert;
-import com.rbac.demo.entity.AssetType;
-import com.rbac.demo.entity.DevType;
-import com.rbac.demo.entity.Employee;
+import com.rbac.demo.entity.*;
 import com.rbac.demo.jpa.*;
+import com.rbac.demo.service.AsmRecordService;
 import com.rbac.demo.service.AsmService;
 import com.rbac.demo.service.TypeService;
 import com.rbac.demo.service.WriteLog;
 import com.rbac.demo.tool.ConvertStrForSearch;
-import org.apache.commons.io.IOUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.*;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -61,6 +55,8 @@ public class AsmRestController {
     private AsmService asmService;
     @Autowired
     private TypeService typeService;
+    @Autowired
+    private AsmRecordService asmRecordService;
     @Autowired
     private ReadAssetEventListener readAssetEventListener;
     @PostMapping("/asm/queryPage")
@@ -99,12 +95,16 @@ public class AsmRestController {
         Map<String,List<Assert>> map=new HashMap<>();
         String[] ids=selectDevIds.split(",");
         List<Employee> employees=jpaEmployee.findEmployeesByEname(name);
+        if(employees.size()>1){
+            throw new RuntimeException("错误信息:系统内含有大于1个名为"+name+"的用户，重名用户会引起资产管理系统出错");
+        }
         Employee borrower=employees.get(0);
         if(actionFlag.equals("bo")){
             for (String str:ids){
                 if(!str.trim().equals("")){
                     Assert ast=jpaAssert.findById(Integer.parseInt(str)).get();
                     ast.setEmployeeByBorrower(borrower);
+                    asmRecordService.write(AsmAction.dev_borrow,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),borrower,ast);
                     jpaAssert.saveAndFlush(ast);
                 }
             }
@@ -113,6 +113,7 @@ public class AsmRestController {
                 if(!str.trim().equals("")){
                     Assert ast=jpaAssert.findById(Integer.parseInt(str)).get();
                     ast.setEmployeeByBorrower(null);
+                    asmRecordService.write(AsmAction.dev_return,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),borrower,ast);
                     jpaAssert.saveAndFlush(ast);
                 }
             }
@@ -126,6 +127,11 @@ public class AsmRestController {
     public Map<String, List<Assert>> getDevs(String name){
         Map<String,List<Assert>> map=new HashMap<>();
         List<Employee> employees=jpaEmployee.findEmployeesByEname(name);
+
+        if(employees.size()>1){
+            throw new RuntimeException("错误信息:系统内含有大于1个名为"+name+"的用户，重名用户会引起资产管理系统出错");
+        }
+
         Employee returner=employees.get(0);
         List<Assert> asserts= (List<Assert>) returner.getAssertsById();
         map.put("devs",asserts);
@@ -151,6 +157,7 @@ public class AsmRestController {
         assertType.setTypeName(devType);
         assertType.setPermiCode(authority);
         jpaAssetType.save(assertType);
+        asmRecordService.write(AsmAction.dev_add_type,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null);
         map.put("ok","新增成功!");
         return map;
     }
@@ -282,28 +289,15 @@ public class AsmRestController {
         }else {
             pageable=PageRequest.of(0,pageSize);
         }
-        if(search.equals("")){
-            if(isDam.equals("完好")){
-                page=jpaAssert.findAssertsBytype(type,"0",pageable);
-            }else {
-                page=jpaAssert.findAssertsBytype(type,"1",pageable);
-            }
-        }else {
-            search=ConvertStrForSearch.getFormatedString(search);
-            page=jpaAssert.findAssertsByAnameLike(search,pageable);
-            if(page.isEmpty()){
-                page=jpaAssert.findAssertsByAssestnumLike(search,pageable);
-                if(page.isEmpty()){
-                    page=jpaAssert.findAssertsByBorroworPingyinLike(search,pageable);
-                    if(page.isEmpty()){
-                        page=jpaAssert.findAssertsByBorroworNameLike(search,pageable);
-                    }
-                }
-            }
-        }
+        page = asmService.queryPage(type,isDam,search,pageable);
         return page;
     }
 
+    /**
+     *
+     * 报损校验
+     *
+     * */
 
     @PostMapping("/asm/validForBad")
     public Map<String,String> validForBad(int id){
@@ -316,6 +310,12 @@ public class AsmRestController {
         }
         return map;
     }
+
+    /**
+     *
+     * 批量导入
+     *
+     * */
     @Transactional
     @RequiresPermissions("asm:inp:view")
     @PostMapping("/asm/putin")
@@ -399,27 +399,14 @@ public class AsmRestController {
         }
         String filename = multipartFile.getOriginalFilename();
         if (!filename.contains("xlsx")) {
-            json.put("ok", "文件类型错误");
+            json.put("error", "文件类型错误");
             return json;
         }
         InputStream inputStream;
         ExcelReader reader = null;
         try {
 
-            String path = ClassUtils.getDefaultClassLoader().getResource("static/excel").getPath();   //上传资源到项目路径的路径获得
-
-            File file = new File(path + "/" + filename);
-            if (!file.exists()) {
-                file.createNewFile();
-            }
             inputStream = multipartFile.getInputStream();
-            FileOutputStream outputStream = new FileOutputStream(file);
-            int len = 0;
-            byte[] b = new byte[1024];
-            while ((len = inputStream.read(b)) != -1) {
-                outputStream.write(b, 0, len);
-            }
-
             /**
              *
              * 使用easyExcel读上传的表格
@@ -428,12 +415,12 @@ public class AsmRestController {
 
 
             try {
-
-                reader = EasyExcel.read(inputStream, EasyExcelMapedModel.class, new ReadAssetEventListener(jpaAssert, jpaEmployee, jpaAssetType, asmService, jpaOperatRecord)).excelType(ExcelTypeEnum.XLSX).build();
+                reader = EasyExcel.read(inputStream, AssetDownloadModel.class, new ReadAssetEventListener(jpaAssert, jpaEmployee, jpaAssetType, asmService, jpaOperatRecord)).excelType(ExcelTypeEnum.XLSX).build();
                 ReadSheet readSheet = EasyExcel.readSheet(0).build();
                 reader.read(readSheet);
             } catch (Exception e) {
-                e.printStackTrace();
+                json.put("error", e.toString());
+                return json;
             }
 
             /**
@@ -441,7 +428,6 @@ public class AsmRestController {
              * */
 
             inputStream.close();
-            outputStream.close();
         } catch (Exception e) {
             json.put("error", e.toString());
             System.out.println(e.toString());
@@ -451,9 +437,10 @@ public class AsmRestController {
                 // 这里千万别忘记关闭，读的时候会创建临时文件，到时磁盘会崩的
                 reader.finish();
             }
-            json.put("ok", "上传成功");
-            return json;
+
         }
+        json.put("ok", "上传成功");
+        return json;
     }
     /**
      *
@@ -497,5 +484,80 @@ public class AsmRestController {
             return;
         }
     }
+//    type="+$("#dev_type").val()+"&isDam="+$("#is_damage").val()+"&search="+$("#keywords").val();
 
+    @RequestMapping("asm/out")
+    public void exportExcel(String type,String isDam,String search,HttpServletResponse response) throws IOException {
+
+        // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+        String fileName = URLEncoder.encode("export", "UTF-8").replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), AssetDownloadModel.class).sheet("模板").doWrite(data(type,isDam,search));
+
+
+
+
+    }
+
+    /**
+     *
+     * 把实体类数组转换成excel导出模板对象数组
+     *
+     * */
+
+
+
+    private List<AssetDownloadModel> data(String type,String isDam,String search){
+        List<Assert> list = asmService.queryList(type,isDam,search);
+        List<AssetDownloadModel> models=new ArrayList<>();
+        for (Assert anAssert:list){
+            AssetDownloadModel model=new AssetDownloadModel();
+
+            if(anAssert.getAssestnum()!=null){
+                model.setAssetNum(anAssert.getAssestnum());
+            }
+            if(anAssert.getAssetTypeByAssertType().getTypeName()!=null){
+                model.setAssetType(anAssert.getAssetTypeByAssertType().getTypeName());
+            }
+            if(anAssert.getEmployeeByBorrower()!=null){
+                model.setBorrower(anAssert.getEmployeeByBorrower().getEname());
+            }
+            model.setDevName(anAssert.getAname());
+            if(anAssert.getBrotime()!=null){
+                model.setBorTime(anAssert.getBrotime().toString());
+            }
+            if(anAssert.getModel()!=null){
+                model.setModel(anAssert.getModel());
+            }
+
+            String damFlag=anAssert.getWorkless();
+            if(damFlag!=null){
+                String dam;
+                if(damFlag.equals("0")){
+                    dam="完好";
+                }else {
+                    dam="报废";
+                }
+                model.setWorkless(dam);
+            }
+
+            if(anAssert.getPutintime()!=null){
+                model.setPutinTime(anAssert.getPutintime().toString());
+            }
+            if(anAssert.getPrice()!=null){
+                model.setPrice(anAssert.getPrice());
+            }
+            if(anAssert.getSnnum()!=null){
+                model.setSnNum(anAssert.getSnnum());
+            }
+            if(anAssert.getRemarks()!=null){
+                model.setRemarks(anAssert.getRemarks());
+            }
+            models.add(model);
+        }
+        return models;
+    }
 }

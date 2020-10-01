@@ -32,6 +32,11 @@ public class UserRealm extends AuthorizingRealm {
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
         String username= (String) principalCollection.getPrimaryPrincipal();
         List<Employee> employees=jpaEmployeee.findEmployeesByEname(username);
+
+        if(employees.size()>1){
+            throw new RuntimeException("错误信息:系统内含有大于1个名为("+username+")的用户，重名用户会引起资产管理系统出错");
+        }
+
         if(employees==null||employees.size()==0){
             return null;
         }
@@ -46,10 +51,14 @@ public class UserRealm extends AuthorizingRealm {
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken){
         UsernamePasswordToken token= (UsernamePasswordToken) authenticationToken;
-
         List<Employee> employees=jpaEmployeee.findEmployeesByEname(token.getUsername());
+        if(employees.size()>1){
+            throw new RuntimeException("错误信息:系统内含有大于1个名为("+token.getUsername()+")的用户，重名用户会引起资产管理系统出错");
+        }
+
         if(employees!=null&&employees.size()>0){
-            if(employees.get(0).getStatus()==null||employees.get(0).getStatus()==1){
+            Employee e=employees.get(0);
+            if(e.getStatus()==null||e.getStatus()==1||e.getOnjob().equals("1")){
                 throw new LockedAccountException();//账号锁定
             }
         }else {

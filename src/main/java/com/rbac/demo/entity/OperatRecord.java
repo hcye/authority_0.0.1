@@ -15,6 +15,16 @@ public class OperatRecord {
     private Employee employeeByAssertEmp;
     private Assert assertByAssertAsset;
 
+    public OperatRecord(String action,Timestamp actionTime, Employee employeeByDealer,Employee employeeByAssertEmp,Assert assertByAssertAsset) {
+        this.action=action;
+        this.actionTime=actionTime;
+        this.employeeByDealer=employeeByDealer;
+        this.employeeByAssertEmp=employeeByAssertEmp;
+        this.assertByAssertAsset=assertByAssertAsset;
+    }
+    public OperatRecord(){
+
+    }
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)

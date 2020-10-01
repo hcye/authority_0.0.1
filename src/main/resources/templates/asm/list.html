@@ -22,7 +22,7 @@
     });
 
 
-
+    //导入表格
     layui.use('upload',function () {
         var upload = layui.upload; //得到 upload 对象
 
@@ -31,7 +31,11 @@
             elem: '#in'
             ,url: '/asm/input'
             ,done: function(res, index, upload){ //上传后的回调
-                layer.alert("上传成功");
+                if(res["ok"]!=null){
+                    layer.alert(res["ok"]);
+                }else if(res["error"]!=null){
+                    layer.alert(res["error"]);
+                }
             }
             ,error:function () {
                 layer.alert("上传错误");
@@ -50,144 +54,94 @@
     $(function () {
         $(document).ready(function () {
             // type,search,pre,next,pageIndex,jumpFlag,isDam
-            queryPage($("#dev_type").val(),"","","","1","","完好");
+            queryPage($("#dev_type").val(), "", "", "", "1", "", "完好");
         });
 
+//导出表格
+        $("#out").click(function () {
+            document.location.href = "/asm/out?type=" + $("#dev_type").val() + "&isDam=" + $("#is_damage").val() + "&search=" + $("#keywords").val();
+        });
 
+//导出模板
         $("#outPutTemplate").click(function () {
-            document.location.href="/asm/outputTemplate";
+            document.location.href = "/asm/outputTemplate";
         })
 
         // type:type,search:search,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag,isDam:isDam
         $("#search").click(function () {
-            queryPage($("#dev_type").val(),$("#keywords").val(),"","",$("#pageInput").val(),"",$("#is_damage").val());
+            queryPage($("#dev_type").val(), $("#keywords").val(), "", "", $("#pageInput").val(), "", $("#is_damage").val());
         })
         $("#next").click(function () {
-            queryPage($("#dev_type").val(),$("#keywords").val(),"","next",$("#pageInput").val(),"",$("#is_damage").val());
+            queryPage($("#dev_type").val(), $("#keywords").val(), "", "next", $("#pageInput").val(), "", $("#is_damage").val());
         })
         $("#jump").click(function () {
-            queryPage($("#dev_type").val(),$("#keywords").val(),"","",$("#pageInput").val(),"jump",$("#is_damage").val());
+            queryPage($("#dev_type").val(), $("#keywords").val(), "", "", $("#pageInput").val(), "jump", $("#is_damage").val());
         })
         $("#pre").click(function () {
-            queryPage($("#dev_type").val(),$("#keywords").val(),"pre","",$("#pageInput").val(),"",$("#is_damage").val());
+            queryPage($("#dev_type").val(), $("#keywords").val(), "pre", "", $("#pageInput").val(), "", $("#is_damage").val());
         })
 
-        $("#select").click(function () {
-            layer.open({
-                type: 2,
-                title: "选择借用人",
-                area: ['1000px','500px'],
-                content: ['/layer/layer_edit_groupLeader.html', 'no'],
-                //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
-                //实现弹出层间不同frame的传值
-            });
-        })
+        function queryPage(type, search, pre, next, pageIndex, jumpFlag, isDam) {
+            $.post("/asm/queryListPage", {
+                    type: type,
+                    search: search,
+                    pre: pre,
+                    next: next,
+                    pageIndex: pageIndex,
+                    jumpFlag: jumpFlag,
+                    isDam: isDam
+                },    //把name数据提交到ajaxRes action内，
+                // String type,String isDam,String search,String pre,String next,int pageIndex,String jumpFlag
+                function (data) {
+                    var editflag = [[${@permission.getPermi('asm:edit:btn')}]];
+                    var badflag = [[${@permission.getPermi('asm:dem:btn')}]];
+                    var editDisable = "";
+                    var badDisable = "";
+                    var astList = data.content;
+                    $("#tb").find("tr").remove();
+                    for (var key in astList) {
+                        $("#tb").append("<tr><td><input type='hidden' value='" + astList[key].id + "' />" + astList[key].aname + "" +
+                            "</td><td>" + astList[key].model + "</td><td>" + astList[key].assestnum + "" +
+                            "</td><td>" + astList[key].snnum + "</td><td>" + astList[key].price + "</td><td>" + astList[key].putintime +
+                            "</td><td>" + astList[key].remarks + "</td><td>" +
+                            "<button class='layui-btn layui-btn-xs " + editflag + "' " + editDisable + "  name='edit'>编辑</button>" +
+                            "<button class='layui-btn layui-btn-xs " + badflag + "' " + badDisable + "  name='bad'>报损</button></td></tr>");
+                    }
 
-        $("#conform").click(function () {
-            if($("#name").val()==''){
-                layer.alert("借用人必填！");
-                return;
-            }
-            layer.confirm('确定出库！', {
-                btn: ['确定', '取消'] //可以无限个按钮
-            }, function(index, layero){
-
-                var checkboxlist=$("#tb").find("input:checkbox:checked");
-                var checkedItemId='';
-                var i=0;
-                while (i<checkboxlist.length){
-                    checkedItemId+=$(checkboxlist[i]).parent().parent().find("input:hidden")[0].value+",";
-                    i++;
-                }
-                if(checkedItemId==''){
-                    layer.alert("请至少勾选一个归还设备！");
-                }
-                $.post("/asm/operat", {name:$("#name").val(),selectDevIds:checkedItemId,actionFlag:'bo'},    //把name数据提交到ajaxRes action内，
-                    function (data) {
-                        var devList=data["allDev"];
-                        layer.open({
-                            type: 2,
-                            scrollbar: true,
-                            title: $("#name").val()+"关联的资产",
-                            area: ['1000px','800px'] ,
-                            content: ['/layer/layer_show_dev_borrowed.html', 'no'],
-                            success: function(layero, index){
-                                var body = layer.getChildFrame('body', index);
-                                var tb=body.find('#tb');
-                                body.find("#label").html("");
-                                for (var key in devList){
-                                    tb.append("<tr><td>"+devList[key].aname+"</td><td>"+devList[key].model+"</td><td>"+devList[key].assestnum+"" +
-                                        "</td><td>"+devList[key].remarks+"</td></tr>");
-                                }
-
-                            }
-                            //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
-                            //实现弹出层间不同frame的传值
-                        });
-                        layer.close(index);
-                        $("#doSearch").trigger("click");  //模拟点击
-                    }, "json");
-            }, function(index){
-                //关闭弹出层
-                layer.close(index);
-            });
-
-
-        })
-    })
-
-    function queryPage(type,search,pre,next,pageIndex,jumpFlag,isDam) {
-        $.post("/asm/queryListPage", {type:type,search:search,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag,isDam:isDam},    //把name数据提交到ajaxRes action内，
-            // String type,String isDam,String search,String pre,String next,int pageIndex,String jumpFlag
-            function(data) {
-                var editflag = [[${@permission.getPermi('asm:edit:btn')}]];
-                var badflag =  [[${@permission.getPermi('asm:dem:btn')}]];
-                var editDisable="";
-                var badDisable="";
-                var astList=data.content;
-                $("#tb").find("tr").remove();
-                for (var key in astList){
-                    $("#tb").append("<tr><td><input type='hidden' value='"+astList[key].id+"' />"+astList[key].aname+"" +
-                        "</td><td>"+astList[key].model+"</td><td>"+astList[key].assestnum+"" +
-                        "</td><td>"+astList[key].snnum+"</td><td>"+astList[key].price+"</td><td>"+astList[key].putintime+
-                        "</td><td>"+astList[key].remarks+"</td><td>" +
-                        "<button class='layui-btn layui-btn-xs "+editflag+"' "+editDisable+"  name='edit'>编辑</button>" +
-                        "<button class='layui-btn layui-btn-xs "+badflag+"' "+badDisable+"  name='bad'>报损</button></td></tr>");
-                }
-
-                // 添加编辑按钮点击事件
-                $("#tb").find("button[name='edit']").click(function () {
-                    document.location.href = "/asm/edit_dev?id=" + $(this).parent().parent().find("input")[0].value;
-                    //获得操作角色id
-                });
-                //添加删除按钮点击事件
-                $("#tb").find("button[name='bad']").click(function () {
-                    var btn=$(this);
-                    layer.confirm('确定报损！', {
-                        btn: ['确定', '取消'] //可以无限个按钮
-                    }, function(index, layero){
-                        $.post("/asm/validForBad", {id:btn.parent().parent().find("input")[0].value},    //把name数据提交到ajaxRes action内，
-                            function (data) {
-                                if (data["error"] != null) {
-                                    layer.alert(data["error"]);
-                                } else if (data["ok"] != null) {
-                                    document.location.href = "/asm/dem?id=" + btn.parent().parent().find("input")[0].value;
-                                }
-
-                            }, "json");
-                    }, function(index){
-                        //关闭弹出层
-                        layer.close(index);
+                    // 添加编辑按钮点击事件
+                    $("#tb").find("button[name='edit']").click(function () {
+                        document.location.href = "/asm/edit_dev?id=" + $(this).parent().parent().find("input")[0].value;
+                        //获得操作角色id
                     });
+                    //添加删除按钮点击事件
+                    $("#tb").find("button[name='bad']").click(function () {
+                        var btn = $(this);
+                        layer.confirm('确定报损！', {
+                            btn: ['确定', '取消'] //可以无限个按钮
+                        }, function (index, layero) {
+                            $.post("/asm/validForBad", {id: btn.parent().parent().find("input")[0].value},    //把name数据提交到ajaxRes action内，
+                                function (data) {
+                                    if (data["error"] != null) {
+                                        layer.alert(data["error"]);
+                                    } else if (data["ok"] != null) {
+                                        document.location.href = "/asm/dem?id=" + btn.parent().parent().find("input")[0].value;
+                                    }
 
-                })
+                                }, "json");
+                        }, function (index) {
+                            //关闭弹出层
+                            layer.close(index);
+                        });
 
-                var form = layui.form;
-                form.render();//重新渲染
-                $("#pageInput").val(data.number+1);
-                $("#PageCount").html(' 共 '+data.totalPages+' 页');
-            }, "json");
-    }
+                    })
+
+                    var form = layui.form;
+                    form.render();//重新渲染
+                    $("#pageInput").val(data.number + 1);
+                    $("#PageCount").html(' 共 ' + data.totalPages + ' 页');
+                }, "json");
+        }
+    });
 
 
 
@@ -222,11 +176,11 @@
                     <div class="layui-input-inline">
                         <input class="layui-input" placeholder="按编号、借用人、设备名检索" id="keywords"/>
                     </div>
-                    <button class="layui-btn" id="search"> <i class="layui-icon">&#xe615;</i> 查找</button>
+                    <button class="layui-btn layui-btn-sm" id="search"> <i class="layui-icon">&#xe615;</i> 查找</button>
                     <div class="layui-btn-group">
-                        <button class="layui-btn" id="in" lay-filter="upload"> <i class="layui-icon">&#xe67c;</i>导入</button>
-                        <button class="layui-btn " id="out" ><i class="layui-icon">&#xe601;</i>导出</button>
-                        <button class="layui-btn" id="outPutTemplate">下载模板</button>
+                        <button class="layui-btn layui-btn-sm" id="in" lay-filter="upload"> <i class="layui-icon">&#xe67c;</i>导入</button>
+                        <button class="layui-btn layui-btn-sm" id="out" ><i class="layui-icon">&#xe601;</i>导出</button>
+                        <button class="layui-btn layui-btn-sm" id="outPutTemplate">下载模板</button>
                     </div>
                 </div>
             </div>

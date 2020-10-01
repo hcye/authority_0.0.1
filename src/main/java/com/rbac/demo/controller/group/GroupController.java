@@ -53,7 +53,13 @@ public class GroupController {
         if(leader==null){
             lead=new Employee();
         }else {
-            lead=jpaEmployee.findEmployeesByEname(leader).get(0);
+            List<Employee> list=jpaEmployee.findEmployeesByEname(leader);
+            if(list.size()>1){
+                model.addAttribute("error","错误信息:系统内含有大于1个名为("+leader+")的用户，重名用户会引起资产管理系统出错");
+                return "error";
+            }else {
+                lead=list.get(0);
+            }
         }
         model.addAttribute("leader",lead);
         model.addAttribute("status",status);
@@ -123,7 +129,16 @@ public class GroupController {
         newGroup.setCreatTime(new Timestamp(new java.util.Date().getTime()));
         //
         String creatorName = SecurityUtils.getSubject().getPrincipal().toString();
-        Employee creator=jpaEmployee.findEmployeesByEname(creatorName).get(0);
+
+        List<Employee> list=jpaEmployee.findEmployeesByEname(creatorName);
+        Employee creator;
+        if(list.size()>1){
+            model.addAttribute("error","错误信息:系统内含有大于1个名为("+leader+")的用户，重名用户会引起资产管理系统出错");
+            return "error";
+        }else {
+            creator=list.get(0);
+        }
+
         newGroup.setEmployeeByCreatorId(creator);
 
         //

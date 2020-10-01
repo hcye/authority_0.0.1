@@ -5,7 +5,7 @@ import com.alibaba.excel.metadata.BaseRowModel;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EasyExcelMapedModel extends BaseRowModel {
+public class AssetDownloadModel extends BaseRowModel {
     @ExcelProperty(value = "资产编号",index = 0)
     private String assetNum;
     @ExcelProperty(value = "设备名称",index = 1)
@@ -63,7 +63,7 @@ public class EasyExcelMapedModel extends BaseRowModel {
     }
 
 
-    public EasyExcelMapedModel() {
+    public AssetDownloadModel() {
     }
 
     public String getDevName() {

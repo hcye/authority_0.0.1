@@ -98,7 +98,16 @@ public class UserController {
                 //session过期
                 return "login";
             }
-            Employee e = jpaEmployee.findEmployeesByEname(username).get(0);
+            Employee e;
+            List<Employee> list= jpaEmployee.findEmployeesByEname(username);
+            if(list.size()>1){
+                model.addAttribute("error","错误信息:系统内含有大于1个名为("+username+")的用户，重名用户会引起资产管理系统出错");
+                return "error";
+            }else {
+                e=jpaEmployee.findEmployeesByEname(username).get(0);
+            }
+
+
             resourcesSet=userService.getResourcesByEmployee(e);
             UsernamePasswordToken token = new UsernamePasswordToken(username, pwd);
             try {
