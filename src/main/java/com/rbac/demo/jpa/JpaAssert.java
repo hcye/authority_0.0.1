@@ -23,22 +23,7 @@ public interface JpaAssert extends JpaRepository<Assert,Integer> {
     @Query("select ast from Assert ast where ast.workless=:dam and ast.assetTypeByAssertType.typeName=:tp")
     Page<Assert> findAssertsBytype(@Param("tp") String type,@Param("dam") String damFlag, Pageable pageable);
 
-
-
     Assert  findAssertByAssestnum(String num);
-
- /*   @Query("select ast from Assert ast where ast.workless='0' and ast.assestnum like :searchKey ")
-    Page<Assert> findAssertsByAssestnumLike(@Param("searchKey")String searchKey,Pageable pageable);
-
-    @Query("select ast from Assert ast where ast.workless='0' and ast.aname like :name")
-    Page<Assert> findAssertsByAnameLike(@Param("name")String name,Pageable pageable);
-
-    @Query("select ast from Assert ast where ast.workless='0' and ast.employeeByBorrower.pingyin like :searchKey ")
-    Page<Assert> findAssertsByBorroworPingyinLike(@Param("searchKey")String search, Pageable pageable);
-
-    @Query("select ast from Assert ast where ast.workless='0' and ast.employeeByBorrower.ename like :searchKey ")
-    Page<Assert> findAssertsByBorroworNameLike(@Param("searchKey")String search, Pageable pageable);*/
-
 
 
     @Query("select ast from Assert ast where ast.workless=:dam and ast.aname like :searchKey")

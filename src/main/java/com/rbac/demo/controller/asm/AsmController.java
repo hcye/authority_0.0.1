@@ -2,6 +2,7 @@ package com.rbac.demo.controller.asm;
 import com.rbac.demo.entity.*;
 import com.rbac.demo.jpa.*;
 import com.rbac.demo.service.AsmRecordService;
+import com.rbac.demo.tool.ConvertStrForSearch;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 @Controller
@@ -29,7 +34,8 @@ public class AsmController {
     private JpaDevType jpaDevType;
     @Autowired
     private AsmRecordService asmRecordService;
-
+    @Autowired
+    private JpaOperatRecord jpaOperatRecord;
 
     @RequiresPermissions("asm:bro:view")
     @GetMapping("/asm/bro")
@@ -94,12 +100,89 @@ public class AsmController {
         return "/asm/add_type";
     }
 
+
+    @RequiresPermissions("asm:log:view")
+    @GetMapping("/asm/log")
+    public String log(Model model){
+        Pageable pageable=PageRequest.of(0,pageSize);
+        Page<OperatRecord> records=jpaOperatRecord.findAll(pageable);
+        model.addAttribute("page",records);
+        model.addAttribute("action",AsmAction.getList());
+        model.addAttribute("list",records.getContent());
+        return "/asm/log";
+    }
+
+    @RequiresPermissions("asm:log:view")
+    @GetMapping("/asm/log/queryPage")
+    public String queryPage(String tp,String timeRange,String pre,String next,String jump,String pageNow,Model model) throws ParseException {
+
+        Pageable pageable;
+        Page<OperatRecord> page = null;
+        int pageInt;
+        try {
+            pageInt =Integer.parseInt(pageNow);
+        }catch (NumberFormatException e){
+            return "redirect:/asm/log";
+        }
+        /**
+         * 先判断是否是翻页
+         * */
+        if(!pre.equals("")||!next.equals("")||!jump.equals("")){
+            pageInt=pageInt-1;
+            pageable=PageRequest.of(pageInt,pageSize);
+            if(!pre.equals("")){
+                pageable=pageable.previousOrFirst();
+            }else if(!next.equals("")){
+                pageable=pageable.next();
+            }
+        }else {
+            pageable=PageRequest.of(0,pageSize);
+        }
+
+
+        if(!tp.equals("")&&!timeRange.equals("")){
+            SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
+            java.util.Date timeStart=simpleDateFormat.parse(timeRange.split(" - ")[0]);
+            java.util.Date timeEnd=simpleDateFormat.parse(timeRange.split(" - ")[1]);
+            if(tp.equals("全部操作")){
+                page=jpaOperatRecord.findOperatRecordsByActionTimeBetween(timeStart,timeEnd,pageable);
+            }else {
+                page=jpaOperatRecord.findOperatRecordsByActionAndActionTimeBetween(tp,timeStart,timeEnd,pageable);
+            }
+        }else if(!tp.equals("")&&timeRange.equals("")){
+
+            if(tp.equals("全部操作")){
+                page=jpaOperatRecord.findAll(pageable);
+            }else {
+                page=jpaOperatRecord.findOperatRecordsByAction(tp,pageable);
+            }
+        }
+
+        List<String> list=AsmAction.getList();
+        if (!tp.equals("全部操作")) {
+            String selected = null;
+            for (String str : list) {
+                if (str.equals(tp)) {
+                    list.remove(str);
+                    selected = str;
+                    break;
+                }
+
+            }
+            list.add(0, selected);
+        }
+        model.addAttribute("action",list);
+        model.addAttribute("list",page.getContent());
+        model.addAttribute("page",page);
+        model.addAttribute("timeRange",timeRange);
+        return "/asm/log";
+    }
+
     @RequiresPermissions("asm:type:edit")
     @GetMapping("/asm/edit_type")
     public String editTypePage(int id,Model model){
         List<Resources> list=jpaResources.findAll();
         AssetType type= jpaAssetType.findById(id).get();
-
         Resources ress=null;
         for (Resources res:list){
             if(res.getPermission().equals(type.getPermiCode())){
@@ -149,10 +232,6 @@ public class AsmController {
         anAssert.setSnnum(sn);
         jpaAssert.save(anAssert);
         asmRecordService.write(AsmAction.dev_edit,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert);
-
-
-
-
         return "redirect:/asm/list";
     }
 
@@ -166,4 +245,8 @@ public class AsmController {
         asmRecordService.write(AsmAction.dev_dam,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert);
         return "redirect:/asm/list";
     }
+
+
+
+
 }

@@ -356,7 +356,7 @@ public class AsmRestController {
             ast.setAssetTypeByAssertType(assetType);
 
             if((tailStr).length()>tailLen){
-                map.put("error","编号超出，入库失败！");
+                map.put("error","编号超出限定范围，入库失败！");
                 return map;
             }else {
                 int zeroNum = tailLen - tailStr.length();
@@ -371,7 +371,9 @@ public class AsmRestController {
             }
             ast.setAssestnum(code);
             tail++;
+
             list.add(ast);
+            asmRecordService.write(AsmAction.dev_in,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null);
         }
         jpaAssert.saveAll(list);
         map.put("ok","入库成功！");

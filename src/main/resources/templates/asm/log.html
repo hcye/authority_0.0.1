@@ -1,10 +1,148 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>操作日志</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+    <script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>-->
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <script th:inline="javascript">
+        //在前端利用thymeleaf 直接调用spring bean对象方法。
+
+        //渲染form组件，如果不执行这个函数，form组件中的select radio 等不会被渲染出来
+        layui.use('form', function(){
+            var form = layui.form;
+        });
+
+        layui.use('laydate', function(){
+            var laydate = layui.laydate;
+
+            //执行一个laydate实例
+            laydate.render({
+                elem: '#time_range'
+                ,type: 'date'
+                ,range: true //或 range: '~' 来自定义分割字符
+                ,max: 0 //7天后
+            });
+        });
+
+
+        //渲染dataPicker
+        //格式化事件字符串
+ /*       function timeStamp2String(time){
+            // 2020-09-16T02:16:01.000+00:00
+            var date1= time.substring(-1,10);
+            var daytime1=time.substr(time.indexOf("T")+1,8);
+            return date1 +" "+ daytime1;
+        }
+        function transformNullStr(str){
+            if (str==null){
+                return "";
+            }
+            return str;
+        }*/
+        $(function () {
+
+            $("#search").click(function () {
+                document.location.href="/asm/log/queryPage?tp="+$("#operate_type").val()+"&timeRange="+$("#time_range").val()+"&pre=&next=&jump=&pageNow="+$("#pageInput").val();
+            });
+
+            $("#pre").click(function () {
+                document.location.href="/asm/log/queryPage?tp="+$("#operate_type").val()+"&timeRange="+$("#time_range").val()+"&pre=pre&next=&jump=&pageNow="+$("#pageInput").val();
+            });
+
+            $("#next").click(function () {
+                document.location.href="/asm/log/queryPage?tp="+$("#operate_type").val()+"&timeRange="+$("#time_range").val()+"&pre=&next=next&jump=&pageNow="+$("#pageInput").val();
+            });
+
+
+            $("#jump").click(function () {
+                document.location.href="/asm/log/queryPage?tp="+$("#operate_type").val()+"&timeRange="+$("#time_range").val()+"&pre=&next=&jump=jump&pageNow="+$("#pageInput").val();
+            });
+
+
+
+        })
+
+    </script>
 </head>
 <body>
-<p2>操作日志</p2>
+<div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
+    <p>操作日志</p>
+</div>
+
+<div class="layui-container">
+    <input type="hidden" id="role_name" />
+    <div class="layui-row layui-form">
+        <!--layui-inline定义外层行内-->
+        <!--layui-input-inline定义内层行内-->
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">操作类型:</label>
+                <div class="layui-input-inline">
+                    <select id="operate_type">
+                        <option th:each="ac : ${action}" th:text="${ac}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">时间范围:</label>
+                <div class="layui-input-inline">
+                    <input id="time_range" class="layui-input" th:value="${timeRange}" />
+                </div>
+            </div>
+            <div class="layui-btn-group">
+                <button class="layui-btn" id="search">查询</button>
+            </div>
+        </div>
+    </div>
+    <div class="layui-row" style="margin-top: 5%">
+        <table class="layui-table">
+            <thead class="layui-table-header">
+            <tr>
+                <td>操作人</td>
+                <td>动作</td>
+                <td>操作时间</td>
+                <td>关联员工</td>
+                <td>关联资产</td>
+                <td>资产编号</td>
+            </tr>
+            </thead>
+            <tbody class="layui-table-body" id="role_table">
+                <tr th:each="oper : ${list}" th:style="${oper.getAction()=='借用' && oper.getAssertByAssertAsset()!=null && oper.getAssertByAssertAsset().getEmployeeByBorrower()!=null} ? 'background:#c7e5b1':'' ">
+                    <td th:text="${oper.getEmployeeByDealer()!=null} ? ${oper.getEmployeeByDealer().getEname()} : '' " >操作人</td>
+                    <td th:text="${oper.getAction()}">动作</td>
+                    <td th:text="${oper.getActionTime()}">操作时间</td>
+                    <td th:text="${oper.getEmployeeByAssertEmp()!=null} ? ${oper.getEmployeeByAssertEmp().getEname()} : '' " >关联员工</td>
+                    <td th:text="${oper.getAssertByAssertAsset()!=null} ? ${oper.getAssertByAssertAsset().getAname()} : '' " >关联资产</td>
+                    <td th:text="${oper.getAssertByAssertAsset()!=null} ? ${oper.getAssertByAssertAsset().getAssestnum()} : '' " >资产编号</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="layui-row">
+        <input type="hidden" id="selectedDepId"/>
+        <div class="layui-col-md-offset2 layui-col-md2">
+            <button class="layui-btn" id="pre" style="float: right">-</button>
+        </div>
+        <div class="layui-col-md2 layui-input-inline">
+            <input type="text" class="layui-input" id="pageInput" th:value="${page.getNumber()}+1" />
+        </div>
+        <div class="layui-col-md1">
+            <button class="layui-btn" id="next">+</button>
+        </div>
+        <div class="layui-col-md2">
+            <button class="layui-btn" id="jump">跳转</button>
+            <span id="PageCount" th:text="'共 '+ ${page.getTotalPages()} +' 页'"></span>
+        </div>
+    </div>
+</div>
 </body>
 </html>
