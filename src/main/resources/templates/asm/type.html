@@ -34,18 +34,22 @@
             }
             return str;
         }
+
+
+
         $(function () {
             //初始化数据
             $(document).ready(function () {
                 queryRoles("","","",0);
             });
+
+            //导出excel
+            $("#out").click(function () {
+                document.location.href="/asm/out_types"
+            });
             //搜索
             $("#search").click(function () {
                 queryRoles($("#rname").val(),"","",0);
-            });
-            //重置
-            $("#reset").click(function () {
-                $("#rname").val("");
             });
             //向前翻页
             $("#pre").click(function () {
@@ -141,9 +145,9 @@
             </div>
 
             <div class="layui-btn-group">
-                <button class="layui-btn" id="search">搜索</button>
-                <button class="layui-btn" id="reset">重置</button>
-                <button class="layui-btn" id="add" shiro:hasPermission="asm:type:add">新增</button>
+                <button class="layui-btn" id="search"><i class="layui-icon">&#xe615;</i>搜索</button>
+                <button class="layui-btn" id="add" shiro:hasPermission="asm:type:add"><i class="layui-icon">&#xe654;</i>新增</button>
+                <button class="layui-btn " id="out" ><i class="layui-icon">&#xe601;</i>导出</button>
             </div>
         </div>
 

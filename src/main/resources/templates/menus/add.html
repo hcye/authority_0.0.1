@@ -33,6 +33,11 @@
             })
 
 
+            $("#cancel").click(function () {
+                //关闭弹出层
+                document.location.href="/menus/menus";
+            })
+
             $("#confirm").click(function () {
                 $.post("/resource/validAddInfo", {id:0,name:$("#name").val(),identify:$("#identify").val()},    //把name数据提交到ajaxRes action内，
                     function(data) {
@@ -101,7 +106,7 @@
         <div class="layui-row">
             <div class="layui-col-md-offset5">
                 <button id="confirm" class="layui-btn">确定</button>
-                <button id="reset" class="layui-btn">取消</button>
+                <button id="cancel" class="layui-btn">取消</button>
             </div>
         </div>
     </div>

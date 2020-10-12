@@ -43,11 +43,6 @@
             $("#search").click(function () {
                 queryRoles($("#rname").val(),$("#status").val(),"","",0);
             });
-            //重置
-            $("#reset").click(function () {
-               $("#rname").val("");
-               $("#status").val("全部");
-            });
             //向前翻页
             $("#pre").click(function () {
                 queryRoles($("#rname").val(),$("#status").val(),"pre","",$("#pageInput").val());
@@ -160,9 +155,8 @@
                     </div>
                 </div>
                 <div class="layui-btn-group">
-                    <button class="layui-btn" id="search">搜索</button>
-                    <button class="layui-btn" id="reset">重置</button>
-                    <button class="layui-btn" id="add" shiro:hasPermission="asm:role:add">新增</button>
+                    <button class="layui-btn" id="search"><i class="layui-icon">&#xe615;</i>搜索</button>
+                    <button class="layui-btn" id="add" shiro:hasPermission="asm:role:add"><i class="layui-icon">&#xe61f;</i>新增</button>
                 </div>
             </div>
 

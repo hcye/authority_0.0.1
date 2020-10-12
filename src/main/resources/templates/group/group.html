@@ -71,15 +71,23 @@
             };
     $(function () {
         $("#edit").click(function () {
-            window.location.href="/group/edit?id="+$("#nodeId").val();
+            if($("#nodeId").val()!=''){
+                window.location.href="/group/edit?id="+$("#nodeId").val();
+            }else {
+                layer.alert("选择一个部门后编辑！");
+            }
+
         });
 
         $("#add").click(function () {
             window.location.href="/group/addPage";
         });
         $("#delete").click(function () {
+            if($("#nodeId").val()==''){
+                layer.alert("选择一个部门后删除！");
+                return;
+            }
             layer.confirm('确定删除？', {icon: 3, title:'删除'}, function(index){
-
                 $.post("/group/delete/valid", {did:$("#nodeId").val()},    //把name数据提交到ajaxRes action内，
                     function(data) {
                         if(data["msg"]=="ok"){
@@ -151,9 +159,9 @@
                         </div>
                     </div>
                     <div class="layui-form-item">
-                        <button class="layui-btn" id="edit" shiro:hasPermission="asm:group:edit" style="margin-left: 25%">编辑</button>
-                        <button class="layui-btn" id="add" shiro:hasPermission="asm:group:add" style="margin-left: 4%">新增</button>
-                        <button class="layui-btn" id="delete" shiro:hasPermission="asm:group:delete" style="margin-left: 4%">删除</button>
+                        <button class="layui-btn" id="edit" shiro:hasPermission="asm:group:edit" style="margin-left: 25%"><i class="layui-icon">&#xe642;</i> 编辑</button>
+                        <button class="layui-btn" id="add" shiro:hasPermission="asm:group:add" style="margin-left: 4%"><i class="layui-icon">&#xe61f;</i>新增</button>
+                        <button class="layui-btn" id="delete" shiro:hasPermission="asm:group:delete" style="margin-left: 4%"><i class="layui-icon">&#xe616;</i>删除</button>
                     </div>
                 </div>
             </div>

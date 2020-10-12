@@ -5,6 +5,7 @@ import com.alibaba.excel.ExcelReader;
 import com.alibaba.excel.read.metadata.ReadSheet;
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.rbac.demo.easyExcel.AssetDownloadModel;
+import com.rbac.demo.easyExcel.AssetTypeDownloadModel;
 import com.rbac.demo.easyExcel.ReadAssetEventListener;
 import com.rbac.demo.entity.*;
 import com.rbac.demo.jpa.*;
@@ -497,19 +498,48 @@ public class AsmRestController {
         // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
         String fileName = URLEncoder.encode("export", "UTF-8").replaceAll("\\+", "%20");
         response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
-        EasyExcel.write(response.getOutputStream(), AssetDownloadModel.class).sheet("模板").doWrite(data(type,isDam,search));
+        EasyExcel.write(response.getOutputStream(), AssetDownloadModel.class).sheet("01").doWrite(data(type,isDam,search));
 
 
 
 
     }
 
+    @RequestMapping("asm/out_types")
+    public void exportExcel(HttpServletResponse response) throws IOException {
+
+        // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+        String fileName = URLEncoder.encode("type_export", "UTF-8").replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), AssetTypeDownloadModel.class).sheet("01").doWrite(data());
+
+
+    }
     /**
      *
      * 把实体类数组转换成excel导出模板对象数组
      *
      * */
 
+    private List<AssetTypeDownloadModel> data(){
+        List<AssetType> list = jpaAssetType.findAll();
+        List<AssetTypeDownloadModel> models=new ArrayList<>();
+        for (AssetType tp:list){
+            AssetTypeDownloadModel model=new AssetTypeDownloadModel();
+            model.setTname(tp.getTypeName());
+            model.setTemplate(tp.getAssetCode());
+            model.setCreateTime(tp.getCreateTime().toString());
+            if(tp.getRemarks()!=null){
+                model.setRemark(tp.getRemarks());
+            }
+            model.setSign(tp.getPermiCode());
+            models.add(model);
+        }
+        return models;
+    }
 
 
     private List<AssetDownloadModel> data(String type,String isDam,String search){
@@ -562,4 +592,7 @@ public class AsmRestController {
         }
         return models;
     }
+
+
+
 }

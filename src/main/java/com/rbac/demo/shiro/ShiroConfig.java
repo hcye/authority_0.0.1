@@ -49,7 +49,7 @@ public class ShiroConfig {
     @Bean
     public DefaultWebSessionManager sessionManager() {
         DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
-        sessionManager.setGlobalSessionTimeout(60*20*1000);
+        sessionManager.setGlobalSessionTimeout(60*1*1000);
         //设置sessionDao对session查询，在查询在线用户service中用到了
         sessionManager.setSessionDAO(sessionDAO());
         //配置session的监听
@@ -84,6 +84,9 @@ public class ShiroConfig {
         DefaultWebSecurityManager defaultSecurityManager=new DefaultWebSecurityManager();
         defaultSecurityManager.setRealm(userRealm);
         shiroFilterFactoryBean.setSecurityManager(defaultSecurityManager);
+
+        // 身份认证失败，则跳转到登录页面的配置
+        shiroFilterFactoryBean.setLoginUrl("/");
         //添加Shiro内置过滤器
         /**
          * Shiro内置过滤器，可以实现权限相关的拦截器
