@@ -23,6 +23,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.thymeleaf.util.Validate;
 
 import java.util.*;
 
@@ -88,7 +89,7 @@ public class UserController {
          * */
 
 
-
+        Employee loginUser;
         Subject subject = SecurityUtils.getSubject();
         Session session = subject.getSession();
         ShiroUtils.clearCachedAuthorizationInfo();
@@ -125,12 +126,15 @@ public class UserController {
 
             subject.hasRole("超级管理员");
             session.setAttribute("user", e);
+            loginUser=e;
 
         }else {
 
             Employee employee= (Employee) session.getAttribute("user");
+            loginUser=employee;
             resourcesSet=userService.getResourcesByEmployee(employee);
         }
+        model.addAttribute("user",loginUser);
         model.addAttribute("resources", resourcesSet);
         return "index";
     }
@@ -139,6 +143,63 @@ public class UserController {
     @RequestMapping("/user/user")
     public String user(){
         return "/user/user";
+    }
+
+
+    @RequestMapping("/user/personal_center")
+    public String personal_center(Model model){
+
+        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        model.addAttribute("user",employee);
+        List<String> sexs=new ArrayList<>();
+        if(employee.getSex().equals("男")){
+            sexs.add("男");
+            sexs.add("女");
+        }else {
+            sexs.add("女");
+            sexs.add("男");
+        }
+        model.addAttribute("sexs",sexs);
+        return "/user/personal_center";
+    }
+
+    @RequestMapping("/user/change_personal_info")
+    public String personal_center(String tx_uri,String mail,String sex,Model model){
+        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        if(tx_uri!=null&&!tx_uri.equals("")){
+            employee.setTxUri(tx_uri.split("/")[3]);
+        }
+        if(mail!=null&&!mail.equals("")){
+            employee.setEmail(mail);
+        }
+        if(sex!=null&&!sex.equals("")){
+            employee.setSex(sex);
+        }
+        jpaEmployee.save(employee);
+
+        List<String> sexs=new ArrayList<>();
+        if(employee.getSex().equals("男")){
+            sexs.add("男");
+            sexs.add("女");
+        }else {
+            sexs.add("女");
+            sexs.add("男");
+        }
+        model.addAttribute("sexs",sexs);
+        model.addAttribute("user",employee);
+        return "/user/personal_center";
+    }
+
+    @RequestMapping("/user/select_tx")
+    public String change_tx(){
+        return "/user/select_tx";
+    }
+
+    @RequestMapping("/user/change_password")
+    public String change_pwd(Model model){
+        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        model.addAttribute("user",employee);
+        return "/user/change_pwd";
     }
 
 }

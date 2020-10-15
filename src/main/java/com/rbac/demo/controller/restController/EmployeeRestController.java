@@ -11,6 +11,8 @@ import com.rbac.demo.jpa.JpaUser2Role;
 import com.rbac.demo.service.UserService;
 import com.rbac.demo.shiro.ShiroUtils;
 import com.rbac.demo.tool.ConvertStrForSearch;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -93,5 +95,37 @@ public class EmployeeRestController {
     public Page<Employee> turn(String depId, String pageInput, String turnFlag, String keyWord, String refreshFlag){
         Page<Employee> page= service.getPage( depId, pageInput, turnFlag,keyWord,refreshFlag);
         return page;
+    }
+
+    @PostMapping("/user/reset_password")
+    public Map<String,String> turn(String oldPwd,String newPwd,String pwdConf){
+        Map<String,String> map=new HashMap<>();
+
+        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        String dbPwd=employee.getPwd();
+        String encryptPwd=ShiroUtils.encryption(oldPwd,ByteSource.Util.bytes(employee.getPingyin()).toHex());
+
+        if(!dbPwd.equals(encryptPwd)){
+            map.put("error","旧密码不匹配");
+            return map;
+        }
+        if(newPwd.length()>8){
+            if(newPwd.equals(pwdConf)){
+                String newp=ShiroUtils.encryption(newPwd,ByteSource.Util.bytes(employee.getPingyin()).toHex());
+                employee.setPwd(newp);
+                jpaEmployee.save(employee);
+                map.put("success","修改成功");
+                return map;
+            }
+        }else {
+            map.put("error","修改失败");
+            return map;
+        }
+ /*       String dbPwd=employee.getPwd();
+        String encryptPwd=ShiroUtils.encryption(inputPwd,ByteSource.Util.bytes(employee.getPingyin()).toHex());
+        if(!dbPwd.equals(encryptPwd)){
+            throw new IncorrectCredentialsException();//密码错误
+        }*/
+        return map;
     }
 }

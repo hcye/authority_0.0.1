@@ -1,6 +1,7 @@
 package com.rbac.demo;
 
 import com.rbac.demo.entity.AssetType;
+import com.rbac.demo.entity.Employee;
 import com.rbac.demo.entity.OperatRecord;
 import com.rbac.demo.jpa.*;
 import org.junit.jupiter.api.Test;
@@ -42,26 +43,9 @@ public class Test1 {
     @Autowired
     JpaOperatRecord jpaOperatRecord;
     @Test
-    public void t() throws IOException, ParseException {
-        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
-        String st="2020-10-01";
-        java.util.Date start=simpleDateFormat.parse(st);
-        Calendar calendar=Calendar.getInstance();
-        calendar.setTime(start);
-        calendar.add(Calendar.MONTH,-4);
-        java.util.Date end=calendar.getTime();
-        Page<OperatRecord> page=jpaOperatRecord.findOperatRecordsByActionAndActionTimeBetween("借用",end,start,PageRequest.of(0,400));
-        List<OperatRecord> operatRecords=page.getContent();
-        List<OperatRecord> notReturn=new ArrayList<>();
-        for (OperatRecord operatRecord:operatRecords){
-            if(operatRecord.getAssertByAssertAsset().getEmployeeByBorrower()!=null){
-                notReturn.add(operatRecord);
-            }
-        }
-        for (OperatRecord record:notReturn){
-            System.out.println(record.getAssertByAssertAsset());
-        }
-
-
+    public void t()  {
+        String a="/img/tx/tx_f_03.gif";
+        String[] as=a.split("/");
+        System.out.println(as[3]);
     }
 }

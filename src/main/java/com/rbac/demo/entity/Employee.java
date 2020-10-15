@@ -23,6 +23,7 @@ public class Employee {
     private Collection<SysGroup> sysGroupsById;
     private Byte status=0;
     private String sex="";
+    private String txUri="";
     private Collection<Assert> assertsById;
 
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -108,6 +109,16 @@ public class Employee {
 
     public void setSalt(String salt) {
         this.salt = salt;
+    }
+
+    @Basic
+    @Column(name = "tx_uri", nullable = true, length = 64)
+    public String getTxUri() {
+        return txUri;
+    }
+
+    public void setTxUri(String txUri) {
+        this.txUri = txUri;
     }
 
     @Override

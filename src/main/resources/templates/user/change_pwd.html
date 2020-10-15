@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>重置密码</title>
+</head>
+<link rel="stylesheet" href="/layui/css/layui.css">
+<script type="text/javascript" src="/layui/layui.js"></script>
+<link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+<link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+<script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+<!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+<!--[if lt IE 9]>-->
+<script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+<script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+<script type="text/javascript">
+    layui.use('form', function(){
+        var form = layui.form;
+    });
+
+    //提交数据
+    $(function () {
+        $("#conform").click(function () {
+            if ($("#old_pwd").val().length<8){
+                layer.alert("旧密码长度不能小于8");
+                return;
+            }
+            if ($("#new_pwd").val().length<8||$("#pwd_conf").val().length<8){
+                layer.alert("新密码长度不能小于8");
+                return;
+            }
+            if($("#new_pwd").val()!=$("#pwd_conf").val()){
+                layer.alert("两次输入的新密码不相等");
+                return;
+            }
+
+            $.post("/user/reset_password", {oldPwd:$("#old_pwd").val(),newPwd:$("#new_pwd").val(),pwdConf:$("#pwd_conf").val()},    //把name数据提交到ajaxRes action内，
+                function(data) {
+                    //回调函数
+                    if(data["error"]!=null){
+                        layer.alert("旧密码输入错误，修改失败！");
+                        $("#old_pwd").val("");
+                    }else {
+                       window.top.document.location.href="/logout";
+                    }
+                }, "json");
+
+
+
+
+        })
+        $("#reset").click(function () {
+
+        })
+    })
+
+</script>
+<body>
+<div class="layui-container">
+    <div class="layui-form"  style="margin-top: 5%;margin-bottom: 18%">
+        <div class="layui-form-item">
+            <label class="layui-form-label">登录名称:</label>
+            <div class="layui-input-block">
+                <input class="layui-input" id="searchArea" th:value="${user.getEname()}" readonly="readonly" />
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">旧密码:</label>
+            <div class="layui-input-block">
+                <input class="layui-input" id="old_pwd" type="password" />
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">新密码:</label>
+            <div class="layui-input-block">
+                <input class="layui-input" id="new_pwd" type="password" />
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">再次确认:</label>
+            <div class="layui-input-block">
+                <input class="layui-input" id="pwd_conf" type="password" />
+            </div>
+        </div>
+        <div class="layui-row">
+            <div class="layui-col-md-offset4 layui-col-md2">
+                <button class="layui-btn" id="conform">确定</button>
+                <button class="layui-btn" type="reset" id="reset">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

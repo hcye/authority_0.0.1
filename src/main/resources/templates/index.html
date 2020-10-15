@@ -32,7 +32,7 @@
 <body class="layui-layout-body">
 	<div class="layui-layout layui-layout-admin">
 		<div class="layui-header">
-			<div class="layui-logo"><a class="logo" href="javascript: void(0);" style="color: #009688;" title="作者寄语">dtree帮助手册</a></div>
+			<div class="layui-logo"><a class="logo" href="javascript: void(0);" style="color: #009688;" title="">HANGSHENG</a></div>
 			<!-- <div class="layui-search layui-form" lay-filter="search-form">
 				<div class="layui-form-item" style="margin-bottom: 0px;padding-top: 10px;">
 					<div class="layui-input-block" style="margin-left: 0px">
@@ -51,9 +51,10 @@
 					</div>
 				</div>
 			</div> -->
+			<div class="finish"><a href="JavaScript:void(0)"><img th:src="${'/img/tx/'+user.getTxUri()}" class="layui-nav-img"></span></a></div>
 			<ul class="layui-nav version-ul" lay-filter="version-ul" style="margin-left: 400px;position: absolute;padding: 0;right: 70px;">
 			  <li class="layui-nav-item">
-			    <a href="javascript:;">文档版本：<span class="version-span">&nbsp;</span></a>
+			    <a href="javascript:;"><span class="version-span">操作:</span></a>
 			    <dl class="layui-nav-child version-li"></dl>
 			  </li>
 			  <li class="layui-nav-item">
@@ -67,7 +68,6 @@
 			    </dl>
 			  </li>
 			</ul>
-			<div class="finish"><a href="JavaScript:void(0)"><img src="../static/img/s.png" class="layui-nav-img"></span></a></div>
 		</div>
 		
 		<div class="layui-side layui-bg-black">
@@ -166,9 +166,9 @@
 		
 		// 存储所有跟文档版本信息相关的记录
 		var version = {
-			"vs257":"v2.5.7（20200119）（正式版）",
-			"vs256":"v2.5.6（20191024）（正式版）", 
-			"vs255":"v2.5.5（20191012）（正式版）"
+			"personal_center":"个人中心",
+			"change_password":"修改密码",
+			"logout":"退出登录"
 		};
 		
 		for(var key in version){
@@ -210,11 +210,15 @@
 				
 			}
 		}
-		
+		//下拉菜单点击动作
 		element.on("nav(version-ul)", function(elem){
 			var dvs = $(elem).attr("data-version");
-			layui.data("dtree-version-now",{key: "versionClsNow", value: dvs});
-			location.reload();
+			var $iframe = $("#iframe_page");
+			if(dvs!='logout'){
+				$iframe.attr("src","/user/"+dvs);
+			}else {
+				document.location.href="/logout";
+			}
 		});
 		
 		// 根据versionCls的值来选择需要显示的元素
@@ -229,9 +233,9 @@
 			$iframe.attr("src",did);
 		});
 		
-		$(".finish").click(function(){
+/*		$(".finish").click(function(){
 			$(document).ready(function(){location.href="/logout"});
-		});
+		});*/
 		
 		$(".logo").click(function(){
 			layer.open({
