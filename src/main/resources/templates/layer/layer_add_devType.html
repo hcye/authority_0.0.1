@@ -24,7 +24,7 @@
 
         $("#conform").click(function () {
 
-            $.post("/asm/addDevType", {devType:$("#type_name").val(),dev_name:$("#dev_name").val(),desc:$("#desc").val()},    //把name数据提交到ajaxRes action内，
+            $.post("/asm/addDevType", {devType:$("#type_name").val(),dev_name:$("#dev_name").val(),desc:$("#desc").val(),temp:$("#temp").val()},    //把name数据提交到ajaxRes action内，
                 function(data) {
                     if(data["error"]!=null){
                         layer.alert(data["error"]);
@@ -63,6 +63,13 @@
                 <label class="layui-form-label">所属类型:</label>
                 <div class="layui-input-block">
                     <input class="layui-input" disabled="disabled" id="type_name" />
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">编号模板:</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="temp" />
                 </div>
             </div>
 

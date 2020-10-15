@@ -19,8 +19,7 @@ public class AsmService {
     @Autowired
     private JpaAssert jpaAssert;
 
-    public Map<String,String> valid(String inputCode, String tep){
-        Map<String,String> map=new HashMap<>();
+    public boolean valid(String inputCode, String tep){
         String[] input=inputCode.split("-");
         String[] tp=tep.split("-");
         String engRegex="[A-Za-z]+";
@@ -28,15 +27,13 @@ public class AsmService {
         String allZero="[0]+";
 
         if(input.length!=tp.length){
-            map.put("error","编号输入不匹配模板！");
-            return map;
+            return false;
         }else {
             for (int i=0;i<tp.length;i++){
                 boolean isMatch=true;
 
                 if(tp[i].length()!=input[i].length()){
-                    map.put("error","编号输入不匹配模板！");
-                    return map;
+                    return false;
                 }
 
                 if(tp[i].contains("x")){
@@ -44,18 +41,15 @@ public class AsmService {
                 }else if(tp[i].contains("0")){
                     isMatch = Pattern.matches(numRegex, input[i]);
                     if(Pattern.matches(allZero, input[i])){
-                        map.put("error","编号尾数不能全是0！");
-                        return map;
+                        return false;
                     }
                 }
                 if(!isMatch){
-                    map.put("error","编号输入不匹配模板！");
-                    return map;
+                    return false;
                 }
             }
         }
-        map.put("ok","校验成功");
-        return map;
+        return true;
     }
 
     public Page<Assert> queryPage(String type, String isDam, String search, Pageable pageable){
@@ -104,5 +98,37 @@ public class AsmService {
             }
         }
         return list;
+    }
+
+    public boolean validDevTypeNum(String inputCode, String tep) {
+        int index = inputCode.lastIndexOf("-");
+        String prefixIn=inputCode.substring(0,index);
+        String prefixTemp=tep.substring(0,index);
+        String suffixIn=inputCode.substring(index+1);
+        String suffixTemp=tep.substring(index+1);
+        String numRegex="[0-9]+";
+        String allZero="[0]+";
+//        Pattern.matches(numRegex, input[i]);
+        /**
+         *
+         * 前导不相同的情况
+         * */
+        if(!prefixIn.equals(prefixTemp)||suffixIn.length()!=suffixTemp.length()){
+            return false;
+        }
+        /**
+         *
+         * 尾数含有非数字的情况
+         * */
+        if(!Pattern.matches(numRegex,suffixIn)){
+            return false;
+            /**
+             *
+             * 尾数全部是0的情况
+             * */
+        }else if(Pattern.matches(allZero,suffixIn)){
+            return false;
+        }
+        return true;
     }
 }

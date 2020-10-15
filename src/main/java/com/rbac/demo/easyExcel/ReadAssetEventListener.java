@@ -86,8 +86,8 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
                 if (jpaAssert.findAssertByAssestnum(assetNum.trim()) != null) {
                     throw new ExcelAnalysisException(num + "行的资产编号重复");
                 } else {
-                    Map<String, String> res = asmService.valid(assetNum, templat);
-                    if (res.get("error") == null) {
+                    boolean res = asmService.valid(assetNum, templat);
+                    if (res) {
                         anAssert.setAssestnum(assetNum.trim());
                     } else {
                         throw new ExcelAnalysisException(num + "行的资产编号不匹配模板要求");

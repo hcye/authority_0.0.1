@@ -19,7 +19,8 @@ public interface JpaDevType extends JpaRepository<DevType,Integer> {
     @Query("select dev.devName from DevType dev where dev.assetTypeByAssertTypeId.typeName=:tp")
     List<String> findDevTypesNameByAssertType(@Param("tp")String tp);
 
+    @Query("select dev from DevType dev where dev.assetTypeByAssertTypeId.typeName=:tp")
+    List<DevType> findDevTypesByAssertType(@Param("tp")String devType);
 
-
-
+    DevType findDevTypeByDevName(String name);
 }

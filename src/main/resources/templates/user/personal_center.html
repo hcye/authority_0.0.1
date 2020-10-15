@@ -37,6 +37,13 @@
             $("#reset").click(function () {
                 document.location.href="/user/user";
             });
+
+            $(document).ready(function () {
+                $("a").hover(function () {
+                    $(this).css('cursor','pointer');
+                })
+            })
+
         })
     </script>
 </head>
@@ -51,8 +58,8 @@
             <p>个人资料</p>
         </div>
         <div class="layui-row">
-            <img th:src="${'/img/tx/'+user.getTxUri()}" />
-            <a id="change">修改头像</a>
+            <img style="height: 80px;width: 80px" th:src="${'/img/tx/'+user.getTxUri()}" />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id="change">修改头像</a>
         </div>
         <div>
             <table  lay-skin="nob" class="layui-table" lay-size="md">

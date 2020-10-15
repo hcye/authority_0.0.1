@@ -26,9 +26,16 @@
             $("img").css("border","2px solid #ffffff");
             $("img").css("height","40px");
             $("img").css("width","40px");
+
+            $("img").hover(function () {
+                $(this).css('cursor','pointer');
+            })
+
         })
 
         $("#conform").click(function () {
+
+
             document.location.href="/user/change_personal_info?tx_uri="+$("#res_uri").val();
 
  /*           $.post("/asm/addDevType", {devType:$("#type_name").val(),dev_name:$("#dev_name").val(),desc:$("#desc").val()},    //把name数据提交到ajaxRes action内，

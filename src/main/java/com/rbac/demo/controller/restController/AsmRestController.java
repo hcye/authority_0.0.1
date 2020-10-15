@@ -188,22 +188,32 @@ public class AsmRestController {
     }
 
     @PostMapping("/asm/getDevNames")
-    public Map<String, List<String>> addAssertType(String devType, Model model){
+    public Map<String, List<String>> addAssertType(String devType){
         Map<String,List<String>> map=new HashMap<>();
         AssetType assetType=jpaAssetType.findAssetTypeByName(devType);
         String code=assetType.getAssetCode();
         List<String> codes=new ArrayList<>();
-        codes.add(code);
+        List<String> devCodes=new ArrayList<>();
         List<String> names=jpaDevType.findDevTypesNameByAssertType(devType);
+        DevType devType1=jpaDevType.findDevTypeByDevName(names.get(0));
+        codes.add(code);
+        devCodes.add(devType1.getAssetNumTemplate());
         map.put("name",names);
         map.put("code",codes);
+        map.put("devCode",devCodes);
         return map;
     }
 
     @PostMapping("/asm/addDevType")
-    public Map<String, String> addDevType(String devType,String dev_name,String desc){
+    public Map<String, String> addDevType(String devType,String dev_name,String desc,String temp){
         Map<String,String> map=new HashMap<>();
         AssetType assertType= jpaAssetType.findAssetTypeByName(devType);
+        String assetCode=assertType.getAssetCode();
+        boolean b=asmService.valid(temp,assetCode);
+        if(!b){
+            map.put("error","设备类型编码不匹配资产类型编码");
+            return map;
+        }
         DevType dtp=jpaDevType.findDevTypeByDevNameAndAssertType(dev_name,assertType);
         if(dtp!=null){
 
@@ -218,6 +228,7 @@ public class AsmRestController {
         devType1.setCreator(usname);
         devType1.setRemarks(desc);
         devType1.setDevName(dev_name);
+        devType1.setAssetNumTemplate(temp);
         devType1.setAssetTypeByAssertTypeId(assertType);
         jpaDevType.save(devType1);
         map.put("ok","增加完成");
@@ -244,6 +255,18 @@ public class AsmRestController {
         }
         return map;
     }
+
+
+
+    @PostMapping("/asm/getDevNumTemplate")
+    public Map<String, String> getNum(String devName){
+        Map<String,String> map=new HashMap<>();
+        DevType devType=jpaDevType.findDevTypeByDevName(devName);
+        String devTypeAssetNumTemplate=devType.getAssetNumTemplate();
+        map.put("code",devTypeAssetNumTemplate);
+        return map;
+    }
+
     @PostMapping("/asm/validInputAssetNum")
     public Map<String,String> valid(String inputCode,String tep,String num,String model,String price){
         Map<String,String> map=new HashMap<>();
@@ -263,8 +286,13 @@ public class AsmRestController {
                 return map;
             }
         }
-        Map<String,String> validRes=asmService.valid( inputCode, tep);
-        return validRes;
+        boolean validRes=asmService.validDevTypeNum(inputCode, tep);
+        if(validRes){
+            map.put("ok","编号校验成功");
+        }else {
+            map.put("error","编号校验失败");
+        }
+        return map;
     }
 
     @PostMapping("/asm/queryListPage")

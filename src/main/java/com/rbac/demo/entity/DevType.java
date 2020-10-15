@@ -14,7 +14,10 @@ public class DevType {
     private String remarks="";
     private Timestamp createTime;
     private String creator="";
+    private String assetNumTemplate="";
     private AssetType assetTypeByAssertTypeId;
+
+
 
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
@@ -59,6 +62,18 @@ public class DevType {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+
+
+    @Basic
+    @Column(name = "asset_num_template", nullable = true)
+    public String getAssetNumTemplate() {
+        return assetNumTemplate;
+    }
+
+    public void setAssetNumTemplate(String assetNumTemplate) {
+        this.assetNumTemplate = assetNumTemplate;
     }
 
     @Basic

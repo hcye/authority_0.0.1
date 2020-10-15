@@ -69,8 +69,8 @@ public class AsmController {
         List<AssetType> types= jpaAssetType.findAssertType();
         String firstType=types.get(0).getTypeName();
         List<String> names=jpaDevType.findDevTypesNameByAssertType(firstType);
-        AssetType assetType=jpaAssetType.findAssetTypeByName(firstType);
-        String code=assetType.getAssetCode();
+        DevType devType=jpaDevType.findDevTypeByDevName(names.get(0));
+        String code=devType.getAssetNumTemplate();
         model.addAttribute("types",types);
         model.addAttribute("names",names);
         model.addAttribute("code",code);

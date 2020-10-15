@@ -28,14 +28,28 @@
                         $("#name").append("<option>"+names[key]+"</option>");
                     }
                     var codes=dt["code"];
-                    $("#encode").attr("placeholder",'编码格式:'+codes[0]);
+                    var devCodes=dt["devCode"];
+                    $("#encode").attr("placeholder",'格式:'+devCodes[0]);
                     $("#code").val(codes[0]);
                     var form = layui.form;
                     form.render('select');//修改select后需要重新渲染
                 }, "json");
 
         });
+
+
+        form.on("select(astName)", function(data){
+            $.post("/asm/getDevNumTemplate", {devName:data.value},    //把name数据提交到ajaxRes action内，
+                function(dt) {
+                    var temp=dt["code"];
+                    $("#code").val(temp);
+                    $("#encode").attr("placeholder",'格式:'+temp);
+                }, "json");
+
+        });
+
     });
+
 
 
     $(function () {
@@ -50,6 +64,7 @@
                 success: function(layero, index){
                     var body = layer.getChildFrame('body', index);
                     body.find('#type_name').val($("#tp").val());
+                    body.find('#temp').attr("placeholder","格式:"+$("#code").val());
                 },
                 end:function () {
                     var form = layui.form;
@@ -100,10 +115,11 @@
 </div>
     <div class="layui-container">
         <input type="hidden" id="code" th:value="${code}" />
+        <input type="hidden" id="devCode" th:value="${code}" />
         <div class="layui-form">
                 <div class="layui-form-item">
                      <label class="layui-form-label">类型</label>
-                     <div class="layui-input-inline">
+                     <div class="layui-input-block">
                         <select class="layui-form-select"  lay-filter="astType" id="tp">
                             <option th:each="type : ${types}" th:text="${type.getTypeName()}"></option>
                         </select>
@@ -111,14 +127,14 @@
                 </div>
                 <div class="layui-form-item">
                     <label class="layui-form-label"><span style="color: red">*</span>型号</label>
-                    <div class="layui-input-inline">
+                    <div class="layui-input-block">
                         <textarea class="layui-textarea" id="model" ></textarea>
                     </div>
                 </div>
 
                 <div class="layui-form-item">
                     <label class="layui-form-label">单价</label>
-                    <div class="layui-input-inline">
+                    <div class="layui-input-block">
                         <input class="layui-input" id="price" />
                     </div>
                 </div>
@@ -133,27 +149,30 @@
                     <button class="layui-btn" id="add_dev_type">增加种类</button>
                 </div>
                 <div class="layui-form-item">
-                    <p style="margin-left: 10%">&nbsp;&nbsp;资产编码按照企业资产编码规范编写。x代表英文字符，0代表数字；例如某办公设备编码是 HS-BG-01005,则编码模板是x-x-0</p>
-                    <p style="margin-left: 10%">某信息化设备编码是 XXH-01005,则编码模板是x-0。<span style="color: firebrick">英文和数字必须用‘-’隔开。</span></p>
-                    <p style="margin-left: 10%">数量大于1的情况入库时设备编码按输入编码末尾数字递增。例如 输入 xx-00 那么下一个设备编码是xx-01</span></p>
+                    <p style="margin-left: 10%">&nbsp;&nbsp;资产编码按照企业资产编码规范编写。例如某办公设备编码模板是 HS-BG-9999；</p>
+                    <p style="margin-left: 10%">HS-BG是资产类型标识,不能改变,9999标识4位的类型序号,序号递增或递减；</p>
+                    <p style="margin-left: 10%">我们新建的资产编号就应该类似 HS-BG-0001。</p>
                     <br/>
                     <label class="layui-form-label"><span style="color: red">*</span>编号</label>
-                    <div class="layui-input-inline">
+                    <div class="layui-input-block">
                         <input class="layui-input" id="encode" th:placeholder="${code}" />
                     </div>
+                    <span id="max"></span>
                 </div>
                 <div class="layui-form-item">
                     <label class="layui-form-label"><span style="color: red">*</span>数量</label>
-                    <div class="layui-input-inline">
+                    <div class="layui-input-block">
                         <input class="layui-input" id="num" />
                     </div>
                 </div>
 
-
-                <div class="layui-form-item">
-                    <button class="layui-btn" id="conform" style="margin-left: 10%">提交</button>
-                    <button class="layui-btn" id="cancel">取消</button>
+                <div class="layui-row">
+                    <div class="layui-form-item layui-col-md-offset5">
+                        <button class="layui-btn" id="conform" style="margin-left: 10%">提交</button>
+                        <button class="layui-btn" id="cancel">取消</button>
+                    </div>
                 </div>
+
         </div>
     </div>
 </body>

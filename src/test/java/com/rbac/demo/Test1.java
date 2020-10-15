@@ -44,8 +44,15 @@ public class Test1 {
     JpaOperatRecord jpaOperatRecord;
     @Test
     public void t()  {
-        String a="/img/tx/tx_f_03.gif";
-        String[] as=a.split("/");
-        System.out.println(as[3]);
+
+        //取最后一个数量
+ /*       String ss="CDHS-07-001-9999";
+        int inde1=ss.lastIndexOf("-");
+        String s=ss.substring(inde1+1);
+        System.out.println(s);*/
+        String ss="CDHS-07-001-9999";
+        int inde1=ss.lastIndexOf("-");
+        String s=ss.substring(0,inde1);
+        System.out.println(s);
     }
 }
