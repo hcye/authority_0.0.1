@@ -164,6 +164,30 @@ public class AsmRestController {
     }
 
 
+    @RequiresPermissions("asm:devType:edit")
+    @PostMapping("/asm/editDevType")
+    public Map<String, String> valid(int id,String input){
+        Map<String ,String> map=new HashMap<>();
+        DevType devType=jpaDevType.findById(id).get();
+        String name=devType.getDevName();
+        List<Assert> list = jpaAssert.findAssertsByAname(name);
+        if(!list.isEmpty()){
+            map.put("error","设备类型关联有设备不能修改！");
+            return map;
+        }else {
+            String tem=devType.getAssetTypeByAssertTypeId().getAssetCode();
+            if(asmService.valid(input,tem)){
+                devType.setAssetNumTemplate(input);
+                map.put("ok","修改成功！");
+
+            }else {
+                map.put("error","输入不匹配资产类型约束！");
+            }
+            return map;
+        }
+
+    }
+    @RequiresPermissions("asm:type:edit")
     @PostMapping("/asm/saveAssetType")
     public Map<String, String> saveType(int id,String devType,String template,String desc,String authority){
         Map<String ,String> map=new HashMap<>();
@@ -203,7 +227,7 @@ public class AsmRestController {
         map.put("devCode",devCodes);
         return map;
     }
-
+    @RequiresPermissions("asm:devType:add")
     @PostMapping("/asm/addDevType")
     public Map<String, String> addDevType(String devType,String dev_name,String desc,String temp){
         Map<String,String> map=new HashMap<>();
@@ -236,7 +260,26 @@ public class AsmRestController {
     }
     @PostMapping("/asm/getTypes")
     public Page<AssetType> getTypes(String name,String pre,String next,int pageNow){
-        return  typeService.getPage( name, pre, next, pageNow);
+        return  typeService.getTypePage( name, pre, next, pageNow);
+    }
+
+
+
+    @PostMapping("/asm/getTypeNames")
+    public List<AssetType> getTypes(){
+
+        return  jpaAssetType.findAll();
+    }
+
+    @PostMapping("/asm/getTypeName")
+    public Map<String,String> getName(String name){
+        Map<String,String> map=new HashMap<>();
+        map.put("code",jpaAssetType.findAssetTypeByName(name).getAssetCode());
+        return  map;
+    }
+    @PostMapping("/asm/getDevTypes")
+    public Page<DevType> getDevTypes(String name,String pre,String next,int pageNow,String type){
+        return  typeService.getDevTypePage( name, pre, next, pageNow,type);
     }
 
     @RequiresPermissions("asm:type:delete")
@@ -249,6 +292,22 @@ public class AsmRestController {
             type.setDevTypesById(null);
             type.setAssertsById(null);
             jpaAssetType.delete(type);
+            map.put("ok","删除成功");
+        }else {
+            map.put("error","删除失败");
+        }
+        return map;
+    }
+
+    @RequiresPermissions("asm:devType:delete")
+    @PostMapping("/asm/deleteDevType")
+    public Map<String,String> deleteDevType(int id){
+        Map<String,String> map=new HashMap<>();
+        DevType type= jpaDevType.findById(id).get();
+        List<Assert> list=jpaAssert.findAssertsByAname(type.getDevName());
+        if(list.isEmpty()){
+            type.setAssetTypeByAssertTypeId(null);
+            jpaDevType.delete(type);
             map.put("ok","删除成功");
         }else {
             map.put("error","删除失败");

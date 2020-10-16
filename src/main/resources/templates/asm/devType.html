@@ -24,6 +24,9 @@
         //格式化事件字符串
         function timeStamp2String(time){
             // 2020-09-16T02:16:01.000+00:00
+            if(time==null){
+                return "";
+                }
             var date1= time.substring(-1,10);
             var daytime1=time.substr(time.indexOf("T")+1,8);
             return date1 +" "+ daytime1;
@@ -35,94 +38,109 @@
             return str;
         }
 
-
-
         $(function () {
-            //初始化数据
-            $(document).ready(function () {
-                queryRoles("","","",0);
-            });
 
-            //导出excel
-            $("#out").click(function () {
-                document.location.href="/asm/out_types"
-            });
-            //搜索
-            $("#search").click(function () {
-                queryRoles($("#rname").val(),"","",0);
-            });
-            //向前翻页
-            $("#pre").click(function () {
-                queryRoles($("#rname").val(),"pre","",$("#pageInput").val());
-            });
-            //向后翻页
-            $("#next").click(function () {
-                queryRoles($("#rname").val(),"","next",$("#pageInput").val());
-            });
-            //跳转
-            $("#jump").click(function () {
-                queryRoles($("#rname").val(),"","",$("#pageInput").val());
-            });
-            //跳转到添加类型页面
             $("#add").click(function () {
-                document.location.href="/asm/add_type"
+                layer.open({
+                    type: 2,
+                    title: "增加种类",
+                    area: ['1000px', '500px'],
+                    content: ['/layer/layer_add_devType', 'no'],
+                    //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                    //实现弹出层间不同frame的传值
+                })
             });
-        })
-        function queryRoles(name,pre,next,pageNow) {
+                //初始化数据
+                $(document).ready(function () {
+                    queryDevTypes("", "", "", 0, $("#type").val());
+                });
 
-            $.post("/asm/getTypes", {name:name,pre:pre,next:next,pageNow:pageNow},    //把name数据提交到ajaxRes action内，
-                function (data) {
-                    var editflag = [[${@permission.getPermi('asm:type:edit')}]];
-                    var deleteflag =  [[${@permission.getPermi('asm:type:delete')}]];
-                    var editDisable="";
-                    var deleteDisable="";
-                    if(editflag=="layui-btn-disabled"){
-                        editDisable="disabled='true'";
-                    }
-                    if(deleteflag=="layui-btn-disabled"){
-                        deleteDisable="disabled='true'";
-                    }
-                    $("#role_table").find("tr").remove();
-                    types=data.content;
-                    for (var key in types){
-                        $("#role_table").append("<tr><td><input type='hidden' value="+types[key].id+" />"+types[key].typeName+"</td><td>"+types[key].assetCode+"</td>" +
-                            "<td>"+timeStamp2String(types[key].createTime)+"</td><td>"+types[key].permiCode+"</td>" +
-                            "<td>"+transformNullStr(types[key].remarks)+"</td><td>" +
-                            "<button class='layui-btn layui-btn-xs "+editflag+"' "+editDisable+"  name='edit'>编辑</button><button class='layui-btn layui-btn-xs "+deleteflag+"' "+deleteDisable+"  name='delete'>删除</button></td></tr>");
-                    }
+                //导出excel
+                $("#out").click(function () {
+                    /*       document.location.href="/asm/out_types"*/
+                });
+                //搜索
+                $("#search").click(function () {
+                    queryDevTypes($("#rname").val(), "", "", 0, $("#type").val());
+                });
+                //向前翻页
+                $("#pre").click(function () {
+                    queryDevTypes($("#rname").val(), "pre", "", $("#pageInput").val(), $("#type").val());
+                });
+                //向后翻页
+                $("#next").click(function () {
+                    queryDevTypes($("#rname").val(), "", "next", $("#pageInput").val(), $("#type").val());
+                });
+                //跳转
+                $("#jump").click(function () {
+                    queryDevTypes($("#rname").val(), "", "", $("#pageInput").val(), $("#type").val());
+                });
+                //跳转到添加类型页面
+            })
 
-                    // 添加编辑按钮点击事件
-                    $("#role_table").find("button[name='edit']").click(function () {
-                        document.location.href = "/asm/edit_type?id=" + $(this).parent().parent().find("input")[0].value;
-                        //获得操作角色id
-                    });
-                    //添加删除按钮点击事件
-                    $("#role_table").find("button[name='delete']").click(function () {
-                        var btn=$(this);
-                        layer.confirm('确定删除！', {
-                            btn: ['确定', '取消'] //可以无限个按钮
-                        }, function(index, layero){
-                            $.post("/asm/deleteType", {id:btn.parent().parent().find("input")[0].value},    //把name数据提交到ajaxRes action内，
+            function queryDevTypes(name, pre, next, pageNow, type) {
+
+                $.post("/asm/getDevTypes", {name: name, pre: pre, next: next, pageNow: pageNow, type: type},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+                        var editflag = [[${@permission.getPermi('asm:devType:edit')}]];
+                        var deleteflag = [[${@permission.getPermi('asm:devType:delete')}]];
+                        var editDisable = "";
+                        var deleteDisable = "";
+                        if (editflag == "layui-btn-disabled") {
+                            editDisable = "disabled='true'";
+                        }
+                        if (deleteflag == "layui-btn-disabled") {
+                            deleteDisable = "disabled='true'";
+                        }
+                        $("#devType_table").find("tr").remove();
+                        types = data.content;
+                        for (var key in types) {
+                            $("#devType_table").append("<tr><td><input type='hidden' value=" + types[key].id + " />" + types[key].devName + "</td><td><input class='layui-input' value='"+transformNullStr(types[key].assetNumTemplate)+"' /></td>" +
+                                "<td>" + timeStamp2String(types[key].createTime) + "</td><td>" + transformNullStr(types[key].remarks) + "</td><td>" +
+                                "<button class='layui-btn layui-btn-xs " + editflag + "' " + editDisable + "  name='edit'>保存</button><button class='layui-btn layui-btn-xs " + deleteflag + "' " + deleteDisable + "  name='delete'>删除</button></td></tr>");
+                        }
+
+                        // 添加编辑按钮点击事件
+                        $("#devType_table").find("button[name='edit']").click(function () {
+                            var id=$(this).parent().parent().find("input")[0].value;
+                            var input=$(this).parent().parent().find("input")[1].value;
+                            $.post("/asm/editDevType", {id:id,input:input},    //把name数据提交到ajaxRes action内，
                                 function (data) {
                                     if (data["error"] != null) {
-                                        layer.alert("该类型有关联资产，删除失败");
+                                        layer.alert(data["error"]);
                                     } else if (data["ok"] != null) {
-                                        document.location.href = "/asm/type";
+                                        layer.alert("保存成功");
                                     }
-
                                 }, "json");
-                        }, function(index){
-                            //关闭弹出层
-                            layer.close(index);
+                            //获得操作角色id
                         });
+                        //添加删除按钮点击事件
+                        $("#devType_table").find("button[name='delete']").click(function () {
+                            var btn = $(this);
+                            layer.confirm('确定删除！', {
+                                btn: ['确定', '取消'] //可以无限个按钮
+                            }, function (index, layero) {
+                                $.post("/asm/deleteDevType", {id: btn.parent().parent().find("input")[0].value},    //把name数据提交到ajaxRes action内，
+                                    function (data) {
+                                        if (data["error"] != null) {
+                                            layer.alert("该类型有关联资产，删除失败");
+                                        } else if (data["ok"] != null) {
+                                            document.location.href = "/asm/dev_type";
+                                        }
 
-                    })
+                                    }, "json");
+                            }, function (index) {
+                                //关闭弹出层
+                                layer.close(index);
+                            });
 
-                    $("#pageInput").val(data.number+1);
-                    $("#PageCount").html('共 '+data.totalPages+' 页');
+                        })
 
-                }, "json");
-        }
+                        $("#pageInput").val(data.number + 1);
+                        $("#PageCount").html('共 ' + data.totalPages + ' 页');
+
+                    }, "json");
+            }
 
     </script>
 </head>
@@ -144,9 +162,18 @@
                 </div>
             </div>
 
+            <div class="layui-inline">
+                <label class="layui-form-label">设备类型:</label>
+                <div class="layui-input-inline">
+                    <select id="type">
+                        <option th:each="tpName : ${list}" th:text="${tpName.getTypeName()}"></option>
+                    </select>
+                </div>
+            </div>
+
             <div class="layui-btn-group">
                 <button class="layui-btn" id="search"><i class="layui-icon">&#xe615;</i>搜索</button>
-                <button class="layui-btn" id="add" shiro:hasPermission="asm:type:add"><i class="layui-icon">&#xe654;</i>新增</button>
+                <button class="layui-btn" id="add" shiro:hasPermission="asm:devType:add"><i class="layui-icon">&#xe654;</i>新增</button>
                 <button class="layui-btn " id="out" ><i class="layui-icon">&#xe601;</i>导出</button>
             </div>
         </div>
@@ -163,7 +190,7 @@
                 <td>操作</td>
             </tr>
             </thead>
-            <tbody class="layui-table-body" id="role_table">
+            <tbody class="layui-table-body" id="devType_table">
 
 
             </tbody>

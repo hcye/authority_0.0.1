@@ -35,8 +35,10 @@
 
         $("#conform").click(function () {
 
-
+            var tx=window.top.document.getElementById("tx");
+            tx.src="http://localhost:8889/"+$("#res_uri").val();
             document.location.href="/user/change_personal_info?tx_uri="+$("#res_uri").val();
+
 
  /*           $.post("/asm/addDevType", {devType:$("#type_name").val(),dev_name:$("#dev_name").val(),desc:$("#desc").val()},    //把name数据提交到ajaxRes action内，
                 function(data) {

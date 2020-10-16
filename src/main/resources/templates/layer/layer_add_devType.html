@@ -18,9 +18,37 @@
     layui.use('form', function(){
         var form = layui.form;
         form.render();
+
+
+        form.on("select(tp)",function (data) {
+            $.post("/asm/getTypeName", {name: data.value},    //把name数据提交到ajaxRes action内，
+                function (data) {
+                    $('#temp').attr("placeholder", "格式:" + data["code"]);
+                    form.render("select");
+                }, "json");
+        });
     });
 
+
+
     $(function () {
+
+
+        $(document).ready(function () {
+
+            $.post("/asm/getTypeNames", {},    //把name数据提交到ajaxRes action内，
+                function (data) {
+                    for (var key in data) {
+                        $("#type_name").append("<option>" + data[key].typeName + "</option>");
+                    }
+                    $('#temp').attr("placeholder", "格式:" + data[0].assetCode);
+                    var form = layui.form;
+                    form.render("select");
+                }, "json");
+
+
+        })
+
 
         $("#conform").click(function () {
 
@@ -62,7 +90,9 @@
             <div class="layui-form-item">
                 <label class="layui-form-label">所属类型:</label>
                 <div class="layui-input-block">
-                    <input class="layui-input" disabled="disabled" id="type_name" />
+                    <select  id="type_name" lay-filter="tp">
+
+                    </select>
                 </div>
             </div>
 

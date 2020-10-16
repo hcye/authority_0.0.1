@@ -25,7 +25,7 @@ public class AsmService {
         String engRegex="[A-Za-z]+";
         String numRegex="[0-9]+";
         String allZero="[0]+";
-
+        String allNine="[9]+";
         if(input.length!=tp.length){
             return false;
         }else {
@@ -35,7 +35,10 @@ public class AsmService {
                 if(tp[i].length()!=input[i].length()){
                     return false;
                 }
-
+                isMatch = Pattern.matches(allNine, input[input.length-1]);
+                if(!isMatch){
+                    return false;
+                }
                 if(tp[i].contains("x")){
                     isMatch = Pattern.matches(engRegex, input[i]);
                 }else if(tp[i].contains("0")){

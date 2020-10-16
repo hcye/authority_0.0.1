@@ -92,6 +92,14 @@ public class AsmController {
         return "/asm/type";
     }
 
+    @RequiresPermissions("asm:devType:view")
+    @GetMapping("/asm/dev_type")
+    public String devTypePage(Model model){
+        List<AssetType> list=jpaAssetType.findAll();
+        model.addAttribute("list",list);
+        return "/asm/devType";
+    }
+
     @RequiresPermissions("asm:type:add")
     @GetMapping("/asm/add_type")
     public String addTypePage(Model model){

@@ -244,6 +244,6 @@ public class Assert {
     }
 
     public void setAssetTypeByAssertType(AssetType assetTypeByAssertType) {
-        this.assetTypeByAssertType = assetTypeByAssertType;
+            this.assetTypeByAssertType = assetTypeByAssertType;
     }
 }
