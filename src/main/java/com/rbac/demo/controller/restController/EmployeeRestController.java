@@ -1,13 +1,8 @@
 package com.rbac.demo.controller.restController;
 
-import com.rbac.demo.entity.Employee;
-import com.rbac.demo.entity.Role;
-import com.rbac.demo.entity.SysGroup;
-import com.rbac.demo.entity.User2Role;
-import com.rbac.demo.jpa.JpaEmployee;
-import com.rbac.demo.jpa.JpaGroup;
-import com.rbac.demo.jpa.JpaRole;
-import com.rbac.demo.jpa.JpaUser2Role;
+import com.rbac.demo.entity.*;
+import com.rbac.demo.jpa.*;
+import com.rbac.demo.service.UpdateUserDB;
 import com.rbac.demo.service.UserService;
 import com.rbac.demo.shiro.ShiroUtils;
 import com.rbac.demo.tool.ConvertStrForSearch;
@@ -21,6 +16,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.SearchResult;
 import java.util.*;
 
 @RestController
@@ -36,6 +34,8 @@ public class EmployeeRestController {
     private UserService service;
     @Autowired
     private JpaGroup jpaGroup;
+    @Autowired
+    private JpaAdinfo jpaAdinfo;
     @PostMapping("/user/findUserByNameLike")
     public List<String> findUsers(String name){
         name= ConvertStrForSearch.getFormatedString(name);
@@ -92,10 +92,46 @@ public class EmployeeRestController {
     }
 
     @PostMapping("/user/getPage")
-    public Page<Employee> turn(String depId, String pageInput, String turnFlag, String keyWord, String refreshFlag){
+    public Page<Employee> turn(String depId, String pageInput, String turnFlag, String keyWord, String refreshFlag) throws NamingException {
         Page<Employee> page= service.getPage( depId, pageInput, turnFlag,keyWord,refreshFlag);
         return page;
     }
+
+    @PostMapping("/user/checkAdinfo")
+    public Map<String,String> check(String dc,String dc_ip,String uname,String pwd)  {
+        Map<String,String> map=new HashMap<>();
+        Adinfo adinfo =jpaAdinfo.findAll().get(0);
+        try {
+            if(dc==null){
+                NamingEnumeration<SearchResult> res= UpdateUserDB.getNamingEnumeration( adinfo.getAdip(), adinfo.getDc(), adinfo.getDomainadminname(),adinfo.getDomainadminpwd());
+                if(!res.hasMoreElements()){
+                    throw new RuntimeException("加载ad资源出错");
+                }
+            }else if(dc!=null){
+                NamingEnumeration<SearchResult> res= UpdateUserDB.getNamingEnumeration( dc_ip, dc, uname,pwd);
+                if(!res.hasMoreElements()){
+                    throw new RuntimeException("加载ad资源出错");
+                }
+            }
+
+        }catch (RuntimeException | NamingException e){
+            map.put("error","ad域信息验证失败！");
+            return map;
+        }
+        map.put("ok","ad域信息验证成功！");
+        return map;
+    }
+
+    @PostMapping("/user/getAdinfo")
+    public Map<String,Adinfo> get()  {
+        Map<String,Adinfo> map=new HashMap<>();
+        Adinfo adinfo =jpaAdinfo.findAll().get(0);
+        map.put("ok",adinfo);
+        return map;
+    }
+
+
+
 
     @PostMapping("/user/reset_password")
     public Map<String,String> turn(String oldPwd,String newPwd,String pwdConf){
@@ -121,11 +157,6 @@ public class EmployeeRestController {
             map.put("error","修改失败");
             return map;
         }
- /*       String dbPwd=employee.getPwd();
-        String encryptPwd=ShiroUtils.encryption(inputPwd,ByteSource.Util.bytes(employee.getPingyin()).toHex());
-        if(!dbPwd.equals(encryptPwd)){
-            throw new IncorrectCredentialsException();//密码错误
-        }*/
         return map;
     }
 }

@@ -1,13 +1,7 @@
 package com.rbac.demo.service;
 
-import com.rbac.demo.entity.Employee;
-import com.rbac.demo.entity.Resources;
-import com.rbac.demo.entity.Role;
-import com.rbac.demo.entity.SysGroup;
-import com.rbac.demo.jpa.JpaEmployee;
-import com.rbac.demo.jpa.JpaGroup;
-import com.rbac.demo.jpa.JpaResources;
-import com.rbac.demo.jpa.JpaRole;
+import com.rbac.demo.entity.*;
+import com.rbac.demo.jpa.*;
 import com.rbac.demo.tool.ConvertStrForSearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import javax.naming.NamingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +26,8 @@ public class UserService {
     private JpaRole jpaRole;
     @Autowired
     private UserService userService;
+    @Autowired
+    private JpaAdinfo jpaAdinfo;
     public UserService(){
 
     }
@@ -43,8 +40,10 @@ public class UserService {
         List<Resources> resourceList=new ArrayList<>();
 
         for (Role role:roles){
-            resourceList.addAll(jpaRole.findResourcesByRole(role));
-            System.out.println(role.getRname());
+            //角色停用后无法
+            if(role.getAvalible()!=0&&role.getDeleteFlag()!=1){
+                resourceList.addAll(jpaRole.findResourcesByRole(role));
+            }
         }
 
         for (Resources resources:resourceList){
@@ -56,12 +55,14 @@ public class UserService {
         Set<String> stringSet=new HashSet<>();
         List<Role> roles=jpaEmployee.findRoleByEmployee(employee);
         for(Role role:roles){
-            stringSet.add(role.getRname());
+            if(role.getAvalible()!=0&&role.getDeleteFlag()!=1){
+                stringSet.add(role.getRname());
+            }
         }
         return stringSet;
     }
     //根据部门id获得部门的用户
-    public Page<Employee> getPage(String depid,String pageInputStr,String turnFlag,String keyWord,String refreshFlag){
+    public Page<Employee> getPage(String depid,String pageInputStr,String turnFlag,String keyWord,String refreshFlag)  {
         int pageInput;
         if(pageInputStr.equals("")){
             pageInput=Integer.parseInt("1");
@@ -105,7 +106,12 @@ public class UserService {
          *
          * */
         if(!refreshFlag.equals("")){
-            userService.updateUserTable();
+            try {
+                userService.updateUserTable();
+            }catch (NamingException e){
+
+            }
+
             pageable=PageRequest.of(0,pageSize);
 
             List<SysGroup> groups=jpaGroup.findAllExcludDeleted();
@@ -138,7 +144,6 @@ public class UserService {
         if(!turnFlag.equals("")){
 
 
-            System.out.println("---");
             if(turnFlag.equals("pre")){
                 pageable=pageable.previousOrFirst();
             }else if(turnFlag.equals("next")){
@@ -164,9 +169,10 @@ public class UserService {
      * 同步ad ladp和本地数据库数据
      *
      * */
-    public void updateUserTable(){
+    public void updateUserTable() throws NamingException {
 //        JpaEmployee jpaEmployee,String adip,String adname,String username,String userpwd
-        UpdateUserDB.updateUserTable(jpaEmployee,"192.168.100.10","hsaecd","yehangcheng@hsaecd.com","Yhc142536.");
+        Adinfo adinfo =jpaAdinfo.findAll().get(0);
+        UpdateUserDB.updateUserTable(jpaEmployee,adinfo.getAdip(),adinfo.getDc(),adinfo.getDomainadminname(),adinfo.getDomainadminpwd());
     }
 
     public List<String> getUserNamesByUsersList(List<Employee> employees){

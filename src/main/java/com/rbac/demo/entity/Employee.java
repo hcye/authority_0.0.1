@@ -19,11 +19,14 @@ public class Employee {
     private Collection<OperatRecord> operatRecordsById_0;
     private Collection<User2Role> user2RolesById;
     private String role;
+    private String loginName;
     private SysGroup sysGroupByGroupId;
     private Collection<SysGroup> sysGroupsById;
     private Byte status=0;
     private String sex="";
     private String txUri="";
+
+
     private Collection<Assert> assertsById;
 
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -39,6 +42,16 @@ public class Employee {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    @Basic
+    @Column(name = "login_name", nullable = true, length = 64)
+    public String getLoginName() {
+        return loginName;
+    }
+
+    public void setLoginName(String loginName) {
+        this.loginName = loginName;
     }
 
     @Basic

@@ -16,6 +16,9 @@
       <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
     <script th:inline="javascript">
         $(function () {
+
+
+
             $(document).ready(function () {
                 $.post("/getGroupTree", {},    //把name数据提交到ajaxRes action内，
                     function (data) {
@@ -38,6 +41,9 @@
 
 //------------绘制dtree-----------
 
+
+
+
                             queryDepUser("","","","","");
 
                             // 绑定节点点击
@@ -52,6 +58,35 @@
         })
 
 
+
+            function checkAdinfo() {
+                $.post("/user/checkAdinfo", {},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+                        if(data["error"]!=null){
+                            layer.confirm('域账号密码信息或AD域信息错误，刷新失败！', {icon: 5, title:'错误'}, function(index){
+
+                                layer.open({
+                                    type: 2,
+                                    title: "编辑域信息",
+                                    area: ['1000px','500px'],
+                                    content: ['/layer/layer_edit_adInfo', 'no'],
+                                    //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                                    //实现弹出层间不同frame的传值
+                       /*             success: function(layero, index){
+                                        var body = layer.getChildFrame('body', index);
+                                        body.find('#depId').val($("#did").val());
+                                    }*/
+                                });
+                                //do something
+                                layer.close(index);
+
+                            });
+                        }else {
+                            queryDepUser("","","","","refresh");
+                            layer.msg("刷新用户列表完成");
+                        }
+                    }, "json");
+            }
 
             function queryDepUser(id, pageNum, turn,keyWord,refreshFlag) {
                 var tbody = $("#userTable");
@@ -109,9 +144,8 @@
                 });
                 //刷新用户列表
                 $("#refresh").click(function () {
-                    queryDepUser("","","","","refresh");
-                    layer.msg("刷新用户列表完成");
-                });
+                    checkAdinfo();
+                })
 
 
             })

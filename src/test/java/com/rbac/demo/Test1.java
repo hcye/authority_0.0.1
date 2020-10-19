@@ -4,6 +4,7 @@ import com.rbac.demo.entity.AssetType;
 import com.rbac.demo.entity.Employee;
 import com.rbac.demo.entity.OperatRecord;
 import com.rbac.demo.jpa.*;
+import com.rbac.demo.service.UpdateUserDB;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.ResourceUtils;
 
+import javax.naming.NamingException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,16 +45,8 @@ public class Test1 {
     @Autowired
     JpaOperatRecord jpaOperatRecord;
     @Test
-    public void t()  {
+    public void t() throws NamingException {
 
-        //取最后一个数量
- /*       String ss="CDHS-07-001-9999";
-        int inde1=ss.lastIndexOf("-");
-        String s=ss.substring(inde1+1);
-        System.out.println(s);*/
-        String ss="CDHS-07-001-9999";
-        int inde1=ss.lastIndexOf("-");
-        String s=ss.substring(0,inde1);
-        System.out.println(s);
+        UpdateUserDB.updateUserTable(jpaEmployee,"192.168.100.10","hsaecd","yehangcheng@hsaecd.com","Yhc142536..");
     }
 }
