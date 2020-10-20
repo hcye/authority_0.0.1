@@ -211,33 +211,26 @@ public class AsmController {
     @GetMapping("/asm/edit_dev")
     public String editDev(int id,Model model){
         Assert anAssert= jpaAssert.findById(id).get();
-        List<AssetType> assetTypes=jpaAssetType.findAll();
-        AssetType type=anAssert.getAssetTypeByAssertType();
-        for (AssetType assetType:assetTypes){
-            if(assetType==type){
-                assetTypes.remove(assetType);
-                break;
-            }
-        }
-        assetTypes.add(0,type);
 
 
-
+        String name=anAssert.getAname();
+        DevType devType=jpaDevType.findDevTypeByDevName(name);
+        String temp=devType.getAssetNumTemplate();
         model.addAttribute("dev",anAssert);
-        model.addAttribute("assetTypes",assetTypes);
-
+        model.addAttribute("temp",temp);
         return "/asm/edit_dev";
     }
 
     @RequiresPermissions("asm:edit:btn")
     @GetMapping("/asm/save_dev")
-    public String saveDev(int id,String types,String model,String price,String remarks,String sn,Model mode){
+    public String saveDev(int id,String types,String model,String price,String remarks,String sn,String num){
         Assert anAssert=jpaAssert.findById(id).get();
         anAssert.setAssetTypeByAssertType(jpaAssetType.findAssetTypeByName(types));
         anAssert.setModel(model);
         anAssert.setPrice(price);
         anAssert.setRemarks(remarks);
         anAssert.setSnnum(sn);
+        anAssert.setAssestnum(num);
         jpaAssert.save(anAssert);
         asmRecordService.write(AsmAction.dev_edit,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert);
         return "redirect:/asm/list";

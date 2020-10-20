@@ -38,17 +38,17 @@ public class UserController {
     private JpaGroup jpaGroup;
     @Autowired
     private UserService userService;
-    @RequestMapping("/user/add")
+    @GetMapping("/user/add")
     @RequiresPermissions("asm:add")
     public String add(){
         return "/hcye/test";
     }
-    @RequestMapping("/delete")
+    @GetMapping("/delete")
     public String delete(){
         return "delete";
     }
     //编辑用户
-    @RequestMapping("/user/edit")
+    @GetMapping("/user/edit")
     public String turnToEditPage(int id, Model model){
         Employee employee=jpaEmployee.findById(id).get();
         List<Role> rolesUserHas= userService.getRolesByEmployee(employee);
@@ -75,7 +75,7 @@ public class UserController {
         return "user/edit";
     }
     //进入登录页面
-    @RequestMapping("/")
+    @GetMapping("/")
     public String login(){
         return "login.html";
     }
@@ -99,17 +99,7 @@ public class UserController {
                 //session过期
                 return "login";
             }
-            Employee e;
-            List<Employee> list= jpaEmployee.findEmployeesByEname(username);
-            if(list.size()>1){
-                model.addAttribute("error","错误信息:系统内含有大于1个名为("+username+")的用户，重名用户会引起资产管理系统出错");
-                return "error";
-            }else {
-                e=jpaEmployee.findEmployeesByEname(username).get(0);
-            }
 
-
-            resourcesSet=userService.getResourcesByEmployee(e);
             UsernamePasswordToken token = new UsernamePasswordToken(username, pwd);
             try {
                 subject.login(token);
@@ -123,10 +113,11 @@ public class UserController {
                 System.out.println("密码错误");
                 return "login";
             }
-
+            Employee employee= jpaEmployee.findEmployeeByLoginName(username);
+            resourcesSet=userService.getResourcesByEmployee(employee);
             subject.hasRole("超级管理员");
-            session.setAttribute("user", e);
-            loginUser=e;
+            session.setAttribute("user", employee);
+            loginUser=employee;
 
         }else {
 
@@ -140,13 +131,13 @@ public class UserController {
     }
 
     @RequiresPermissions("asm:user:view")
-    @RequestMapping("/user/user")
+    @GetMapping("/user/user")
     public String user(){
         return "/user/user";
     }
 
 
-    @RequestMapping("/user/personal_center")
+    @GetMapping("/user/personal_center")
     public String personal_center(Model model){
 
         Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
@@ -163,7 +154,7 @@ public class UserController {
         return "/user/personal_center";
     }
 
-    @RequestMapping("/user/change_personal_info")
+    @GetMapping("/user/change_personal_info")
     public String personal_center(String tx_uri,String mail,String sex,Model model){
         Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
         if(tx_uri!=null&&!tx_uri.equals("")){
@@ -190,12 +181,12 @@ public class UserController {
         return "/user/personal_center";
     }
 
-    @RequestMapping("/user/select_tx")
+    @GetMapping("/user/select_tx")
     public String change_tx(){
         return "/user/select_tx";
     }
 
-    @RequestMapping("/user/change_password")
+    @GetMapping("/user/change_password")
     public String change_pwd(Model model){
         Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
         model.addAttribute("user",employee);

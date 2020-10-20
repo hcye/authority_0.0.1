@@ -31,18 +31,15 @@ public class UserRealm extends AuthorizingRealm {
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
         String username= (String) principalCollection.getPrimaryPrincipal();
-        List<Employee> employees=jpaEmployeee.findEmployeesByEname(username);
+        Employee employee=jpaEmployeee.findEmployeeByLoginName(username);
 
-        if(employees.size()>1){
-            throw new RuntimeException("错误信息:系统内含有大于1个名为("+username+")的用户，重名用户会引起资产管理系统出错");
-        }
 
-        if(employees==null||employees.size()==0){
+        if(employee==null){
             return null;
         }
         SimpleAuthorizationInfo authorizationInfo=new SimpleAuthorizationInfo();
-        authorizationInfo.setRoles(userService.getRoleSStrSet(employees.get(0)));
-        authorizationInfo.setStringPermissions(userService.getPermissionStrSet(employees.get(0)));
+        authorizationInfo.setRoles(userService.getRoleSStrSet(employee));
+        authorizationInfo.setStringPermissions(userService.getPermissionStrSet(employee));
         return authorizationInfo;
     }
     /**
@@ -51,14 +48,10 @@ public class UserRealm extends AuthorizingRealm {
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken){
         UsernamePasswordToken token= (UsernamePasswordToken) authenticationToken;
-        List<Employee> employees=jpaEmployeee.findEmployeesByEname(token.getUsername());
-        if(employees.size()>1){
-            throw new RuntimeException("错误信息:系统内含有大于1个名为("+token.getUsername()+")的用户，重名用户会引起资产管理系统出错");
-        }
+        Employee employee=jpaEmployeee.findEmployeeByLoginName(token.getUsername());
 
-        if(employees!=null&&employees.size()>0){
-            Employee e=employees.get(0);
-            if(e.getStatus()==null||e.getStatus()==1||e.getOnjob().equals("1")){
+        if(employee!=null){
+            if(employee.getStatus()==null||employee.getStatus()==1||employee.getOnjob().equals("1")||employee.getSysGroupByGroupId().getAvalible()==0||employee.getSysGroupByGroupId().getDeleteFlag()==1){
                 throw new LockedAccountException();//账号锁定
             }
         }else {
@@ -68,9 +61,9 @@ public class UserRealm extends AuthorizingRealm {
         //        userRealm.setCredentialsMatcher(myCredentialsMatcher());
         //        defaultSecurityManager.setRealm(userRealm);
         return new SimpleAuthenticationInfo(     //
-                employees.get(0).getEname(),  //用户名principle
-                ShiroUtils.encryption(String.valueOf(token.getPassword()),ByteSource.Util.bytes(employees.get(0).getPingyin()).toHex()),    //密码password.加密后的密码
-                ByteSource.Util.bytes(employees.get(0).getPingyin()),
+                employee.getLoginName(),  //用户名principle
+                ShiroUtils.encryption(String.valueOf(token.getPassword()),ByteSource.Util.bytes(employee.getPingyin()).toHex()),    //密码password.加密后的密码
+                ByteSource.Util.bytes(employee.getPingyin()),
                 getName());             //realm名字
 
     }

@@ -38,11 +38,17 @@ public class EmployeeRestController {
     private JpaAdinfo jpaAdinfo;
     @PostMapping("/user/findUserByNameLike")
     public List<String> findUsers(String name){
+        List<String> names=new ArrayList<>();
         name= ConvertStrForSearch.getFormatedString(name);
-        List<String> names;
-        names=jpaEmployee.findEmployeesNameByNameLike(name);
-        if(names.size()==0){
-            names=jpaEmployee.findEmployeesNameByPinyinLike(name);
+        List<Employee> employees;
+        employees=jpaEmployee.findEmployeesByEnameLike(name);
+        if(employees.size()==0){
+            employees=jpaEmployee.findEmployeesByPingyinLike(name);
+        }
+        String str="";
+        for (Employee employee:employees){
+            str=employee.getEname()+"-"+employee.getLoginName();
+            names.add(str);
         }
         return names;
     }
@@ -111,6 +117,12 @@ public class EmployeeRestController {
                 NamingEnumeration<SearchResult> res= UpdateUserDB.getNamingEnumeration( dc_ip, dc, uname,pwd);
                 if(!res.hasMoreElements()){
                     throw new RuntimeException("加载ad资源出错");
+                }else {
+                    adinfo.setAdip(dc_ip);
+                    adinfo.setDc(dc);
+                    adinfo.setDomainadminname(uname);
+                    adinfo.setDomainadminpwd(pwd);
+                    jpaAdinfo.save(adinfo);
                 }
             }
 

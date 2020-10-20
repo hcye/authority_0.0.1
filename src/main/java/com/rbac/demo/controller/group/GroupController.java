@@ -25,7 +25,7 @@ public class GroupController {
     @Autowired
     private JpaGroup jpaGroup;
     @RequiresPermissions("asm:group:edit")
-    @RequestMapping("/group/edit")
+    @GetMapping("/group/edit")
     public String edit(int id, Model model){
         //本部门
         SysGroup group =jpaGroup.findById(id).get();
@@ -49,17 +49,13 @@ public class GroupController {
             status.add(1,"可用");
         }
         String leader=group.getLeader();
+
         Employee lead;
-        if(leader==null){
+        if(leader==null||leader.equals("")){
             lead=new Employee();
         }else {
-            List<Employee> list=jpaEmployee.findEmployeesByEname(leader);
-            if(list.size()>1){
-                model.addAttribute("error","错误信息:系统内含有大于1个名为("+leader+")的用户，重名用户会引起资产管理系统出错");
-                return "error";
-            }else {
-                lead=list.get(0);
-            }
+            String loginName=leader.split("-")[1];
+            lead=jpaEmployee.findEmployeeByLoginName(loginName);
         }
         model.addAttribute("leader",lead);
         model.addAttribute("status",status);
@@ -93,7 +89,7 @@ public class GroupController {
         return "/group/group";
     }
     @RequiresPermissions("asm:group:delete")
-    @RequestMapping("/group/delete")
+    @GetMapping("/group/delete")
     public String delete(int id, Model model){
         SysGroup group =jpaGroup.findById(id).get();
         if(group.getEmployeesById().isEmpty()){
@@ -105,15 +101,15 @@ public class GroupController {
         return "/group/group";
     }
     @RequiresPermissions("asm:group:add")
-    @RequestMapping("/group/addPage")
+    @GetMapping("/group/addPage")
     public String jumpToAddPage(Model model){
         List<String> names = jpaGroup.getDistinctGourpName();
         model.addAttribute("names",names);
         return "/group/add";
     }
     @RequiresPermissions("asm:group:add")
-    @RequestMapping("/group/add")
-    public String add(String upperDep, String depName, String leader, String status, Model model, HttpSession session){
+    @GetMapping("/group/add")
+    public String add(String upperDep, String depName, String leader, String status, Model model){
         if(depName==null||depName.equals("")||jpaGroup.findSysGroupByGname(depName)!=null){
             List<String> names = jpaGroup.getDistinctGourpName();
             model.addAttribute("names",names);
@@ -127,20 +123,9 @@ public class GroupController {
         newGroup.setSysGroupByParentId(upperGroup);
         newGroup.setLeader(leader);
         newGroup.setCreatTime(new Timestamp(new java.util.Date().getTime()));
-        //
         String creatorName = SecurityUtils.getSubject().getPrincipal().toString();
-
-        List<Employee> list=jpaEmployee.findEmployeesByEname(creatorName);
-        Employee creator;
-        if(list.size()>1){
-            model.addAttribute("error","错误信息:系统内含有大于1个名为("+leader+")的用户，重名用户会引起资产管理系统出错");
-            return "error";
-        }else {
-            creator=list.get(0);
-        }
-
+        Employee creator=jpaEmployee.findEmployeeByLoginName(creatorName);
         newGroup.setEmployeeByCreatorId(creator);
-
         //
         if(status.equals("正常")) {
             newGroup.setAvalible((byte) 1);

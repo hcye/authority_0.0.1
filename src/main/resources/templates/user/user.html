@@ -68,7 +68,7 @@
                                 layer.open({
                                     type: 2,
                                     title: "编辑域信息",
-                                    area: ['1000px','500px'],
+                                    area: ['1200px','500px'],
                                     content: ['/layer/layer_edit_adInfo', 'no'],
                                     //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
                                     //实现弹出层间不同frame的传值
@@ -76,6 +76,12 @@
                                         var body = layer.getChildFrame('body', index);
                                         body.find('#depId').val($("#did").val());
                                     }*/
+                                    end:function () {
+                                        if($("#adCheckFlag").val()=='1'){
+                                            queryDepUser("","","","","refresh");
+                                            layer.msg("刷新用户列表完成");
+                                        }
+                                    }
                                 });
                                 //do something
                                 layer.close(index);
@@ -101,12 +107,14 @@
                         employees = data.content;
                         for (var key in employees) {
                             var status = "";
+                            var trCss="";
                             if (employees[key].status == 1) {
-                                status = "<span style='color: #00FFFF'>账号停用</span>";
+                                status = "<span>账号停用</span>";
+                                trCss="style='color: #9F9F9F'";
                             } else if (employees[key].status == 0) {
                                 status = "账号正常";
                             }
-                            tbody.append("<tr><td>" + employees[key].ename + "<input  value="+employees[key].id+"  type='hidden'/></td><td>"+employees[key].email+ "</td><td>" + employees[key].sex + "</td>" +
+                            tbody.append("<tr "+trCss+" ><td>" + employees[key].ename + "<input  value="+employees[key].id+"  type='hidden'/></td><td>"+employees[key].loginName+ "</td><td>"+employees[key].email+ "</td><td>" + employees[key].sex + "</td>" +
                                 "<td>" + status + "</td><td style='align-content: center'><button class='layui-btn "+editflag+"'  "+isDisabled+"  name='edit'  >编辑</button></td></tr>");
                         }
                         editUser();
@@ -158,6 +166,9 @@
     <p>用户管理</p>
 </div>
         <div class="layui-container">
+
+<!--            layer传回的ad域账号是否校验成功标志位-->
+            <input type="hidden" id="adCheckFlag" />
             <div class="layui-row" style="margin-top: 5%">
                 <div class="layui-col-md-offset4 layui-col-md2 layui-input-inline">
                     <input type="text" class="layui-input" id="searchInput"/>
@@ -182,6 +193,7 @@
                         <thead class="layui-table-header">
                         <tr>
                             <td>用户名</td>
+                            <td>登录名</td>
                             <td>邮箱</td>
                             <td>性别</td>
                             <td>状态</td>

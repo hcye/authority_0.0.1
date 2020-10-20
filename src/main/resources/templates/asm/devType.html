@@ -92,10 +92,16 @@
                         if (deleteflag == "layui-btn-disabled") {
                             deleteDisable = "disabled='true'";
                         }
+
+
                         $("#devType_table").find("tr").remove();
                         types = data.content;
                         for (var key in types) {
-                            $("#devType_table").append("<tr><td><input type='hidden' value=" + types[key].id + " />" + types[key].devName + "</td><td><input class='layui-input' value='"+transformNullStr(types[key].assetNumTemplate)+"' /></td>" +
+                            var readonlyFlag="readonly='readonly'"
+                            if(transformNullStr(types[key].assetNumTemplate)!=''){
+                                readonlyFlag="";
+                            }
+                            $("#devType_table").append("<tr><td><input type='hidden' value=" + types[key].id + " />" + types[key].devName + "</td><td><input class='layui-input' "+readonlyFlag+"  value='"+transformNullStr(types[key].assetNumTemplate)+"'  /></td>" +
                                 "<td>" + timeStamp2String(types[key].createTime) + "</td><td>" + transformNullStr(types[key].remarks) + "</td><td>" +
                                 "<button class='layui-btn layui-btn-xs " + editflag + "' " + editDisable + "  name='edit'>保存</button><button class='layui-btn layui-btn-xs " + deleteflag + "' " + deleteDisable + "  name='delete'>删除</button></td></tr>");
                         }

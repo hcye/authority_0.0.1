@@ -44,10 +44,13 @@
                 function(data) {
                     if(data["error"]!=null){
                         layer.alert(data["error"]);
+                        $(window.parent.document).find("#adCheckFlag").val("0");
                     }else {
                         layer.confirm(data["ok"], {
                             btn: ['确定'] //可以无限个按钮
                         }, function(index, layero){
+                            $(window.parent.document).find("#adCheckFlag").val("1");
+                            var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
                             parent.layer.close(index);
                         });
                     }

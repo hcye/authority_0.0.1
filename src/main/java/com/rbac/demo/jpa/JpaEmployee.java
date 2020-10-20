@@ -32,4 +32,12 @@ public interface JpaEmployee extends JpaRepository<Employee,Integer> {
     List<String> findEmployeesNameByPinyinLike(@Param("py")String name);
 
     Employee findEmployeeByLoginName(String ename);
+
+
+    @Query("select employee from Employee employee where  employee.onjob='0' and employee.pingyin like :py")
+    List<Employee> findEmployeesByPingyinLike(@Param("py")String name);
+
+    @Query("select employee from Employee employee where employee.onjob='0' and employee.ename like :name")
+    List<Employee> findEmployeesByEnameLike(@Param("name")String name);
+
 }

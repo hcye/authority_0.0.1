@@ -19,7 +19,28 @@
         var form = layui.form;
         //监听提交
         //checkbox 点击事件
+        form.on("select(astType)", function(data){
+            $.post("/asm/getDevNames", {TpName:data.value,getTypesOnly:'1'},    //把name数据提交到ajaxRes action内，
+                function(dt) {
+                    var names=dt["name"];
+                    $("#devName").find("option").remove();
+                    for(var key in names){
+                        $("#devName").append("<option>"+names[key]+"</option>");
+                    }
+                    var form = layui.form;
+                    form.render("select");
+                }, "json");
+
+        });
     });
+
+
+    function transformNullStr(str){
+        if (str==null){
+            return "";
+        }
+        return str;
+    }
 
     $(function () {
         $("#doSearch").click(function () {
@@ -79,7 +100,8 @@
                                 var tb=body.find('#tb');
                                 body.find("#label").html("");
                                 for (var key in devList){
-                                    tb.append("<tr><td>"+devList[key].aname+"</td><td>"+devList[key].model+"</td><td>"+devList[key].assestnum+"" +
+                                    var assestnum=transformNullStr(devList[key].assestnum);
+                                    tb.append("<tr><td>"+devList[key].aname+"</td><td>"+devList[key].model+"</td><td>"+assestnum+"" +
                                         "</td><td>"+devList[key].remarks+"</td></tr>");
                                 }
 
@@ -105,7 +127,8 @@
                 var astList=data.content;
                 $("#tb").find("tr").remove();
                 for (var key in astList){
-                    $("#tb").append("<tr><td><input type='hidden' value='"+astList[key].id+"' />"+astList[key].aname+"</td><td>"+astList[key].model+"</td><td>"+astList[key].assestnum+"" +
+                    var assestnum=transformNullStr(astList[key].assestnum);
+                    $("#tb").append("<tr><td><input type='hidden' value='"+astList[key].id+"' />"+astList[key].aname+"</td><td>"+astList[key].model+"</td><td>"+assestnum+"" +
                         "</td><td>"+astList[key].remarks+"</td><td><input type='checkbox' lay-skin='primary' /></td></tr>");
                 }
                 var form = layui.form;
@@ -149,15 +172,15 @@
                 <div class="layui-inline">
                     <label class="layui-form-label">资产分类:</label>
                     <div class="layui-input-inline">
-                        <select id="astType" class="layui-form-select">
-                            <option th:each="tp : ${assertTypes}" th:text="${tp.getTypeName()}"></option>
+                        <select id="astType" class="layui-form-select" lay-filter="astType">
+                            <option  shiro:hasPermission="${tp.getPermiCode()}" th:each="tp : ${assertTypes}" th:text="${tp.getTypeName()}"></option>
                         </select>
                     </div>
                 </div>
                 <div class="layui-inline">
                     <label class="layui-form-label">资产名称:</label>
                     <div class="layui-input-inline">
-                        <select id="devName" class="layui-form-select">
+                        <select id="devName" class="layui-form-select" >
                             <option th:each="devname : ${assertNames}" th:text="${devname}"></option>
                         </select>
                     </div>

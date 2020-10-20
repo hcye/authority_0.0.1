@@ -46,11 +46,7 @@
         $("#conform").click(function () {
             // String devType,String template,String desc
             var name=$("#type_name").val();
-            var temp=$("#encode_template").val();
-            if(name==""||temp==""){
-                layer.alert("标*输入框不能为空");
-                return;
-            }
+            var temp=$("#encode_template").val().trim();
             $.post("/asm/addAssetType", {devType:name,template:temp,desc:$("#desc").val(),authority:$("#authority").val()},    //把name数据提交到ajaxRes action内，
                 function(data) {
                     if(data["error"]!=null){
@@ -87,12 +83,12 @@
             </div>
 
             <div class="layui-form-item">
-                <p style="margin-left: 12%">&nbsp;&nbsp;资产编码按照企业资产编码规范编写。x代表英文字符，0代表数字；例如某办公设备编码是 HS-BG-01005,则编码模板是xx-xx-00000</p>
-                <p style="margin-left: 12%">某信息化设备编码是 XXH-01005,则编码模板是xxx-00000。<span style="color: firebrick">英文和数字必须用‘-’隔开。</span></p>
+                <p style="margin-left: 12%">&nbsp;&nbsp;资产编码按照企业资产编码规范编写。x代表英文字符，0代表数字；例如某设备类型编码是 HS-BG-99999,则资产类型编码模板是xx-xx-00000</p>
+                <p style="margin-left: 12%">资产类型编码约束设备类型编码,不填写编码模板则默认为资产类型是耗材，未来不检查资产编码，资产不能添加到耗材内<span style="color: firebrick">英文和数字必须用‘-’隔开。</span></p>
                 <br/>
-                <label class="layui-form-label"><span style="color: red">*</span>编码模板:</label>
+                <label class="layui-form-label"><span style="color: red"></span>编码模板:</label>
                 <div class="layui-input-block">
-                    <input class="layui-input" id="encode_template" placeholder="类似x-x-0" />
+                    <input class="layui-input" id="encode_template" placeholder="类似x-x-0,不填写则认为是耗材" />
                 </div>
             </div>
             <div class="layui-form-item">

@@ -26,10 +26,9 @@ public class MyCredentialsMatcher implements CredentialsMatcher {
         char[] pwd= (char[]) token.getCredentials();
         String inputPwd=String.valueOf(pwd);
         String name= (String) token.getPrincipal();
-        List<Employee> employees =jpaEmployee.findEmployeesByEname(name);
-        Employee employee;
-        if (employees!=null||employees.size()!=0){
-            employee=employees.get(0);
+        Employee employee =jpaEmployee.findEmployeeByLoginName(name);
+
+        if (employee!=null){
             String dbPwd=employee.getPwd();
             String encryptPwd=ShiroUtils.encryption(inputPwd,ByteSource.Util.bytes(employee.getPingyin()).toHex());
             if(!dbPwd.equals(encryptPwd)){

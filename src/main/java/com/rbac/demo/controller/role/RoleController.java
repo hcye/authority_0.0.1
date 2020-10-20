@@ -25,13 +25,13 @@ public class RoleController {
     private JpaRole2Resources jpaRole2Resources;
 
     @RequiresPermissions("asm:role:add")
-    @RequestMapping("/role/add")
+    @GetMapping("/role/add")
     public String toAddPage(){
         return "/role/add";
     }
 
     @RequiresPermissions("asm:role:edit")
-    @RequestMapping("/role/edit")
+    @GetMapping("/role/edit")
     public String edit(int id, Model model){
         Role role=jpaRole.findById(id).get();
 

@@ -137,10 +137,7 @@ public class ShiroConfig {
     @Bean
     public UserRealm getUserRealm(EhCacheManager ehCacheManager) {
         UserRealm userRealm=new UserRealm();
-
-
         userRealm.setCacheManager(ehCacheManager);   //添加缓存管理器
-
         userRealm.setAuthenticationCachingEnabled(true);
         userRealm.setAuthorizationCachingEnabled(true);
         userRealm.setCachingEnabled(true);   //开启缓存
@@ -159,6 +156,12 @@ public class ShiroConfig {
     }
 
 
+
+    /**
+     *
+     * 配置echache权限缓存
+     *
+     * */
     @Bean
     public EhCacheManager ehCacheManager() {
 

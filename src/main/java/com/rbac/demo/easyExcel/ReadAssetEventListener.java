@@ -118,10 +118,12 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
             if (borrower != null) {  //借用人
                 List<Employee> employees = jpaEmployee.findEmployeesByEname(borrower.trim());
 
-                if (employees.size() > 0) {
+                if (employees.size() ==1) {
                     anAssert.setEmployeeByBorrower(employees.get(0));
-                } else {
+                } else if(employees.size()==0){
                     throw new ExcelAnalysisException(num + "行的用户 " + borrower + " 不存在");
+                }else if(employees.size()>1){
+                    throw new ExcelAnalysisException(num + "行的用户 " + borrower + " 存在多个,请在ad域修改重名用户");
                 }
             }
             if (borTime != null) {

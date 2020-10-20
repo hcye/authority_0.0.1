@@ -20,7 +20,7 @@
         //监听提交
         //checkbox 点击事件
         form.on("select(astType)", function(data){
-            $.post("/asm/getDevNames", {devType:data.value},    //把name数据提交到ajaxRes action内，
+            $.post("/asm/getDevNames", {TpName:data.value},    //把name数据提交到ajaxRes action内，
                 function(dt) {
                     $("#name").find("option").remove();
                     var names=dt["name"];
@@ -29,7 +29,13 @@
                     }
                     var codes=dt["code"];
                     var devCodes=dt["devCode"];
-                    $("#encode").attr("placeholder",'格式:'+devCodes[0]);
+                    if(devCodes[0]==""){
+                        $("#encode").attr("placeholder","");
+                        $("#encode").attr("readonly","readonly");
+                    }else {
+                        $("#encode").attr("placeholder",'格式:'+devCodes[0]);
+                        $("#encode").removeAttr("readonly");
+                    }
                     $("#code").val(codes[0]);
                     var form = layui.form;
                     form.render('select');//修改select后需要重新渲染
@@ -42,8 +48,14 @@
             $.post("/asm/getDevNumTemplate", {devName:data.value},    //把name数据提交到ajaxRes action内，
                 function(dt) {
                     var temp=dt["code"];
-                    $("#code").val(temp);
-                    $("#encode").attr("placeholder",'格式:'+temp);
+                    if(temp==""){
+                        $("#encode").attr("readonly","readonly");
+                    }else {
+                        $("#code").val(temp);
+                        $("#encode").attr("placeholder",'格式:'+temp);
+                        $("#encode").removeAttr("readonly");
+                    }
+
                 }, "json");
 
         });
@@ -87,8 +99,9 @@
                                 if(data["error"]!=null){
                                     layer.alert(data["error"]);
                                 }else {
-                                    layer.alert(data["ok"]);
-                                    document.location.href="/asm/inp"
+                                    layer.confirm(data["ok"],function () {
+                                        document.location.href="/asm/inp"
+                                    });
                                 }
                             }, "json");
 
@@ -112,7 +125,7 @@
                      <label class="layui-form-label">类型</label>
                      <div class="layui-input-block">
                         <select class="layui-form-select"  lay-filter="astType" id="tp">
-                            <option th:each="type : ${types}" th:text="${type.getTypeName()}"></option>
+                            <option shiro:hasPermission="${type.getPermiCode()}" th:each="type : ${types}" th:text="${type.getTypeName()}"></option>
                         </select>
                     </div>
                 </div>
@@ -141,10 +154,10 @@
                 </div>
                 <div class="layui-form-item">
                     <p style="margin-left: 10%">&nbsp;&nbsp;资产编码按照企业资产编码规范编写。例如某办公设备编码模板是 HS-BG-9999；</p>
-                    <p style="margin-left: 10%">HS-BG是资产类型标识,不能改变,9代表数字,9999标识4位的类型序号,序号递增或递减；</p>
+                    <p style="margin-left: 10%">HS-BG是资产类型标识,不能改变,9代表数字,9999标识4位的类型序号,序号递增；</p>
                     <p style="margin-left: 10%">我们新建的资产编号就应该类似 HS-BG-0001。</p>
                     <br/>
-                    <label class="layui-form-label"><span style="color: red">*</span>编号</label>
+                    <label class="layui-form-label">编号</label>
                     <div class="layui-input-block">
                         <input class="layui-input" id="encode" th:placeholder="${code}" />
                     </div>

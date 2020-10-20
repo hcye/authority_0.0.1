@@ -34,8 +34,19 @@
                     return;
                 }
             }
-            document.location.href="/asm/save_dev/?id="+$("#id").val()+"&types=" +
-                ""+$("#types").val()+"&model="+$("#model").val()+"&price="+$("#price").val()+"&remarks="+$("#remarks").val()+"&sn="+$("#sn_num").val();
+
+            $.post("/asm/validAssetNum", {num:$("#num").val(),id:$("#id").val()},    //把name数据提交到ajaxRes action内，
+                function(data) {
+                    if(data["error"]!=null){
+                        layer.alert(data["error"]);
+                        return;
+                    }else {
+                        document.location.href="/asm/save_dev/?id="+$("#id").val()+"&types=" +
+                            ""+$("#types").val()+"&model="+$("#model").val()+"&price="+$("#price").val()+"&remarks="+$("#remarks").val()+"&sn="+$("#sn_num").val()+"&num="+$("#num").val();
+                    }
+                }, "json");
+
+
         })
 
 
@@ -96,9 +107,7 @@
                     <div class="layui-form-item">
                         <label class="layui-form-label">从属类型:</label>
                         <div class="layui-input-block">
-                            <select id="types" >
-                                <option th:each="tp : ${assetTypes}" th:text="${tp.getTypeName()}"></option>
-                            </select>
+                            <input class="layui-input" id="types" th:value="${dev.getAssetTypeByAssertType().getTypeName()}" readonly="readonly" />
                         </div>
                     </div>
 
@@ -108,6 +117,18 @@
                             <input  class="layui-input" id="model" th:value="${dev.getModel()}"/>
                         </div>
                     </div>
+
+                    <div class="layui-form-item">
+                        <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;约束码:</span><span th:text= "${temp}"></span><span>(由-分隔最后的几位9代表资产序列可以是任意数字，前面为资产标识不可以改变)</span>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">资产编号:</label>
+                        <div class="layui-input-block">
+                            <input  class="layui-input" id="num" th:value="${dev.getAssestnum()}"/>
+                        </div>
+                    </div>
+
                     <div class="layui-form-item">
                         <label class="layui-form-label">sn编号:</label>
                         <div class="layui-input-block">

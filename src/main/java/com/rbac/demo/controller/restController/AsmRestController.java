@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -95,11 +96,8 @@ public class AsmRestController {
     public Map<String, List<Assert>> borrow(String selectDevIds,String name,String actionFlag){
         Map<String,List<Assert>> map=new HashMap<>();
         String[] ids=selectDevIds.split(",");
-        List<Employee> employees=jpaEmployee.findEmployeesByEname(name);
-        if(employees.size()>1){
-            throw new RuntimeException("错误信息:系统内含有大于1个名为"+name+"的用户，重名用户会引起资产管理系统出错");
-        }
-        Employee borrower=employees.get(0);
+
+        Employee borrower=jpaEmployee.findEmployeeByLoginName(name.split("-")[1]);
         if(actionFlag.equals("bo")){
             for (String str:ids){
                 if(!str.trim().equals("")){
@@ -127,13 +125,7 @@ public class AsmRestController {
     @PostMapping("/asm/devs")
     public Map<String, List<Assert>> getDevs(String name){
         Map<String,List<Assert>> map=new HashMap<>();
-        List<Employee> employees=jpaEmployee.findEmployeesByEname(name);
-
-        if(employees.size()>1){
-            throw new RuntimeException("错误信息:系统内含有大于1个名为"+name+"的用户，重名用户会引起资产管理系统出错");
-        }
-
-        Employee returner=employees.get(0);
+        Employee returner=jpaEmployee.findEmployeeByLoginName(name.split("-")[1]);
         List<Assert> asserts= (List<Assert>) returner.getAssertsById();
         map.put("devs",asserts);
         return map;
@@ -212,13 +204,18 @@ public class AsmRestController {
     }
 
     @PostMapping("/asm/getDevNames")
-    public Map<String, List<String>> addAssertType(String devType){
+    public Map<String, List<String>> get(String TpName,String getTypesOnly){
         Map<String,List<String>> map=new HashMap<>();
-        AssetType assetType=jpaAssetType.findAssetTypeByName(devType);
+        AssetType assetType=jpaAssetType.findAssetTypeByName(TpName);
+        if(getTypesOnly!=null){
+            List<String> names=jpaDevType.findDevTypesNameByAssertType(TpName);
+            map.put("name",names);
+            return map;
+        }
         String code=assetType.getAssetCode();
         List<String> codes=new ArrayList<>();
         List<String> devCodes=new ArrayList<>();
-        List<String> names=jpaDevType.findDevTypesNameByAssertType(devType);
+        List<String> names=jpaDevType.findDevTypesNameByAssertType(TpName);
         DevType devType1=jpaDevType.findDevTypeByDevName(names.get(0));
         codes.add(code);
         devCodes.add(devType1.getAssetNumTemplate());
@@ -277,6 +274,30 @@ public class AsmRestController {
         map.put("code",jpaAssetType.findAssetTypeByName(name).getAssetCode());
         return  map;
     }
+
+    @PostMapping("/asm/validAssetNum")
+    public Map<String,String> valid(String num,int id){
+        Map<String,String> map=new HashMap<>();
+        Assert anAssert=jpaAssert.findById(id).get();
+        String name=anAssert.getAname();
+        DevType devType=jpaDevType.findDevTypeByDevName(name);
+        String template=devType.getAssetNumTemplate();
+        boolean flag=asmService.validDevTypeNum(num,template);
+        boolean repeatFlag=asmService.validRepeat(num);
+        if(flag){
+            map.put("ok","校验正确");
+        }else {
+            map.put("error","输入的资产编码不匹配设备类型约束！");
+        }
+        if(repeatFlag){
+            map.put("ok","不含重复");
+        }else {
+            map.put("error","输入的资产编号重复！");
+        }
+        return  map;
+    }
+
+
     @PostMapping("/asm/getDevTypes")
     public Page<DevType> getDevTypes(String name,String pre,String next,int pageNow,String type){
         return  typeService.getDevTypePage( name, pre, next, pageNow,type);
@@ -408,8 +429,25 @@ public class AsmRestController {
     @RequiresPermissions("asm:inp:view")
     @PostMapping("/asm/putin")
     public Map<String,String> putin(String type, String model, String price, String name, String encode, String num){
-
+        int nu=Integer.parseInt(num);
         Map<String,String> map=new HashMap<>();
+        List<Assert> list=new ArrayList<>();
+        AssetType assetType=jpaAssetType.findAssetTypeByName(type);
+        String temp=assetType.getAssetCode();
+        if(temp.equals("")&&encode.equals("")){
+            for (int i=0;i<nu;i++){
+                Assert ast=new Assert();
+                ast.setAname(name);
+                ast.setPrice(price);
+                ast.setModel(model);
+                ast.setAssetTypeByAssertType(assetType);
+                list.add(ast);
+                asmRecordService.write(AsmAction.dev_in,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null);
+            }
+            jpaAssert.saveAll(list);
+            map.put("ok","入库成功！");
+            return map;
+        }
         String[] encodes=encode.split("-");
         String zeroInhead="";
         if(encodes[encodes.length-1].charAt(0)=='0'){
@@ -426,15 +464,14 @@ public class AsmRestController {
             map.put("error","编号末尾不能全部是0");
             return map;
         }
-        int nu=Integer.parseInt(num);
-        AssetType assetType=jpaAssetType.findAssetTypeByName(type);
+
 
         String head="";
         int lastIndexof=encode.lastIndexOf("-")+1;
         head=encode.substring(0,lastIndexof);
         int tail=Integer.parseInt(encodes[encodes.length-1]);
         int tailLen=encodes[encodes.length-1].length();
-        List<Assert> list=new ArrayList<>();
+
         for (int i=0;i<nu;i++){
             String tailStr=tail+"";
             Assert ast=new Assert();
@@ -537,7 +574,7 @@ public class AsmRestController {
      * 下载模板
      *
      * */
-    @RequestMapping("asm/outputTemplate")
+    @PostMapping("asm/outputTemplate")
     public void exportModel(HttpServletResponse response) throws FileNotFoundException {
         OutputStream stream = null;
         try {
@@ -576,7 +613,7 @@ public class AsmRestController {
     }
 //    type="+$("#dev_type").val()+"&isDam="+$("#is_damage").val()+"&search="+$("#keywords").val();
 
-    @RequestMapping("asm/out")
+    @PostMapping("asm/out")
     public void exportExcel(String type,String isDam,String search,HttpServletResponse response) throws IOException {
 
         // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
@@ -592,7 +629,7 @@ public class AsmRestController {
 
     }
 
-    @RequestMapping("asm/out_types")
+    @GetMapping("asm/out_types")
     public void exportExcel(HttpServletResponse response) throws IOException {
 
         // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman

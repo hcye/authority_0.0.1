@@ -36,6 +36,10 @@
                 }
             });
         })
+
+        $("#cancel").click(function () {
+            document.location.href="/group/group";
+        });
     })
 </script>
 <body>
@@ -66,7 +70,7 @@
                     <div class="layui-form-label">负责人</div>
                     <div class="layui-input-block">
                         <div class="layui-input-inline"> <!--把内部元素转换成行内元素-->
-                            <input class="layui-input" id="name" name="leader" th:value="${leader.ename}" />
+                            <input class="layui-input" id="name" name="leader" readonly="readonly" th:value="${leader.getEname()}==null ? '':${leader.getEname()}+'-'+${leader.getLoginName()}"  />
                         </div>
                         <button type="button" class="layui-btn" id="change" ><i class="layui-icon">&#xe642;</i> 修改</button>
                     </div>
@@ -81,7 +85,7 @@
                     </div>
                 </div>
                 <button type="submit" class="layui-btn" style="margin-left: 30%">确定</button>
-                <button type="reset" class="layui-btn" style="margin-left: 5%">取消</button>
+                <button type="cancel" class="layui-btn" style="margin-left: 5%">取消</button>
             </form>
         </div>
 

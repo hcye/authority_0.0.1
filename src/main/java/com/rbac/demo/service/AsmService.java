@@ -20,6 +20,9 @@ public class AsmService {
     private JpaAssert jpaAssert;
 
     public boolean valid(String inputCode, String tep){
+        if(inputCode.equals("")&&tep.equals("")){
+            return true;
+        }
         String[] input=inputCode.split("-");
         String[] tp=tep.split("-");
         String engRegex="[A-Za-z]+";
@@ -104,6 +107,9 @@ public class AsmService {
     }
 
     public boolean validDevTypeNum(String inputCode, String tep) {
+        if(inputCode.equals("")&&tep.equals("")){
+            return true;
+        }
         int index = inputCode.lastIndexOf("-");
         String prefixIn=inputCode.substring(0,index);
         String prefixTemp=tep.substring(0,index);
@@ -133,5 +139,16 @@ public class AsmService {
             return false;
         }
         return true;
+    }
+    public boolean validRepeat(String tep) {
+        if(tep.equals("")){
+            return true;
+        }
+        Assert anAssert=jpaAssert.findAssertByAssestnum(tep);
+        if(anAssert!=null){
+            return false;
+        }else {
+            return true;
+        }
     }
 }
