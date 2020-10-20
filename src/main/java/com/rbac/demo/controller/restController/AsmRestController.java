@@ -6,6 +6,7 @@ import com.alibaba.excel.read.metadata.ReadSheet;
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.rbac.demo.easyExcel.AssetDownloadModel;
 import com.rbac.demo.easyExcel.AssetTypeDownloadModel;
+import com.rbac.demo.easyExcel.DevTypeDownloadModel;
 import com.rbac.demo.easyExcel.ReadAssetEventListener;
 import com.rbac.demo.entity.*;
 import com.rbac.demo.jpa.*;
@@ -642,6 +643,20 @@ public class AsmRestController {
 
 
     }
+
+    @GetMapping("asm/out_DevTypes")
+    public void exportDevExcel(HttpServletResponse response) throws IOException {
+        System.out.println("---");
+        // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+        String fileName = URLEncoder.encode("dev_type_export", "UTF-8").replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), DevTypeDownloadModel.class).sheet("01").doWrite(dev_data());
+
+
+    }
     /**
      *
      * 把实体类数组转换成excel导出模板对象数组
@@ -660,6 +675,27 @@ public class AsmRestController {
                 model.setRemark(tp.getRemarks());
             }
             model.setSign(tp.getPermiCode());
+            models.add(model);
+        }
+        return models;
+    }
+
+    private List<DevTypeDownloadModel> dev_data(){
+        List<DevType> list = jpaDevType.findAll();
+        List<DevTypeDownloadModel> models=new ArrayList<>();
+        for (DevType tp:list){
+            DevTypeDownloadModel model=new DevTypeDownloadModel();
+            model.setDevName(tp.getDevName());
+            model.setAssetNumTemplate(tp.getAssetNumTemplate());
+            if(tp.getCreateTime()!=null){
+                model.setCreateTime(tp.getCreateTime().toString());
+            }
+            if(tp.getRemarks()!=null){
+                model.setRemarks(tp.getRemarks());
+            }
+            if(tp.getCreator()!=null){
+                model.setCreator(tp.getCreator());
+            }
             models.add(model);
         }
         return models;

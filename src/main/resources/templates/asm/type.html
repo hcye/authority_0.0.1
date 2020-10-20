@@ -44,9 +44,10 @@
             });
 
             //导出excel
-            $("#out").click(function () {
-                document.location.href="/asm/out_types"
+            $("#putout").click(function () {
+                document.location.href="/asm/out_types";
             });
+
             //搜索
             $("#search").click(function () {
                 queryRoles($("#rname").val(),"","",0);
@@ -147,7 +148,7 @@
             <div class="layui-btn-group">
                 <button class="layui-btn" id="search"><i class="layui-icon">&#xe615;</i>搜索</button>
                 <button class="layui-btn" id="add" shiro:hasPermission="asm:type:add"><i class="layui-icon">&#xe654;</i>新增</button>
-                <button class="layui-btn " id="out" ><i class="layui-icon">&#xe601;</i>导出</button>
+                <button class="layui-btn " id="putout" ><i class="layui-icon">&#xe601;</i>导出</button>
             </div>
         </div>
 
