@@ -58,8 +58,15 @@ public class UserController {
         roles.remove(jpaRole.findById(1).get());
         String gname=employee.getSysGroupByGroupId().getGname();
         List<String> status=new ArrayList<>();
+        List<String> sex=new ArrayList<>();
         int statu=employee.getStatus();
-
+        if(employee.getSex().equals("男")){
+            sex.add("男");
+            sex.add("女");
+        }else {
+            sex.add("女");
+            sex.add("男");
+        }
         status.add("启用");
         status.add("禁用");
         if(statu==1){

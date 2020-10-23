@@ -221,6 +221,11 @@ public class AsmController {
         return "/asm/edit_dev";
     }
 
+    @GetMapping("/asm/asmDoc")
+    public String doc(){
+        return "/asm/asmDoc";
+    }
+
     @RequiresPermissions("asm:edit:btn")
     @GetMapping("/asm/save_dev")
     public String saveDev(int id,String types,String model,String price,String remarks,String sn,String num){
@@ -236,16 +241,6 @@ public class AsmController {
         return "redirect:/asm/list";
     }
 
-    @RequiresPermissions("asm:dem:btn")
-    @GetMapping("/asm/dem")
-    public String badDev(int id){
-        Assert anAssert=jpaAssert.findById(id).get();
-        anAssert.setWorkless("1");
-        anAssert.setDamagetime(new Date(new java.util.Date().getTime()));
-        jpaAssert.save(anAssert);
-        asmRecordService.write(AsmAction.dev_dam,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert);
-        return "redirect:/asm/list";
-    }
 
 
 

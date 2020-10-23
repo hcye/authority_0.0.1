@@ -5,15 +5,15 @@ import com.alibaba.excel.metadata.BaseRowModel;
 
 public class AssetTypeDownloadModel extends BaseRowModel {
     @ExcelProperty(value = "类型名称",index = 0)
-    private String tname;
+    private String tname="";
     @ExcelProperty(value = "编码模板",index = 1)
-    private String template;
+    private String template="";
     @ExcelProperty(value = "创建时间",index=2)
-    private String createTime;
+    private String createTime="";
     @ExcelProperty(value = "权限标识",index = 3)
-    private String sign;
+    private String sign="";
     @ExcelProperty(value = "备注",index = 4)
-    private String remark;
+    private String remark="";
 
 
     @Override

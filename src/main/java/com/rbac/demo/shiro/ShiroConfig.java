@@ -3,7 +3,6 @@ package com.rbac.demo.shiro;
 
 import at.pollux.thymeleaf.shiro.dialect.ShiroDialect;
 import com.rbac.demo.realm.UserRealm;
-import net.sf.ehcache.CacheManager;
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.cache.ehcache.EhCacheManager;
 import org.apache.shiro.config.ConfigurationException;
@@ -14,30 +13,23 @@ import org.apache.shiro.session.mgt.eis.SessionDAO;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
-
 import org.apache.shiro.web.servlet.SimpleCookie;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Configuration
 public class ShiroConfig {
     @Bean(name="SecurityManager")    //以securityManager注入
     public DefaultWebSecurityManager getDefaultSecurityManager(@Qualifier("userRealm")UserRealm userRealm){
         DefaultWebSecurityManager defaultSecurityManager=new DefaultWebSecurityManager();
-        EhCacheManager manager=new EhCacheManager();
-        manager.setCacheManagerConfigFile("classpath:ehcache.xml");
-        defaultSecurityManager.setCacheManager(manager);
+        defaultSecurityManager.setCacheManager(ehCacheManager());
         defaultSecurityManager.setSessionManager(sessionManager());
         userRealm.setCredentialsMatcher(myCredentialsMatcher());
         defaultSecurityManager.setRealm(userRealm);
@@ -110,9 +102,13 @@ public class ShiroConfig {
         filter.put("/","anon");  //登录界面不需要认证即可访问
         filter.put("/user/**","authc");
 
+        //添加过滤器
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filter);
         return shiroFilterFactoryBean;
-    }
+
+
+
+}
 
 
     @Bean
@@ -157,30 +153,29 @@ public class ShiroConfig {
 
 
 
+
+
     /**
      *
-     * 配置echache权限缓存
+     * 配置echache缓存管理器
      *
      * */
     @Bean
     public EhCacheManager ehCacheManager() {
 
 
-
-        net.sf.ehcache.CacheManager cacheManager = net.sf.ehcache.CacheManager.getCacheManager("hcye");
-
         EhCacheManager em = new EhCacheManager();
+        net.sf.ehcache.CacheManager cacheManager = net.sf.ehcache.CacheManager.getCacheManager("hcye");
+        em.setCacheManagerConfigFile("classpath:ehcache.xml");
         if (cacheManager==null)
         {
             em.setCacheManager(new net.sf.ehcache.CacheManager(getCacheManagerConfigFileInputStream()));
-            return em;
         }
         else
         {
-
             em.setCacheManager(cacheManager);
-            return em;
         }
+        return em;
     }
 
     protected InputStream getCacheManagerConfigFileInputStream()

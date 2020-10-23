@@ -143,7 +143,7 @@
 		</div>
 		
 		<div class="layui-body">
-			<iframe id="iframe_page" name="iframePage" src="doc/basicDoc.html" frameborder="0" style="width: 100%;height: 99%;"></iframe>
+			<iframe id="iframe_page" name="iframePage"  frameborder="0" style="width: 100%;height: 99%;"></iframe>
 		</div>
 		
 		<div class="layui-footer">
@@ -243,13 +243,9 @@
 		});*/
 		
 		$(".logo").click(function(){
-			layer.open({
-				type: 2,
-				title: "作者寄语",
-				area: ["600px", "80%"],
-				content: "msg.html",
-				btn: ["期待再次起航"]
-			});
+
+				$("#iframe_page").attr("src","/asm/asmDoc");
+
 		});
 		
 	/*	// 作者寄语

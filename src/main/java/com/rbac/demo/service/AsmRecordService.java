@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 @Component
 public class AsmRecordService {
     @Autowired
-    private  JpaOperatRecord jpaOperatRecord;
+    private JpaOperatRecord jpaOperatRecord;
     public void write(String action, Timestamp actionTime, Employee employeeByDealer, Employee employeeByAssertEmp, Assert assertByAssertAsset){
         OperatRecord op=new OperatRecord( action,  actionTime,  employeeByDealer,  employeeByAssertEmp,  assertByAssertAsset);
         jpaOperatRecord.save(op);

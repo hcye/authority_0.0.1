@@ -10,6 +10,7 @@ public class AsmAction {
     public static final String dev_edit="编辑资产";
     public static final String dev_dam="资产报损";
     public static final String dev_add_type="增加资产类型";
+    public static final String dev_del="删除资产";
 
 
     public static List<String> getList(){
@@ -21,6 +22,7 @@ public class AsmAction {
         list.add(dev_dam);
         list.add(dev_edit);
         list.add(dev_return);
+        list.add(dev_del);
         return list;
     }
 }

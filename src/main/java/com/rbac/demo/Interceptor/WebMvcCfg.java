@@ -10,6 +10,7 @@ public class WebMvcCfg implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         //使用过滤器验证是否登录，放行静态资源和登录页面及请求
         registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/**").excludePathPatterns("/css/**","/font/**","/js/**","/layui/**","/layui_ext/**","/","/index","/login.html");
-
+        //重复提交过滤器，10秒内拦截重复提交请求
+        registry.addInterceptor(new RepeatSubmitInterceptor()).addPathPatterns("/**");
     }
 }

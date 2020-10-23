@@ -1,16 +1,17 @@
 package com.rbac.demo.easyExcel;
 
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.alibaba.excel.metadata.BaseRowModel;
 
 import java.sql.Timestamp;
 
-public class DevTypeDownloadModel {
+public class DevTypeDownloadModel extends BaseRowModel {
     @ExcelProperty(value = "设备名称",index = 0)
-    private String devName;
+    private String devName="";
     @ExcelProperty(value = "备注",index = 4)
     private String remarks="";
     @ExcelProperty(value = "创建日期",index = 3)
-    private String createTime;
+    private String createTime="";
     @ExcelProperty(value = "创建人",index = 2)
     private String creator="";
     @ExcelProperty(value = "编号模板",index = 1)

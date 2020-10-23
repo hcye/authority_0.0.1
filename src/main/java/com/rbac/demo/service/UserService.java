@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.support.TransactionSynchronizationUtils;
 
 import javax.naming.NamingException;
 import java.util.ArrayList;
@@ -108,6 +109,7 @@ public class UserService {
         if(!refreshFlag.equals("")){
             try {
                 userService.updateUserTable();
+
             }catch (NamingException e){
 
             }
@@ -172,7 +174,7 @@ public class UserService {
     public void updateUserTable() throws NamingException {
 //        JpaEmployee jpaEmployee,String adip,String adname,String username,String userpwd
         Adinfo adinfo =jpaAdinfo.findAll().get(0);
-        UpdateUserDB.updateUserTable(jpaEmployee,adinfo.getAdip(),adinfo.getDc(),adinfo.getDomainadminname(),adinfo.getDomainadminpwd());
+        UpdateUserDB.updateUserTable(jpaEmployee,jpaGroup,adinfo.getAdip(),adinfo.getDc(),adinfo.getDomainadminname(),adinfo.getDomainadminpwd());
     }
 
     public List<String> getUserNamesByUsersList(List<Employee> employees){

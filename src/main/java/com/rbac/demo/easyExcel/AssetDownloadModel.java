@@ -7,27 +7,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class AssetDownloadModel extends BaseRowModel {
     @ExcelProperty(value = "资产编号",index = 0)
-    private String assetNum;
+    private String assetNum="";
     @ExcelProperty(value = "设备名称",index = 1)
-    private String devName;
+    private String devName="";
     @ExcelProperty(value = "型号",index=2)
-    private String model;
+    private String model="";
     @ExcelProperty(value = "SN号",index = 3)
-    private String snNum;
+    private String snNum="";
     @ExcelProperty(value = "单价",index = 4)
-    private String price;
+    private String price="";
     @ExcelProperty(value = "到库时间",index = 5)
-    private String putinTime;
+    private String putinTime="";
     @ExcelProperty(value = "借用人",index = 6)
-    private String borrower;
+    private String borrower="";
     @ExcelProperty(value = "借用时间",index = 7)
-    private String borTime;
+    private String borTime="";
     @ExcelProperty(value = "备注",index = 8)
-    private String remarks;
+    private String remarks="";
     @ExcelProperty(value = "报废",index = 9)
-    private String workless;
+    private String workless="";
     @ExcelProperty(value = "资产类型",index = 10)
-    private String assetType;
+    private String assetType="";
 
     @Override
     public String toString() {

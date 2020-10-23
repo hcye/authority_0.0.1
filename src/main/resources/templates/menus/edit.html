@@ -69,7 +69,7 @@
                 <input type="hidden" id="mid" th:value="${res.getId()}" />
                 <label class="layui-form-label">上级菜单:</label>
                 <div class="layui-input-inline">
-                    <input id="upperMenu" class="layui-input" th:value="${res.getResourcesByParentId().getDescription()}" readonly="readonly" />
+                    <input id="upperMenu" class="layui-input" th:value="${res.getResourcesByParentId()!=null?res.getResourcesByParentId().getDescription():''}" readonly="readonly" />
                 </div>
                 <button class="layui-btn" id="select">选择</button>
             </div>

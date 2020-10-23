@@ -352,7 +352,7 @@ public class AsmRestController {
     public Map<String,String> valid(String inputCode,String tep,String num,String model,String price){
         Map<String,String> map=new HashMap<>();
         String numRegex="[0-9]+";
-        String priceRegex="[0-9]+[\\.]?[0-9]+";
+        String priceRegex="[0-9]+[\\.]?[0-9]*";
         if(model.equals("")){
             map.put("error","型号不能为空！");
             return map;
@@ -408,18 +408,41 @@ public class AsmRestController {
      * 报损校验
      *
      * */
-
+    @RequiresPermissions("asm:dem:btn")
     @PostMapping("/asm/validForBad")
     public Map<String,String> validForBad(int id){
         Map<String,String> map=new HashMap<>();
-        Employee borrower=jpaAssert.findById(id).get().getEmployeeByBorrower();
+        Assert anAssert=jpaAssert.findById(id).get();
+        Employee borrower=anAssert.getEmployeeByBorrower();
         if(borrower!=null){
             map.put("error","设备被借出！归还后才能报损");
         }else {
+            anAssert.setWorkless("1");
+            anAssert.setDamagetime(new java.sql.Date(new java.util.Date().getTime()));
+            jpaAssert.save(anAssert);
+            asmRecordService.write(AsmAction.dev_dam,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert);
             map.put("ok","校验成功");
         }
         return map;
     }
+    @RequiresPermissions("asm:delete:btn")
+    @PostMapping("/asm/validForDel")
+    public Map<String,String> del(int id){
+        Map<String,String> map=new HashMap<>();
+        Assert anAssert=jpaAssert.findById(id).get();
+        Employee borrower=anAssert.getEmployeeByBorrower();
+/*        List<OperatRecord> list=jpaOperatRecord.findOperatRecordsByAssertByAssertAsset(anAssert);*/
+        if(borrower!=null){
+            map.put("error","设备被借出！归还后才能删除");
+        }else {
+            jpaAssert.delete(anAssert);
+            asmRecordService.write(AsmAction.dev_del,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null);
+            map.put("ok","删除成功");
+        }
+        return map;
+    }
+
+
 
     /**
      *
@@ -543,7 +566,7 @@ public class AsmRestController {
 
 
             try {
-                reader = EasyExcel.read(inputStream, AssetDownloadModel.class, new ReadAssetEventListener(jpaAssert, jpaEmployee, jpaAssetType, asmService, jpaOperatRecord)).excelType(ExcelTypeEnum.XLSX).build();
+                reader = EasyExcel.read(inputStream, AssetDownloadModel.class, new ReadAssetEventListener(jpaAssert, jpaEmployee, jpaAssetType, asmService, jpaOperatRecord,jpaDevType)).excelType(ExcelTypeEnum.XLSX).build();
                 ReadSheet readSheet = EasyExcel.readSheet(0).build();
                 reader.read(readSheet);
             } catch (Exception e) {
@@ -575,7 +598,7 @@ public class AsmRestController {
      * 下载模板
      *
      * */
-    @PostMapping("asm/outputTemplate")
+    @GetMapping("asm/outputTemplate")
     public void exportModel(HttpServletResponse response) throws FileNotFoundException {
         OutputStream stream = null;
         try {
@@ -614,7 +637,7 @@ public class AsmRestController {
     }
 //    type="+$("#dev_type").val()+"&isDam="+$("#is_damage").val()+"&search="+$("#keywords").val();
 
-    @PostMapping("asm/out")
+    @GetMapping("asm/out")
     public void exportExcel(String type,String isDam,String search,HttpServletResponse response) throws IOException {
 
         // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
@@ -702,7 +725,7 @@ public class AsmRestController {
     }
 
 
-    private List<AssetDownloadModel> data(String type,String isDam,String search){
+    private List<AssetDownloadModel> data(String type, String isDam, String search){
         List<Assert> list = asmService.queryList(type,isDam,search);
         List<AssetDownloadModel> models=new ArrayList<>();
         for (Assert anAssert:list){

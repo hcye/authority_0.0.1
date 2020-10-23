@@ -1,8 +1,12 @@
 package com.rbac.demo.service;
 
 import com.rbac.demo.entity.Employee;
+import com.rbac.demo.entity.SysGroup;
 import com.rbac.demo.jpa.JpaEmployee;
+import com.rbac.demo.jpa.JpaGroup;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationUtils;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
@@ -22,8 +26,7 @@ import java.util.Properties;
 
 @Component
 public class UpdateUserDB {
-
-    public static void updateUserTable(JpaEmployee jpaEmployee, String adip, String adname, String username, String userpwd) throws NamingException {
+    public static void updateUserTable(JpaEmployee jpaEmployee, JpaGroup jpaGroup, String adip, String adname, String username, String userpwd) throws NamingException {
         NamingEnumeration<SearchResult> answer=getNamingEnumeration( adip,  adname,  username,  userpwd);
         List<String> allLADPUserList = new ArrayList<String>();
         List<Employee> allUser = jpaEmployee.findAll();
@@ -40,10 +43,10 @@ public class UpdateUserDB {
             result = sr.getName() + "," + sr.getAttributes().get("mail") + "," + sr.getAttributes().get("userPrincipalName");
             results = result.split(",");
 
-
             depart = results[1].split("=")[1];
             adUserName = result.split("=")[1].split(",")[0];
             if (results.length > 4) {
+
                 loginName = results[4].split(": ")[1].split("@")[0];
             } else {
                 continue;
@@ -62,17 +65,61 @@ public class UpdateUserDB {
             //------------
             for (int i = 0; i < allUser.size(); i++) {
                 flag = 0;
-                if (allUser.get(i).getLoginName()!= null && allUser.get(i).getLoginName().trim().equals(loginName.trim())) {
+                Employee employee=allUser.get(i);
+                if (employee.getLoginName()!= null && employee.getLoginName().trim().equals(loginName.trim())) {
+                    /**
+                     * 判断用户是否已存在，更新用户信息！
+                     *         String adUserName = "";
+                     *         String depart = "";
+                     *         String mail = "";
+                     *         String result = "";
+                     * */
+                    /**
+                     * 更新显示用户名
+                     * */
+                    if(!adUserName.equals(employee.getEname())){
+                        employee.setEname(adUserName);
+                    }
+                    /**
+                     * 更新部门
+                     * */
+                    if(employee.getSysGroupByGroupId()==null){
+                        continue;
+                    }
+                    if(!depart.equals(employee.getSysGroupByGroupId().getGname())){
+                        List<SysGroup> groups=jpaGroup.findAll();
+                        for (SysGroup group:groups){
+                            if(depart.equals(group.getGname())){
+                                employee.setSysGroupByGroupId(group);
+                                break;
+                            }
+                        }
+               /*         if(!fla){
+                            throw new RuntimeException("ad域部门名与系统不匹配，如果是新部门请在系统内新增部门，部门名称要求和ad域分组名相同！");
+                        }*/
+
+                    }
+                    /**
+                     * 更新邮箱地址
+                     * */
+
+                    if(employee.getEmail()!=null&&!mail.equals(employee.getEmail())){
+                        employee.setEmail(mail);
+                    }
+
+                    jpaEmployee.save(employee);
                     flag = 1;
                     break;
                 }
             }
-            if (flag == 0) {
+            SysGroup sysGroup=jpaGroup.findSysGroupByGname(depart);
+            if (flag == 0&&sysGroup!=null) {
                 Employee employee = new Employee();
                 String pingyin = Chinese2Eng.convertHanzi2Pinyin(adUserName, true);
                 employee.setEname(adUserName);
                 employee.setEmail(mail);
                 employee.setEdepart(depart);
+                employee.setSysGroupByGroupId(sysGroup);
                 employee.setPingyin(pingyin);
                 employee.setLoginName(loginName);
                 jpaEmployee.saveAndFlush(employee);
@@ -89,23 +136,27 @@ public class UpdateUserDB {
                     break;
                 }
             }
-            if (flag1 == 1) {
-                Employee employees = jpaEmployee.findEmployeeByLoginName(allUser.get(i).getLoginName());
-                employees.setOnjob("0");
-                jpaEmployee.save(employees);
-
-
-
+            try {
+                if (flag1 == 1) {
+                    Employee employees = jpaEmployee.findEmployeeByLoginName(allUser.get(i).getLoginName());
+                    employees.setOnjob("0");
+                    jpaEmployee.saveAndFlush(employees);
+                }
+            }catch (Exception e){
+                throw new RuntimeException("系统中发现登录名重复的用户："+allUser.get(i).getLoginName()+",删除后重新刷新！");
             }
+
+
+
+
             if (flag1 == 0) {
                 if(allUser.get(i).getLoginName()!=null){
                     Employee employee = jpaEmployee.findEmployeeByLoginName(allUser.get(i).getLoginName().trim());
                     employee.setOnjob("1");
-                    jpaEmployee.save(employee);
+                    jpaEmployee.saveAndFlush(employee);
                 }
             }
         }
-
 
     }
     public static NamingEnumeration<SearchResult> getNamingEnumeration( String adip, String adname, String username, String userpwd) throws NamingException {
