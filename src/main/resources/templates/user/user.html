@@ -79,6 +79,7 @@
                                     end:function () {
                                         if($("#adCheckFlag").val()=='1'){
                                             queryDepUser("","","","","refresh");
+                                            queryDepUser($("#selectedDepId").val(),$("#pageInput").val(),'jump',$("#searchInput").val(),"");
                                             layer.msg("刷新用户列表完成");
                                         }
                                     }
@@ -89,6 +90,7 @@
                             });
                         }else {
                             queryDepUser("","","","","refresh");
+                            queryDepUser($("#selectedDepId").val(),$("#pageInput").val(),'jump',$("#searchInput").val(),"");
                             layer.msg("刷新用户列表完成");
                         }
                     }, "json");

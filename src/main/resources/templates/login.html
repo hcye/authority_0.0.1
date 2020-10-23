@@ -6,6 +6,17 @@
 <link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
 <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
 <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+<script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $(document).ready(function () {
+            var tx=window.top.document.title;
+            if(tx!='登录'){
+                window.top.document.close();
+            }
+        });
+    })
+</script>
 <head>
     <meta charset="UTF-8">
     <title>登录</title>

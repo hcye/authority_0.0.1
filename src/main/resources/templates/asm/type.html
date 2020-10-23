@@ -108,7 +108,8 @@
                                     if (data["error"] != null) {
                                         layer.alert("该类型有关联资产，删除失败");
                                     } else if (data["ok"] != null) {
-                                        document.location.href = "/asm/type";
+                                        queryRoles($("#rname").val(),"","",$("#pageInput").val());
+                                        layer.close(index);
                                     }
 
                                 }, "json");

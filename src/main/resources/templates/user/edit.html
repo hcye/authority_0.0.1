@@ -37,7 +37,8 @@
                 $.post("/user/doEdit", {id:$("#eid").val(),email:$("#email").val(),sex:$("#usex").val(),status:$("#status").val(),group:$("#group").val(),pwd:$("#pwd").val().trim(),roles:ids},    //把name数据提交到ajaxRes action内，
                     function (data) {
                         // int id,String name,String email,String sex,String status,String group,String pwd,String roles
-                        document.location.href="/user/user";
+                        self.location=document.referrer;
+                        // document.location.href="/user/user";
                     }, "json");
             });
 
