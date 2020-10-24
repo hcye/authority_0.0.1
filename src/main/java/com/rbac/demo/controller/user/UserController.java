@@ -38,10 +38,9 @@ public class UserController {
     private JpaGroup jpaGroup;
     @Autowired
     private UserService userService;
-    @GetMapping("/user/add")
-    @RequiresPermissions("asm:add")
+    @GetMapping("/user/undefined")
     public String add(){
-        return "/hcye/test";
+        return "basicDoc";
     }
     @GetMapping("/delete")
     public String delete(){
