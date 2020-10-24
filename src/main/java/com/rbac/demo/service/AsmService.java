@@ -1,7 +1,9 @@
 package com.rbac.demo.service;
 
 import com.rbac.demo.entity.Assert;
+import com.rbac.demo.entity.DevType;
 import com.rbac.demo.jpa.JpaAssert;
+import com.rbac.demo.jpa.JpaDevType;
 import com.rbac.demo.tool.ConvertStrForSearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,7 +20,8 @@ public class AsmService {
 
     @Autowired
     private JpaAssert jpaAssert;
-
+    @Autowired
+    private JpaDevType jpaDevType;
     public boolean valid(String inputCode, String tep){
         if(inputCode.equals("")&&tep.equals("")){
             return true;
@@ -106,11 +109,46 @@ public class AsmService {
         return list;
     }
 
+    public String getMaxAssetNum(DevType devType){
+        String dev_name=devType.getDevName();
+        List<Assert> list=jpaAssert.findAssertsByAname(dev_name);
+        String template=devType.getAssetNumTemplate();
+        if(template.equals("")){
+            return "";
+        }
+        String maxNum="";
+        int max=0;
+        for (Assert asset:list){
+            String assestnum=asset.getAssestnum();
+            if(validDevTypeNum(asset.getAssestnum(),template)){
+                String a=assestnum.split("-")[assestnum.split("-").length-1];
+                int xuhao=Integer.parseInt(a);
+                if(xuhao>max){
+                    max=xuhao;
+                    maxNum=assestnum;
+                }
+            }
+        }
+        if(!maxNum.equals("")){
+            return "编码最大值是:"+maxNum;
+        }else {
+            return maxNum;
+        }
+
+
+    }
+
     public boolean validDevTypeNum(String inputCode, String tep) {
         if(inputCode.equals("")&&tep.equals("")){
             return true;
+        }else if(inputCode.equals("")&&!tep.equals("")){
+            return false;
+        }else if(!inputCode.contains("-")){
+            return false;
         }
+
         int index = inputCode.lastIndexOf("-");
+
         String prefixIn=inputCode.substring(0,index);
         String prefixTemp=tep.substring(0,index);
         String suffixIn=inputCode.substring(index+1);

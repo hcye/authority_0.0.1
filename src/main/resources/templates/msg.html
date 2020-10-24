@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>资产管理模块说明</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+    <script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>-->
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <script th:inline="javascript">
+
+
+    </script>
+</head>
+<body>
+<div class="layui-container">
+    <div class="layui-row">
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>简述</legend>
+            <div class="layui-field-box">
+                lay-admin是一个基于RBAC的后台管理系统，此版本包含一个资产管理模块。起名lay-admin是由于前端由layui编写，作者非常喜欢此前端框架。
+            </div>
+        </fieldset>
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>技术栈</legend>
+            <div class="layui-field-box">
+                lay-admin技术栈：springboot、shiro、thymeleaf、jpa，数据库使用mariadb,EXCEL导入导出使用阿里的easyExcel。
+            </div>
+        </fieldset>
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>架构</legend>
+            <div class="layui-field-box">
+                lay-admin根据RBAC(role based access)思想编写，依据角色实现权限分配。含用户管理、组织架构、角色管理、菜单管理四个子项，
+                用户管理依赖ad域环境。
+            </div>
+        </fieldset>
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>展望</legend>
+            <div class="layui-field-box">
+                目前系统根据作者需求已包含资产管理模块，未来计划增加网络管理模块，功能有交换机管理、存活主机扫描等。
+            </div>
+        </fieldset>
+
+
+
+
+
+    </div>
+</div>
+</body>
+</html>

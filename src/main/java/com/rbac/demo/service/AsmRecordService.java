@@ -12,8 +12,9 @@ import java.sql.Timestamp;
 public class AsmRecordService {
     @Autowired
     private JpaOperatRecord jpaOperatRecord;
-    public void write(String action, Timestamp actionTime, Employee employeeByDealer, Employee employeeByAssertEmp, Assert assertByAssertAsset){
-        OperatRecord op=new OperatRecord( action,  actionTime,  employeeByDealer,  employeeByAssertEmp,  assertByAssertAsset);
+    public void write(String action, Timestamp actionTime, Employee employeeByDealer, Employee employeeByAssertEmp, Assert assertByAssertAsset,String remarks){
+//        String action,Timestamp actionTime, Employee employeeByDealer,Employee employeeByAssertEmp,Assert assertByAssertAsset,String remarks
+        OperatRecord op=new OperatRecord( action,  actionTime,  employeeByDealer,  employeeByAssertEmp,  assertByAssertAsset,remarks);
         jpaOperatRecord.save(op);
     }
 }

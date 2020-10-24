@@ -3,7 +3,7 @@
       xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <meta charset="UTF-8">
-    <title>资产管理模块说明</title>
+    <title>使用说明</title>
     <link rel="stylesheet" href="/layui/css/layui.css">
     <script type="text/javascript" src="/layui/layui.js"></script>
     <link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
@@ -13,27 +13,104 @@
     <!--[if lt IE 9]>-->
     <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
     <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
-    <script th:inline="javascript">
-
-
-    </script>
 </head>
 <body>
 <div class="layui-container">
-    <div class="layui-row">
-        <blockquote class="layui-elem-quote">资产管理系统简介</blockquote>
-        Lay_Admin资产管理模块由：资产借用、资产归还、资产入库、资产列表、操作日志、资产类型、设备类型，7个子项构成，\n
-        完成企业简单的资产和耗材管理工作。
-        Lay_Admin资产管理模块由：资产借用、资产归还、资产入库、资产列表、操作日志、资产类型、设备类型，7个子项构成，\n
-        完成企业简单的资产和耗材管理工作。
+    <h1 class="site-h1" style="margin-top: 5%">使用说明</h1>
+    <hr>
+    <blockquote class="layui-elem-quote">系统管理</blockquote>
+
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>用户管理</legend>
+        <div class="layui-field-box">
+            <img src="/img/sys/user_manage.gif" style="height: 80%;width: 80%"><br/>
+            <br/>
+            用户管理界面提供用户查找、编辑、刷新用户列表3个功能。<br/>
+            <img src="/img/sys/user_edit.gif" style="height: 80%;width: 80%"><br/>
+            <br/>
+            用户编辑页面可以修改用户基本信息，重置密码，用户启用和禁用，用户角色赋予和删除。用户启用后就可以登录系统
+            ，禁用反之。 点击刷新用户列表后系统会访问ad域同步用户信息，如果ad域登录信息错误或不存在系统会弹出提示框可
+            以跟随引导修改， 新人入职后发放资产，就需要先刷新用户列表否则在系统内无法查找到该用户,此操作比较耗时长则数
+            10秒。在系统初始化时需要先建部门，查看下方组织架构。
+        </div>
+    </fieldset>
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>组织架构</legend>
+        <div class="layui-field-box">
+            <img src="/img/sys/group_manage.gif" style="height: 80%;width: 80%"><br/>
+            <br/>
+            由于系统是从ad域同步数据，ad域中的每个组织单位（OU）对应一个部门，为保证用户同步正确就需要提前建立对应部门，该部门要求和ad域对应的
+            组织单位名相同。
+        </div>
+    </fieldset>
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>角色管理</legend>
+        <div class="layui-field-box">
+            <img src="/img/sys/role_manage.gif" style="height: 80%;width: 80%"><br/>
+            <br/>
+            <img src="/img/sys/role_edit.gif" style="height: 80%;width: 80%"><br/>
+            <br/>
+            在权限新增或者编辑页关联权限和资源，角色名和权限字符不能和已建角色相同，禁用该角色后拥有该角色的用户无法使用对应权限。
+        </div>
+    </fieldset>
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>菜单管理</legend>
+        <div class="layui-field-box">
+            <img src="/img/sys/menus_manage.gif" style="height: 80%;width: 80%"><br/>
+            <br/>
+            菜单管理即资源管理，菜单类型有菜单和按钮，菜单会显示到左侧菜单栏，按钮则不会。请求地址是对应资源的uri，某些资源不含http请求可
+            不填，权限标识不允许重复，为减轻程序维护复杂度要求易读，权限标识关联后台和前台编码数据，一般不要更改。
+        </div>
+    </fieldset>
 
 
+    <blockquote class="layui-elem-quote">资产管理</blockquote>
+    <fieldset class="layui-elem-field">
+        <legend>资产管理架构</legend>
+        <div class="layui-field-box">
+            <img src="/img/sys/asset_struct.gif" style="height: 80%;width: 80%"><br/>
+            <br/>
+            资产依赖设备类型，设备类型依赖资产类型。
+        </div>
+    </fieldset>
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>资产类型</legend>
+        <div class="layui-field-box">
+            <img src="/img/sys/asset_type.gif" style="height: 80%;width: 80%"><br/>
+            <br/>
+            资产录入的第一步是建立资产类型，资产类型编码x代表字母，0代表数字，字母和数字用‘-’隔开，末尾的数字代表资产序号，字母和数字数量不限，资产类型编码可以重复，例如：
+            办公资产编码是xxx-00-00-0000,我要新建一个属于办公资产的设备类型冰箱，则冰箱的设备类型编码可以是 HSB-01-02-9999，设备类型编码用‘-’
+            分割的每一段数字和字母的数量必须和资产类型相同，最后的序号必须全是9，9代表任意数字，且数量必须跟资产类型对应的数量相同。（耗材可以不输入类型编码）
+            <br/>
+            资产类型权限标识用于给予某些角色管理该资产类型的权限，例如我可以新建一个信息化资产管理员管理信息化资产，而他对办公资产无操作权限，
+            权限标识要先在系统管理->菜单管理->操作权限 新建一个资产操作权限，这个资产操作权限的权限标识被对应资产的权限标识引用。
+        </div>
+    </fieldset>
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>设备类型</legend>
+        <div class="layui-field-box">
+            <img src="/img/sys/dev_type.gif" style="height: 80%;width: 80%"><br/>
+            <br/>
+            建立资产类型后就可以建立相应设备类型了，设备类型编码规则见上方资产类型（耗材可以不输入类型编码）
+        </div>
+    </fieldset>
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>资产入库</legend>
+        <div class="layui-field-box">
+            <img src="/img/sys/asset_input.gif" style="height: 80%;width: 80%"><br/>
+            <br/>
+            资产类型和设备类型都建立后相应资产就可以入库了，例如冰箱的类型编码是 HSB-01-01-9999，那么冰箱的资产编码只能填写HSB-01-01-xxxx
+            ,xxxx是任意数字，代表资产序号。此时我要入库10台冰箱，第一台资产编码是HSB-01-01-0001,输入数量和资产编码后系统内自动增加了序号0001到0010的
+            10个冰箱资产。
+        </div>
+    </fieldset>
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>批量导入</legend>
+        <div class="layui-field-box">
+            系统支持使用excel的批量导入操作，导入前必须建立对应资产类型和设备类型，且资产编码必须满足设备类型约束，否则会导入失败。
+        </div>
+    </fieldset>
 
-
-
-        <blockquote class="layui-elem-quote layui-quote-nm">资产借用</blockquote>
-
-    </div>
 </div>
 </body>
 </html>

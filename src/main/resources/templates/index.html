@@ -34,24 +34,6 @@
 	<div class="layui-layout layui-layout-admin">
 		<div class="layui-header">
 			<div class="layui-logo"><a class="logo" href="javascript: void(0);" style="color: #009688;" title="">HANGSHENG</a></div>
-			<!-- <div class="layui-search layui-form" lay-filter="search-form">
-				<div class="layui-form-item" style="margin-bottom: 0px;padding-top: 10px;">
-					<div class="layui-input-block" style="margin-left: 0px">
-						<div class="layui-unselect layui-form-select" id="search_module">
-							<div class="layui-select-title">
-								<input type="text" name="search_name" id="search_id" placeholder="树功能属性一览" readonly="" class="layui-input layui-unselect">
-								<i class="layui-edge"></i>
-							</div>
-						</div>
-						<div class="layui-card dtree-select" id="selectTree">
-							<div class="layui-card-body">
-								<div id="toolbarDiv"><ul id="searchTree" class="dtree" data-id="0" style="width: 100%;"></ul></div>
-							</div>
-						</div>
-						
-					</div>
-				</div>
-			</div> -->
 			<div class="finish"><a href="JavaScript:void(0)"><img th:src="${'/img/tx/'+user.getTxUri()}" class="layui-nav-img" id="tx"></span></a></div>
 			<ul class="layui-nav version-ul" lay-filter="version-ul" style="margin-left: 400px;position: absolute;padding: 0;right: 70px;">
 			  <li class="layui-nav-item">
@@ -74,62 +56,7 @@
 		<div class="layui-side layui-bg-black">
 			<div class="layui-side-scroll">
 				<ul  class="layui-nav layui-nav-tree" lay-filter="operate">
-<!--
-					<li class="layui-nav-item layui-nav-itemed">
-						<a href="javascript:void(0);"  data-id="log/log.html">开发者日志<span class='layui-badge-dot'></span></a>
-					</li>
-					<li class="layui-nav-item layui-nav-itemed layui-this">
-						<a href="javascript:void(0);" data-id="doc/basicDoc.html">基础文档<span class='layui-badge-dot'></span></a>
-					</li>
-					<li class="layui-nav-item layui-nav-itemed">
-						<a href="javascript:void(0);">案例演示</a>
-						<dl class="layui-nav-child">
-							<dd><a href="javascript:void(0);" data-id="case/common.html">常见使用<span data-vlog="vs257" class='layui-badge-dot'></span></a></dd>
-							<dd><a href="javascript:void(0);" data-id="case/complex.html">数据格式<span data-vlog="vs250" class='layui-badge-dot'></span></a></dd>
-							<dd><a href="javascript:void(0);" data-id="case/async.html">异步加载<span data-vlog="vs257" class='layui-badge-dot'></span></a></dd>
-							<dd><a href="javascript:void(0);" data-id="case/open.html">弹出框选中回调<span data-vlog="vs256" class='layui-badge-dot'></span></a></dd>
-							<dd><a href="javascript:void(0);" data-id="case/checkbar.html">开启复选框<span data-vlog="vs257" class='layui-badge-dot'></span></a></dd>
-							<dd><a href="javascript:void(0);" data-id="case/menubar.html">开启菜单栏<span data-vlog="vs250" class='layui-badge-dot'></span></a></dd>
-							<dd><a href="javascript:void(0);" data-id="case/toolbar.html">开启工具栏<span data-vlog="vs255" class='layui-badge-dot'></span></a></dd>
-							&lt;!&ndash; <dd ><a href="javascript:void(0);" data-id="case/draw.html">开启拖拽<span class='layui-badge-dot'></span></a></dd> &ndash;&gt;
-							<dd><a href="javascript:void(0);" data-id="case/iframe.html">开启iframe<span data-vlog="vs255" class='layui-badge-dot'></span></a></dd>
-							<dd><a href="javascript:void(0);" data-id="case/select.html">使用下拉树<span data-vlog="vs257" class='layui-badge-dot'></span></a></dd>
-							<dd><a href="javascript:void(0);" data-id="case/style.html">图标及配色方案<span data-vlog="vs255" class='layui-badge-dot'></span></a></dd>
-						</dl>
-					</li>
-					<li class="layui-nav-item layui-nav-itemed">
-						<a href="javascript:void(0);" data-id="depend/icon.html">依赖图标</a>
-					</li>
-					<li class="layui-nav-item layui-nav-itemed">
-						<a href="javascript:void(0);" data-id="other/other.html">其他可实现功能</a>
-					</li>
-					&lt;!&ndash; <li class="layui-nav-item layui-nav-itemed">
-						<a href="javascript:void(0);" data-id="example/example.html">开启全部功能</a>
-					</li> &ndash;&gt;
-					&lt;!&ndash; <li class="layui-nav-item layui-nav-itemed">
-						<a href="javascript:void(0);" data-id="question/question.html">常见问题解答</a>
-					</li> &ndash;&gt;
-					<li class="layui-nav-item layui-nav-itemed">
-						<a href="javascript:void(0);" data-id="layuiadmin/layuiadmin.html">集成到layuiAdmin</a>
-					</li> 
-					&lt;!&ndash; <li class="layui-nav-item layui-nav-itemed">
-						<a href="javascript:void(0);" data-id="test/test.html">测试</a>
-					</li> &ndash;&gt;
-					<li class="layui-nav-item layui-nav-itemed">
-						<a href="javascript:void(0);" data-id="online/online.html">在线运行</a>
-					</li>
-					&lt;!&ndash;	自加 	&ndash;&gt;
-					<li class="layui-nav-item layui-nav-itemed">
-						<a href="javascript:void(0);" data-id="hcye/helloworld.html">自定义页面</a>
-					</li>
-					&lt;!&ndash;	自加	&ndash;&gt;
 
-					&lt;!&ndash; <li class="layui-nav-item layui-nav-itemed">
-						<a href="javascript:void(0);" data-id="finish/finish.html">小额赞赏~</a>
-					</li> &ndash;&gt;
-					&lt;!&ndash; <li class="layui-nav-item layui-nav-itemed">
-						<a href="javascript:void(0);" data-id="msg/msg.html">反馈留言（试用）</a>
-					</li> &ndash;&gt;-->
 
 					<li class="layui-nav-item layui-nav-itemed" th:each="res :${resources}" >
 						<!--/*@thymesVar id="getUrl" type=""*/-->
@@ -143,7 +70,7 @@
 		</div>
 		
 		<div class="layui-body">
-			<iframe id="iframe_page" name="iframePage"  frameborder="0" style="width: 100%;height: 99%;"></iframe>
+			<iframe id="iframe_page" src="/common/basicDoc" name="iframePage"  frameborder="0" style="width: 100%;height: 99%;"></iframe>
 		</div>
 		
 		<div class="layui-footer">
@@ -230,78 +157,26 @@
 		$("*[data-vlog='"+versionCls+"']").show();
 
 		
-		// 统计访问
+
 
 		element.on("nav(operate)", function(elem){
 			var $iframe = $("#iframe_page");
 			var did = $(elem).attr("data-id");
 			$iframe.attr("src",did);
 		});
-		
-/*		$(".finish").click(function(){
-			$(document).ready(function(){location.href="/logout"});
-		});*/
+
 		
 		$(".logo").click(function(){
 
-				$("#iframe_page").attr("src","/asm/asmDoc");
+			layer.open({
+				type: 2,
+				title: "系统简介",
+				area: ['800px', '90%'],
+				content: ['/common/msg'],
+			})
 
 		});
-		
-	/*	// 作者寄语
-		function showAuthorMsg() {
-			// layui.data("dtree-author-msg", {key: "msg", remove: true});
-			var msg = layui.data("dtree-author-msg", "msg");
-			if(!msg) {
-				layer.open({
-					type: 2,
-					title: "作者寄语",
-					anim: 1,
-					area: ["600px", "80%"],
-					content: "msg.html",
-					btn: ["期待再次起航"],
-					yes: function(index, layero) {
-						layui.data("dtree-author-msg", {key: "msg", value: "readed"});
-						layer.close(index);
-					},
-					cancel: function(index, layero) {
-						layui.data("dtree-author-msg", {key: "msg", value: "readed"});
-						layer.close(index);
-					},
-					end: function() {
-						layui.data("dtree-author-msg", {key: "msg", value: "readed"});
-					}
-				});
-			}
-		}*/
-		
-		// 搜索功能
-		/* var searchTree = dtree.render({
-			elem: "#searchTree",
-			url: "json/module/module.js",
-			icon: "-1",
-			dataFormat:"list",
-			dataStyle:"layuiStyle",
-			accordion:true,
-			type:"all"
-		}); */
-		
-		/* $("#search_module").on("click",function(){
-			$(this).toggleClass("layui-form-selected");
-			$("#selectTree").toggleClass("layui-show layui-anim layui-anim-upbit");
-		});
-		
-		dtree.on("node(searchTree)", function(obj){
-			if(!obj.param.leaf){
-				var $div = obj.dom;
-				searchTree.clickSpread($div);
-			} else {
-				$("#search_id").val(obj.param.context);
-				$("#search_module").toggleClass("layui-form-selected");
-				$("#selectTree").toggleClass("layui-show layui-anim layui-anim-upbit");
-				layer.msg("功能完善中，敬请期待。。。");
-			}
-		}); */
+
 	});
 </script>
 </html>

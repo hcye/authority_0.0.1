@@ -48,11 +48,13 @@
             $.post("/asm/getDevNumTemplate", {devName:data.value},    //把name数据提交到ajaxRes action内，
                 function(dt) {
                     var temp=dt["code"];
+                    var max=dt["max"];
                     if(temp==""){
                         $("#encode").attr("readonly","readonly");
                     }else {
                         $("#code").val(temp);
                         $("#encode").attr("placeholder",'格式:'+temp);
+                        $("#max").html(max);
                         $("#encode").removeAttr("readonly");
                     }
 
@@ -158,10 +160,10 @@
                     <p style="margin-left: 10%">我们新建的资产编号就应该类似 HS-BG-0001。</p>
                     <br/>
                     <label class="layui-form-label">编号</label>
-                    <div class="layui-input-block">
+                    <div class="layui-input-inline">
                         <input class="layui-input" id="encode" th:placeholder="${code}" />
                     </div>
-                    <span id="max"></span>
+                    <span id="max" th:text="${maxNum}"></span>
                 </div>
                 <div class="layui-form-item">
                     <label class="layui-form-label"><span style="color: red">*</span>数量</label>

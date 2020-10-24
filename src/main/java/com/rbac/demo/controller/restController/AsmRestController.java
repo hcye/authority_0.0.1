@@ -60,8 +60,6 @@ public class AsmRestController {
     private TypeService typeService;
     @Autowired
     private AsmRecordService asmRecordService;
-    @Autowired
-    private ReadAssetEventListener readAssetEventListener;
     @PostMapping("/asm/queryPage")
     public Page<Assert> queryPage(String name,String search,String pre,String next,int pageIndex,String jumpFlag){
         /**
@@ -104,7 +102,7 @@ public class AsmRestController {
                 if(!str.trim().equals("")){
                     Assert ast=jpaAssert.findById(Integer.parseInt(str)).get();
                     ast.setEmployeeByBorrower(borrower);
-                    asmRecordService.write(AsmAction.dev_borrow,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),borrower,ast);
+                    asmRecordService.write(AsmAction.dev_borrow,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),borrower,ast,"");
                     jpaAssert.saveAndFlush(ast);
                 }
             }
@@ -113,7 +111,7 @@ public class AsmRestController {
                 if(!str.trim().equals("")){
                     Assert ast=jpaAssert.findById(Integer.parseInt(str)).get();
                     ast.setEmployeeByBorrower(null);
-                    asmRecordService.write(AsmAction.dev_return,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),borrower,ast);
+                    asmRecordService.write(AsmAction.dev_return,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),borrower,ast,"");
                     jpaAssert.saveAndFlush(ast);
                 }
             }
@@ -151,7 +149,7 @@ public class AsmRestController {
         assertType.setTypeName(devType);
         assertType.setPermiCode(authority);
         jpaAssetType.save(assertType);
-        asmRecordService.write(AsmAction.dev_add_type,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null);
+        asmRecordService.write(AsmAction.dev_add_type,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null,devType);
         map.put("ok","新增成功!");
         return map;
     }
@@ -343,8 +341,10 @@ public class AsmRestController {
     public Map<String, String> getNum(String devName){
         Map<String,String> map=new HashMap<>();
         DevType devType=jpaDevType.findDevTypeByDevName(devName);
+        String max=asmService.getMaxAssetNum(devType);
         String devTypeAssetNumTemplate=devType.getAssetNumTemplate();
         map.put("code",devTypeAssetNumTemplate);
+        map.put("max",max);
         return map;
     }
 
@@ -420,7 +420,7 @@ public class AsmRestController {
             anAssert.setWorkless("1");
             anAssert.setDamagetime(new java.sql.Date(new java.util.Date().getTime()));
             jpaAssert.save(anAssert);
-            asmRecordService.write(AsmAction.dev_dam,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert);
+            asmRecordService.write(AsmAction.dev_dam,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert,"");
             map.put("ok","校验成功");
         }
         return map;
@@ -436,7 +436,7 @@ public class AsmRestController {
             map.put("error","设备被借出！归还后才能删除");
         }else {
             jpaAssert.delete(anAssert);
-            asmRecordService.write(AsmAction.dev_del,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null);
+            asmRecordService.write(AsmAction.dev_del,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null,"");
             map.put("ok","删除成功");
         }
         return map;
@@ -466,7 +466,7 @@ public class AsmRestController {
                 ast.setModel(model);
                 ast.setAssetTypeByAssertType(assetType);
                 list.add(ast);
-                asmRecordService.write(AsmAction.dev_in,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null);
+                asmRecordService.write(AsmAction.dev_in,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null,"");
             }
             jpaAssert.saveAll(list);
             map.put("ok","入库成功！");
@@ -522,7 +522,7 @@ public class AsmRestController {
             tail++;
 
             list.add(ast);
-            asmRecordService.write(AsmAction.dev_in,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null);
+    //        asmRecordService.write(AsmAction.dev_in,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null);
         }
         jpaAssert.saveAll(list);
         map.put("ok","入库成功！");

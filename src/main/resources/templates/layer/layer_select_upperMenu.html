@@ -60,14 +60,14 @@
     <div class="layui-container">
         <input type="hidden" id="mid">
         <div class="layui-row">
-            <div style="height: 700px;overflow: auto;">   <!--高度不能使用百分比否则会显示异常-->
+            <div style="height: auto;overflow: auto;">   <!--高度不能使用百分比否则会显示异常-->
                 <ul id="menuTree" class="dtree" data-id="0"></ul>
             </div>
+            <div class="layui-row" >
+                <button class="layui-btn" id="conform" style="margin-left: 30%">确定</button>
+                <button class="layui-btn" id="reset">取消</button>
+            </div>
         </div>
-    </div>
-    <div class="layui-row" >
-        <button class="layui-btn" id="conform" style="margin-left: 50%">确定</button>
-        <button class="layui-btn" id="reset">取消</button>
     </div>
 </body>
 

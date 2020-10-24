@@ -21,8 +21,9 @@
                 layer.open({
                     type: 2,
                     title: "上级部门",
-                    area: ['350px','800px'],
-                    content: ['/layer/layer_select_upperMenu', 'no'],
+                    area: ['350px','100%'],
+                    resize: true,
+                    content: ['/layer/layer_select_upperMenu'],
                     //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
                     //实现弹出层间不同frame的传值
                     /* success: function(layero, index){

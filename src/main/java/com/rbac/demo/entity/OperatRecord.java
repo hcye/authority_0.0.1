@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "operat_record", schema = "mydb1", catalog = "")
+@Table(name = "operat_record", schema = "mydb1")
 public class OperatRecord {
     private Integer id;
     private String action="";
@@ -14,17 +14,21 @@ public class OperatRecord {
     private Employee employeeByDealer;
     private Employee employeeByAssertEmp;
     private Assert assertByAssertAsset;
+    private String remarks;
 
-    public OperatRecord(String action,Timestamp actionTime, Employee employeeByDealer,Employee employeeByAssertEmp,Assert assertByAssertAsset) {
+    public OperatRecord(String action,Timestamp actionTime, Employee employeeByDealer,Employee employeeByAssertEmp,Assert assertByAssertAsset,String remarks) {
         this.action=action;
         this.actionTime=actionTime;
         this.employeeByDealer=employeeByDealer;
         this.employeeByAssertEmp=employeeByAssertEmp;
         this.assertByAssertAsset=assertByAssertAsset;
+        this.remarks=remarks;
     }
     public OperatRecord(){
 
     }
+
+
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
@@ -60,6 +64,17 @@ public class OperatRecord {
         this.actionTime = actionTime;
     }
 
+    @Basic
+    @Column(name = "remarks", nullable = true)
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -70,7 +85,7 @@ public class OperatRecord {
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
         if (action != null ? !action.equals(that.action) : that.action != null) return false;
         if (actionTime != null ? !actionTime.equals(that.actionTime) : that.actionTime != null) return false;
-
+        if (remarks != null ? !remarks.equals(that.remarks) : that.remarks != null) return false;
         return true;
     }
 
@@ -79,6 +94,7 @@ public class OperatRecord {
         int result = id != null ? id.hashCode() : 0;
         result = 31 * result + (action != null ? action.hashCode() : 0);
         result = 31 * result + (actionTime != null ? actionTime.hashCode() : 0);
+        result = 31 * result + (remarks != null ? remarks.hashCode() : 0);
         return result;
     }
 

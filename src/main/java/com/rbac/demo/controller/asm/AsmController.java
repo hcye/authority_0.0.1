@@ -2,6 +2,7 @@ package com.rbac.demo.controller.asm;
 import com.rbac.demo.entity.*;
 import com.rbac.demo.jpa.*;
 import com.rbac.demo.service.AsmRecordService;
+import com.rbac.demo.service.AsmService;
 import com.rbac.demo.tool.ConvertStrForSearch;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -36,7 +37,8 @@ public class AsmController {
     private AsmRecordService asmRecordService;
     @Autowired
     private JpaOperatRecord jpaOperatRecord;
-
+    @Autowired
+    private AsmService asmService;
     @RequiresPermissions("asm:bro:view")
     @GetMapping("/asm/bro")
     public String broPage(Model model){
@@ -70,10 +72,12 @@ public class AsmController {
         String firstType=types.get(0).getTypeName();
         List<String> names=jpaDevType.findDevTypesNameByAssertType(firstType);
         DevType devType=jpaDevType.findDevTypeByDevName(names.get(0));
+        String maxNum=asmService.getMaxAssetNum(devType);
         String code=devType.getAssetNumTemplate();
         model.addAttribute("types",types);
         model.addAttribute("names",names);
         model.addAttribute("code",code);
+        model.addAttribute("maxNum",maxNum);
         return "/asm/inp";
     }
 
@@ -237,7 +241,7 @@ public class AsmController {
         anAssert.setSnnum(sn);
         anAssert.setAssestnum(num);
         jpaAssert.save(anAssert);
-        asmRecordService.write(AsmAction.dev_edit,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert);
+        asmRecordService.write(AsmAction.dev_edit,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert,"");
         return "redirect:/asm/list";
     }
 
