@@ -105,7 +105,6 @@ public class UserController {
                 //session过期
                 return "login";
             }
-
             UsernamePasswordToken token = new UsernamePasswordToken(username, pwd);
             try {
                 subject.login(token);

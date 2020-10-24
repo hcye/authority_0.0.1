@@ -8,17 +8,15 @@ import java.util.Collection;
 @Entity
 public class Employee {
     private Integer id;
-    private String edepart;
+    private String edepart="";
     private String email="";
-    private String ename;
+    private String ename="";
     private String onjob="";
     private String pingyin="";
     private String pwd="";
-    private String salt="";
     private Collection<OperatRecord> operatRecordsById;
     private Collection<OperatRecord> operatRecordsById_0;
     private Collection<User2Role> user2RolesById;
-    private String role;
     private String loginName;
     private SysGroup sysGroupByGroupId;
     private Collection<SysGroup> sysGroupsById;
@@ -114,15 +112,6 @@ public class Employee {
         this.pwd = pwd;
     }
 
-    @Basic
-    @Column(name = "salt", nullable = true, length = 64)
-    public String getSalt() {
-        return salt;
-    }
-
-    public void setSalt(String salt) {
-        this.salt = salt;
-    }
 
     @Basic
     @Column(name = "tx_uri", nullable = true, length = 64)
@@ -148,7 +137,6 @@ public class Employee {
         if (onjob != null ? !onjob.equals(employee.onjob) : employee.onjob != null) return false;
         if (pingyin != null ? !pingyin.equals(employee.pingyin) : employee.pingyin != null) return false;
         if (pwd != null ? !pwd.equals(employee.pwd) : employee.pwd != null) return false;
-        if (salt != null ? !salt.equals(employee.salt) : employee.salt != null) return false;
 
         return true;
     }
@@ -162,7 +150,6 @@ public class Employee {
         result = 31 * result + (onjob != null ? onjob.hashCode() : 0);
         result = 31 * result + (pingyin != null ? pingyin.hashCode() : 0);
         result = 31 * result + (pwd != null ? pwd.hashCode() : 0);
-        result = 31 * result + (salt != null ? salt.hashCode() : 0);
         return result;
     }
 
@@ -195,15 +182,6 @@ public class Employee {
         this.user2RolesById = user2RolesById;
     }
 
-    @Basic
-    @Column(name = "role", nullable = true, length = 64)
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
 
     @JsonIgnore
     @ManyToOne

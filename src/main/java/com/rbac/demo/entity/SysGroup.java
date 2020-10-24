@@ -13,7 +13,7 @@ import java.util.Date;
 public class SysGroup {
     private Integer id;
     private String gname;
-    private Integer priority;
+    private Integer priority=1;
     private Byte avalible=1;
     private Collection<Employee> employeesById;
     private SysGroup sysGroupByParentId;

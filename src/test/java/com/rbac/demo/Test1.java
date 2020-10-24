@@ -2,6 +2,8 @@ package com.rbac.demo;
 
 import com.rbac.demo.jpa.*;
 import com.rbac.demo.service.UpdateUserDB;
+import com.rbac.demo.shiro.ShiroUtils;
+import org.apache.shiro.util.ByteSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,7 +36,8 @@ public class Test1 {
     JpaOperatRecord jpaOperatRecord;
     @Test
     public void t() throws NamingException {
-
+        String encryptPwd= ShiroUtils.encryption("admin", ByteSource.Util.bytes("admin").toHex());
+        System.out.println(encryptPwd);
     /*    UpdateUserDB.updateUserTable(jpaEmployee,"192.168.100.10","hsaecd","yehangcheng@hsaecd.com","Yhc142536..");*/
     }
 }

@@ -1,4 +1,5 @@
 package com.rbac.demo.realm;
+
 import com.rbac.demo.entity.Employee;
 import com.rbac.demo.jpa.JpaEmployee;
 import com.rbac.demo.service.UserService;
@@ -26,49 +27,54 @@ public class UserRealm extends AuthorizingRealm {
 
     /**
      * 授权
-     * */
+     */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
-        String username= (String) principalCollection.getPrimaryPrincipal();
-        Employee employee=jpaEmployeee.findEmployeeByLoginName(username);
+        String username = (String) principalCollection.getPrimaryPrincipal();
+        Employee employee = jpaEmployeee.findEmployeeByLoginName(username);
 
 
-        if(employee==null){
+        if (employee == null) {
             return null;
         }
-        SimpleAuthorizationInfo authorizationInfo=new SimpleAuthorizationInfo();
+        SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
         authorizationInfo.setRoles(userService.getRoleSStrSet(employee));
         authorizationInfo.setStringPermissions(userService.getPermissionStrSet(employee));
         return authorizationInfo;
     }
+
     /**
      * 认证
-     * */
+     */
     @Override
-    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken){
-        UsernamePasswordToken token= (UsernamePasswordToken) authenticationToken;
-        Employee employee=jpaEmployeee.findEmployeeByLoginName(token.getUsername());
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) {
+        UsernamePasswordToken token = (UsernamePasswordToken) authenticationToken;
+        Employee employee = jpaEmployeee.findEmployeeByLoginName(token.getUsername());
 
-        if(employee!=null){
-            if(employee.getStatus()==null||employee.getStatus()==1||employee.getOnjob().equals("1")||employee.getSysGroupByGroupId().getAvalible()==0||employee.getSysGroupByGroupId().getDeleteFlag()==1){
-                throw new LockedAccountException();//账号锁定
+        if (employee != null) {
+            if (employee.getSysGroupByGroupId() != null) {
+                if (employee.getStatus() == null || employee.getStatus() == 1 || employee.getOnjob().equals("1") || employee.getSysGroupByGroupId().getAvalible() == 0 || employee.getSysGroupByGroupId().getDeleteFlag() == 1) {
+                    throw new LockedAccountException();//账号锁定
+                }else if(employee.getStatus() == null || employee.getStatus() == 1 || employee.getOnjob().equals("1")){
+                    throw new LockedAccountException();//账号锁定
+                }
+            } else {
+                throw new UnknownAccountException();
             }
-        }else {
-            throw new UnknownAccountException();
         }
-         //这里要实现密码验证需要重写credentialsMater,然后在realmconfig内getDefaultSecurityManager方法上 userRealm参数上设置这个匹配器
+
+        //这里要实现密码验证需要重写credentialsMater,然后在realmconfig内getDefaultSecurityManager方法上 userRealm参数上设置这个匹配器
         //        userRealm.setCredentialsMatcher(myCredentialsMatcher());
         //        defaultSecurityManager.setRealm(userRealm);
         return new SimpleAuthenticationInfo(     //
                 employee.getLoginName(),  //用户名principle
-                ShiroUtils.encryption(String.valueOf(token.getPassword()),ByteSource.Util.bytes(employee.getPingyin()).toHex()),    //密码password.加密后的密码
+                ShiroUtils.encryption(String.valueOf(token.getPassword()), ByteSource.Util.bytes(employee.getPingyin()).toHex()),    //密码password.加密后的密码
                 ByteSource.Util.bytes(employee.getPingyin()),
                 getName());             //realm名字
 
     }
 
-    public void clearCachedAuthorizationInfo()
-    {
+    public void clearCachedAuthorizationInfo() {
         this.clearCachedAuthorizationInfo(SecurityUtils.getSubject().getPrincipals());
     }
 
