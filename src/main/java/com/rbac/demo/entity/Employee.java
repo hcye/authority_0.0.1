@@ -21,11 +21,13 @@ public class Employee {
     private SysGroup sysGroupByGroupId;
     private Collection<SysGroup> sysGroupsById;
     private Byte status=0;
-    private String sex="";
-    private String txUri="";
-
-
+    private String sex="男";
+    private String txUri="tx_ms_04.gif";
     private Collection<Assert> assertsById;
+
+    public Employee(){
+
+    }
 
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
