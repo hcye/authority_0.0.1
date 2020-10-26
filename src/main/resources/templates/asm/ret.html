@@ -20,6 +20,13 @@
         //监听提交
         //checkbox 点击事件
     });
+    function transformNullStr(str){
+        if (str==null){
+            return "";
+        }
+        return str;
+    }
+
     $(function () {
         $("#show").click(function () {
             $.post("/asm/devs", {name:$("#name").val()},    //把name数据提交到ajaxRes action内，
@@ -27,8 +34,8 @@
                     $("#tb").find("tr").remove();
                     var astList=data["devs"];
                     for (var key in astList){
-                        $("#tb").append("<tr><td><input type='hidden' value='"+astList[key].id+"' />"+astList[key].aname+"</td><td>"+astList[key].model+"</td><td>"+astList[key].assestnum+"" +
-                            "</td><td>"+astList[key].remarks+"</td><td><input type='checkbox' lay-skin='primary' /></td></tr>");
+                        $("#tb").append("<tr><td><input type='hidden' value='"+astList[key].id+"' />"+astList[key].aname+"</td><td>"+transformNullStr(astList[key].model)+"</td><td>"+transformNullStr(astList[key].assestnum)+"" +
+                            "</td><td>"+transformNullStr(astList[key].remarks)+"</td><td><input type='checkbox' lay-skin='primary' /></td></tr>");
                     }
                     var form = layui.form;
                     form.render();

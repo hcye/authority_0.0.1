@@ -53,7 +53,7 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
         String snNum= assetDownloadModel.getSnNum();
         String templat = "";
         Assert anAssert = new Assert();
-        DateFormat format1 = new SimpleDateFormat("yyyy.MM.dd");
+        DateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
         int num=analysisContext.readRowHolder().getRowIndex();
         if (!assetDownloadModel.getDevName().equals("")) {
             anAssert.setAname(devName.trim());
@@ -168,7 +168,9 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
 
     @Override
     public void onException(Exception exception, AnalysisContext context) throws Exception {
-        super.onException(exception, context);
+        throw new ExcelAnalysisException(context.readRowHolder().getRowIndex() + "行" + "存在未知异常" +
+                "如果表格超过500行可以尝试把表格拆分后上传！");
+
     }
 
     @Transactional(rollbackFor = ExcelAnalysisException.class)

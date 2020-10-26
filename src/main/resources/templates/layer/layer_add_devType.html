@@ -69,7 +69,7 @@
                              var tp=$(window.parent.document).find("#type");
                              var inp=$(window.parent.document).find("#pageInput");
                             parent.queryDevTypes(rname.val(), "", "", inp.val(), tp.val());
-                            // var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                             var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
                             parent.layer.close(index);
 
                         });

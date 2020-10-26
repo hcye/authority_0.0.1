@@ -13,6 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.util.ResourceUtils;
 
 import javax.naming.NamingException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 @SpringBootTest
 public class Test1 {
@@ -35,9 +38,13 @@ public class Test1 {
     @Autowired
     JpaOperatRecord jpaOperatRecord;
     @Test
-    public void t() throws NamingException {
+    public void t() throws NamingException, ParseException {
         String encryptPwd= ShiroUtils.encryption("admin", ByteSource.Util.bytes("admin").toHex());
         System.out.println(encryptPwd);
     /*    UpdateUserDB.updateUserTable(jpaEmployee,"192.168.100.10","hsaecd","yehangcheng@hsaecd.com","Yhc142536..");*/
+
+
+        DateFormat format1 = new SimpleDateFormat("yyyy/MM/dd");
+        format1.parse("2020/07/01");
     }
 }

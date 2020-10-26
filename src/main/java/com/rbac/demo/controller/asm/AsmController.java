@@ -43,13 +43,14 @@ public class AsmController {
     @GetMapping("/asm/bro")
     public String broPage(Model model){
         //operator
+        List<AssetType> assetTypes=asmService.getPermitAsmAssetTypes();
         String loginUser= (String) SecurityUtils.getSubject().getPrincipal();  //操作者用户名
-        List<AssetType> assertTypes = jpaAssetType.findAll();   //类型列表
         Pageable pageable=PageRequest.of(0,pageSize);   //初始化第一页
-        List<String> assertNames=jpaAssert.getDistinctAssertNames(assertTypes.get(0));
+        List<String> assertNames=jpaAssert.getDistinctAssertNames(assetTypes.get(0));
+
         Page<Assert> asserts =jpaAssert.findAssertsByDevice(assertNames.get(0),pageable);  //初始化使用第一个类型，的第一个设备类型
         model.addAttribute("operator",loginUser);
-        model.addAttribute("assertTypes",assertTypes);
+        model.addAttribute("assertTypes",assetTypes);
         model.addAttribute("asserts",asserts);
         model.addAttribute("assertList",asserts.getContent());
         model.addAttribute("assertNames",assertNames);
@@ -68,13 +69,13 @@ public class AsmController {
     public String inpPage(Model model){
 
 
-        List<AssetType> types= jpaAssetType.findAssertType();
-        String firstType=types.get(0).getTypeName();
+        List<AssetType> assetTypes=asmService.getPermitAsmAssetTypes();
+        String firstType=assetTypes.get(0).getTypeName();
         List<String> names=jpaDevType.findDevTypesNameByAssertType(firstType);
         DevType devType=jpaDevType.findDevTypeByDevName(names.get(0));
         String maxNum=asmService.getMaxAssetNum(devType);
         String code=devType.getAssetNumTemplate();
-        model.addAttribute("types",types);
+        model.addAttribute("types",assetTypes);
         model.addAttribute("names",names);
         model.addAttribute("code",code);
         model.addAttribute("maxNum",maxNum);
@@ -225,10 +226,7 @@ public class AsmController {
         return "/asm/edit_dev";
     }
 
-    @GetMapping("/asm/asmDoc")
-    public String doc(){
-        return "/asm/asmDoc";
-    }
+
 
     @RequiresPermissions("asm:edit:btn")
     @GetMapping("/asm/save_dev")

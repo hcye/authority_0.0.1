@@ -10,7 +10,7 @@ import java.util.Collection;
 public class Assert {
     private Integer id;
     private String aname;
-    private String assestnum;
+    private String assestnum="";
     private String labelpic="";
     private String model="";
     private Date putintime=new Date(new java.util.Date().getTime());

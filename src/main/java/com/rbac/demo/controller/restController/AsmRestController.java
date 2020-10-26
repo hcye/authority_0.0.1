@@ -123,10 +123,20 @@ public class AsmRestController {
 
     @PostMapping("/asm/devs")
     public Map<String, List<Assert>> getDevs(String name){
+        List<AssetType> assetTypes=asmService.getPermitAsmAssetTypes();
         Map<String,List<Assert>> map=new HashMap<>();
         Employee returner=jpaEmployee.findEmployeeByLoginName(name.split("-")[1]);
         List<Assert> asserts= (List<Assert>) returner.getAssertsById();
-        map.put("devs",asserts);
+        List<Assert> assertsHasPermit=new ArrayList<>();
+        for(int i=0;i<asserts.size();i++){
+            for (int j=0;j<assetTypes.size();j++){
+                if(asserts.get(i).getAssetTypeByAssertType().equals(assetTypes.get(j))){
+                    assertsHasPermit.add(asserts.get(i));
+                }
+            }
+        }
+
+        map.put("devs",assertsHasPermit);
         return map;
     }
 
@@ -169,6 +179,7 @@ public class AsmRestController {
             String tem=devType.getAssetTypeByAssertTypeId().getAssetCode();
             if(asmService.valid(input,tem)){
                 devType.setAssetNumTemplate(input);
+                jpaDevType.save(devType);
                 map.put("ok","修改成功！");
 
             }else {
