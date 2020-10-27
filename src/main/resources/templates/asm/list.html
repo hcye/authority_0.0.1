@@ -53,14 +53,22 @@
 
 
 
-                var astList = data.content;
+                var bro = data["emp"][0];
+                var page = data["page"][0][0];
+                var astList = page.content;
                 $("#tb").find("tr").remove();
                 for (var key in astList) {
+                    var browser;
+                    if(bro[key]==null){
+                        browser='';
+                    }else {
+                        browser=bro[key].ename;
+                    }
                     var sn = transformNullStr(astList[key].snnum);
                     var assetNum=transformNullStr(astList[key].assestnum);
                     $("#tb").append("<tr><td><input type='hidden' value='" + astList[key].id + "' />" + astList[key].aname + "" +
                         "</td><td>" + astList[key].model + "</td><td>" + assetNum + "" +
-                        "</td><td>" + sn + "</td><td>" + astList[key].price + "</td><td>" + astList[key].putintime +
+                        "</td><td>" + browser + "</td><td>" + sn + "</td><td>" + astList[key].price + "</td><td>" + astList[key].putintime +
                         "</td><td>" + astList[key].remarks + "</td><td>" +
                         "<button class='layui-btn layui-btn-xs " + editflag + "' " + editDisable + "  name='edit'>编辑</button>" +
                         "<button class='layui-btn layui-btn-xs " + badflag + "' " + badDisable + "  name='bad'>报损</button>" +
@@ -120,8 +128,8 @@
 
                 var form = layui.form;
                 form.render();//重新渲染
-                $("#pageInput").val(data.number + 1);
-                $("#PageCount").html(' 共 ' + data.totalPages + ' 页');
+                $("#pageInput").val(page.number + 1);
+                $("#PageCount").html(' 共 ' + page.totalPages + ' 页');
             }, "json");
     }
 
@@ -245,6 +253,7 @@
                             <td>名称</td>
                             <td>型号</td>
                             <td>编号</td>
+                            <td>借用人</td>
                             <td>sn号</td>
                             <td>价格</td>
                             <td>入库时间</td>

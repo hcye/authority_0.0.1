@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
 
 @RestController
 public class AsmRestController {
-    private static final int pageSize=10;
+    private static final int pageSize=15;
     @Autowired
     private JpaEmployee jpaEmployee;
     @Autowired
@@ -61,14 +61,51 @@ public class AsmRestController {
     @Autowired
     private AsmRecordService asmRecordService;
     @PostMapping("/asm/queryPage")
-    public Page<Assert> queryPage(String name,String search,String pre,String next,int pageIndex,String jumpFlag){
+    public Map<String,List<Object>> queryPage(String name,String search,String pre,String next,int pageIndex,String jumpFlag){
         /**
          *
          * 确定是否是翻页
          *
          * */
+
+
+
+/*        Map<String,List<Object>> map=new HashMap<>();
+        List<Employee> bros=new ArrayList<>();
+        List<Page<Assert>> pages=new ArrayList<>();
+        Pageable pageable;
+        if(!pre.equals("")||!next.equals("")||!jumpFlag.equals("")){
+            pageIndex=pageIndex-1;
+            pageable=PageRequest.of(pageIndex,pageSize);
+            if(!pre.equals("")){
+                pageable=pageable.previousOrFirst();
+            }else if(!next.equals("")){
+                pageable=pageable.next();
+            }
+        }else {
+            pageable=PageRequest.of(0,pageSize);
+        }
+        Page<Assert> page = asmService.queryPage(type,isDam,search,pageable);
+        List<Assert> asserts=page.getContent();
+        for (Assert ast:asserts){
+            Employee bro=ast.getEmployeeByBorrower();
+            if(bro==null){
+                bros.add(null);
+            }else {
+                bros.add(bro);
+            }
+        }
+        pages.add(page);
+        map.put("ast", Collections.singletonList(asserts));
+        map.put("emp", Collections.singletonList(bros));
+        map.put("page", Collections.singletonList(pages));
+        return map;*/
+
+        Map<String,List<Object>> map=new HashMap<>();
+        List<Employee> bros=new ArrayList<>();
         Page<Assert> page;
         Pageable pageable;
+        List<Page<Assert>> pages=new ArrayList<>();
         if(!pre.equals("")||!next.equals("")||!jumpFlag.equals("")){
             pageIndex=pageIndex-1;
             pageable=PageRequest.of(pageIndex,pageSize);
@@ -89,7 +126,22 @@ public class AsmRestController {
                 page=jpaAssert.findAssertsByAssestnum(search,pageable);
             }
         }
-        return page;
+        List<Assert> asserts=page.getContent();
+        for (Assert ast:asserts){
+            Employee bro=ast.getEmployeeByBorrower();
+            if(bro==null){
+                bros.add(null);
+            }else {
+                bros.add(bro);
+            }
+        }
+
+
+
+        pages.add(page);
+        map.put("page", Collections.singletonList(pages));
+        map.put("emp", Collections.singletonList(bros));
+        return map;
     }
     @PostMapping("/asm/operat")
     public Map<String, List<Assert>> borrow(String selectDevIds,String name,String actionFlag){
@@ -123,8 +175,12 @@ public class AsmRestController {
 
     @PostMapping("/asm/devs")
     public Map<String, List<Assert>> getDevs(String name){
-        List<AssetType> assetTypes=asmService.getPermitAsmAssetTypes();
         Map<String,List<Assert>> map=new HashMap<>();
+        if(name.equalsIgnoreCase("")||!name.contains("-")){
+            return map;
+        }
+        List<AssetType> assetTypes=asmService.getPermitAsmAssetTypes();
+
         Employee returner=jpaEmployee.findEmployeeByLoginName(name.split("-")[1]);
         List<Assert> asserts= (List<Assert>) returner.getAssertsById();
         List<Assert> assertsHasPermit=new ArrayList<>();
@@ -398,7 +454,7 @@ public class AsmRestController {
     }
 
     @PostMapping("/asm/queryListPage")
-    public Page<Assert> queryListPage(String type,String isDam,String search,String pre,String next,int pageIndex,String jumpFlag){
+    public Map<String,List<Object>> queryListPage(String type,String isDam,String search,String pre,String next,int pageIndex,String jumpFlag){
         /**
          *
          * 确定是否是翻页
@@ -407,7 +463,9 @@ public class AsmRestController {
 
 
 
-        Page<Assert> page;
+        Map<String,List<Object>> map=new HashMap<>();
+        List<Employee> bros=new ArrayList<>();
+        List<Page<Assert>> pages=new ArrayList<>();
         Pageable pageable;
         if(!pre.equals("")||!next.equals("")||!jumpFlag.equals("")){
             pageIndex=pageIndex-1;
@@ -420,8 +478,20 @@ public class AsmRestController {
         }else {
             pageable=PageRequest.of(0,pageSize);
         }
-        page = asmService.queryPage(type,isDam,search,pageable);
-        return page;
+        Page<Assert> page = asmService.queryPage(type,isDam,search,pageable);
+        List<Assert> asserts=page.getContent();
+        for (Assert ast:asserts){
+            Employee bro=ast.getEmployeeByBorrower();
+            if(bro==null){
+                bros.add(null);
+            }else {
+                bros.add(bro);
+            }
+        }
+        pages.add(page);
+        map.put("emp", Collections.singletonList(bros));
+        map.put("page", Collections.singletonList(pages));
+        return map;
     }
 
     /**
