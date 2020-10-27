@@ -59,7 +59,7 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
             anAssert.setAname(devName.trim());
             AssetType assetType = null;
 
-            DevType devType =jpaDevType.findDevTypeByDevName(devName.trim());
+            DevType devType =jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(devName.trim(),jpaAssetType.findAssetTypeByName(devName.trim()));
 
             if(devType==null){
                 throw new ExcelAnalysisException(num + "行" + "设备类型未预定义！");
@@ -166,12 +166,6 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
         listOthermeans.add(anAssert);
     }
 
-    @Override
-    public void onException(Exception exception, AnalysisContext context) throws Exception {
-        throw new ExcelAnalysisException(context.readRowHolder().getRowIndex() + "行" + "存在未知异常" +
-                "如果表格超过500行可以尝试把表格拆分后上传！");
-
-    }
 
     @Transactional(rollbackFor = ExcelAnalysisException.class)
     @Override

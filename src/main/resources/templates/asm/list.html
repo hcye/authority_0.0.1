@@ -40,6 +40,19 @@
                 var editDisable = "";
                 var badDisable = "";
                 var deleteDisable="";
+
+                if (editflag == "layui-btn-disabled") {
+                    editDisable = "disabled='true'";
+                }
+                if(badflag=="layui-btn-disabled"){
+                    badDisable = "disabled='true'";
+                }
+                if (deleteflag == "layui-btn-disabled") {
+                    deleteDisable = "disabled='true'";
+                }
+
+
+
                 var astList = data.content;
                 $("#tb").find("tr").remove();
                 for (var key in astList) {
@@ -132,6 +145,8 @@
                     layer.alert(res["ok"]);
                     document.location.href="/asm/list";
                 }else if(res["error"]!=null){
+                    layer.alert(res["error"]);
+                }else {
                     layer.alert(res["error"]);
                 }
             }

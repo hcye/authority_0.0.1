@@ -24,11 +24,21 @@
                 function(dt) {
                     $("#name").find("option").remove();
                     var names=dt["name"];
-                    for(var key in names){
-                        $("#name").append("<option>"+names[key]+"</option>");
+                    if(names!=null){
+                        for(var key in names){
+                            $("#name").append("<option>"+names[key]+"</option>");
+                        }
                     }
+                    $("#max").html('');
                     var codes=dt["code"];
-                    var devCodes=dt["devCode"];
+                    var devCodes;
+                    if(dt["devCode"]==null){
+                        $("#encode").attr("placeholder","");
+                        $("#encode").attr("readonly","readonly");
+                        return;
+                    }else {
+                        devCodes= dt["devCode"];
+                    }
                     if(devCodes[0]==""){
                         $("#encode").attr("placeholder","");
                         $("#encode").attr("readonly","readonly");
@@ -45,12 +55,19 @@
 
 
         form.on("select(astName)", function(data){
-            $.post("/asm/getDevNumTemplate", {devName:data.value},    //把name数据提交到ajaxRes action内，
+            $.post("/asm/getDevNumTemplate", {devName:data.value,assetType:$("#tp").val()},    //把name数据提交到ajaxRes action内，
                 function(dt) {
+                    $("#max").html('');
                     var temp=dt["code"];
                     var max=dt["max"];
                     if(temp==""){
                         $("#encode").attr("readonly","readonly");
+                        $("#max").html("");
+                    }
+                    if(temp==null){
+                        $("#encode").attr("readonly","readonly");
+                        $("#max").html('');
+
                     }else {
                         $("#code").val(temp);
                         $("#encode").attr("placeholder",'格式:'+temp);

@@ -54,6 +54,17 @@
             });
         })
 
+        $("#name").click(function () {
+            layer.open({
+                type: 2,
+                title: "选择归还人",
+                area: ['1000px','500px'],
+                content: ['/layer/layer_edit_groupLeader.html', 'no'],
+                //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                //实现弹出层间不同frame的传值
+            });
+        })
+
         $("#ret").click(function () {
 
             if($("#name").val()==''){
@@ -101,7 +112,7 @@
                 <div class="layui-inline">
                     <label class="layui-form-label">借用人:</label>
                     <div class="layui-input-inline">
-                        <input class="layui-input" disabled="disabled" id="name"/>
+                        <input class="layui-input" id="name"/>
                     </div>
                     <button class="layui-btn" id="select">选择</button>
                 </div>

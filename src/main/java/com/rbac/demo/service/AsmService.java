@@ -117,7 +117,11 @@ public class AsmService {
     }
 
     public String getMaxAssetNum(DevType devType){
+        if(devType==null){
+            return "";
+        }
         String dev_name=devType.getDevName();
+
         List<Assert> list=jpaAssert.findAssertsByAname(dev_name);
         String template=devType.getAssetNumTemplate();
         if(template.equals("")){

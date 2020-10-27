@@ -227,7 +227,8 @@ public class AsmRestController {
         List<String> devCodes=new ArrayList<>();
         List<String> names=jpaDevType.findDevTypesNameByAssertType(TpName);
         if(names.size()!=0){
-            DevType devType1=jpaDevType.findDevTypeByDevName(names.get(0));
+            DevType devType1=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(names.get(0),assetType);
+
             devCodes.add(devType1.getAssetNumTemplate());
         }
 
@@ -292,8 +293,9 @@ public class AsmRestController {
     public Map<String,String> valid(String num,int id){
         Map<String,String> map=new HashMap<>();
         Assert anAssert=jpaAssert.findById(id).get();
+
         String name=anAssert.getAname();
-        DevType devType=jpaDevType.findDevTypeByDevName(name);
+        DevType devType=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(name,anAssert.getAssetTypeByAssertType());
         String template=devType.getAssetNumTemplate();
         boolean flag=asmService.validDevTypeNum(num,template);
         boolean repeatFlag=false;
@@ -357,9 +359,9 @@ public class AsmRestController {
 
 
     @PostMapping("/asm/getDevNumTemplate")
-    public Map<String, String> getNum(String devName){
+    public Map<String, String> getNum(String devName,String assetType){
         Map<String,String> map=new HashMap<>();
-        DevType devType=jpaDevType.findDevTypeByDevName(devName);
+        DevType devType=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(devName,jpaAssetType.findAssetTypeByName(assetType));
         String max=asmService.getMaxAssetNum(devType);
         String devTypeAssetNumTemplate=devType.getAssetNumTemplate();
         map.put("code",devTypeAssetNumTemplate);
@@ -629,7 +631,8 @@ public class AsmRestController {
         String path= ClassUtils.getDefaultClassLoader().getResource("static/excel").getPath();   //上传资源到项目路径的路径获得
 
         File file=new File(path+"/"+"moban1.xlsx");
-        InputStream inputStream =new FileInputStream(file);
+//        InputStream inputStream =new FileInputStream(file);
+        InputStream inputStream =this.getClass().getClassLoader().getResourceAsStream("static/excel/moban1.xlsx");
         response.setHeader("Content-disposition", "attachment; filename=" + "template.xlsx");
         response.setContentType("application/msexcel;charset=UTF-8");//设置类型
         response.setHeader("Pragma", "No-cache");//设置头

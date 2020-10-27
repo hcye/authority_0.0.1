@@ -66,9 +66,12 @@
                         }, function(index, layero){
                             //关闭弹出层
                              var rname=$(window.parent.document).find("#rname");
+
                              var tp=$(window.parent.document).find("#type");
                              var inp=$(window.parent.document).find("#pageInput");
-                            parent.queryDevTypes(rname.val(), "", "", inp.val(), tp.val());
+                             if(rname.val()!=null){
+                                 parent.queryDevTypes(rname.val(), "", "", inp.val(), tp.val());
+                             }
                              var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
                             parent.layer.close(index);
 
@@ -103,7 +106,9 @@
                     </select>
                 </div>
             </div>
-
+            <div class="layui-form-item">
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;不为空的模板，以-分割的最后一组0在设备类型模板必须使用全部9代替</span>
+            </div>
             <div class="layui-form-item">
                 <label class="layui-form-label">编号模板:</label>
                 <div class="layui-input-block">

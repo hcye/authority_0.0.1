@@ -74,7 +74,8 @@ public class AsmController {
         String firstType=assetTypes.get(0).getTypeName();
         List<String> names=jpaDevType.findDevTypesNameByAssertType(firstType);
         if(names.size()!=0){
-            DevType devType=jpaDevType.findDevTypeByDevName(names.get(0));
+
+            DevType devType=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(names.get(0),assetTypes.get(0));
             String maxNum=asmService.getMaxAssetNum(devType);
             String code=devType.getAssetNumTemplate();
             model.addAttribute("code",code);
@@ -220,14 +221,14 @@ public class AsmController {
 
 
 
-    @RequiresPermissions("asm:type:edit")
+    @RequiresPermissions("asm:edit:btn")
     @GetMapping("/asm/edit_dev")
     public String editDev(int id,Model model){
         Assert anAssert= jpaAssert.findById(id).get();
 
 
         String name=anAssert.getAname();
-        DevType devType=jpaDevType.findDevTypeByDevName(name);
+        DevType devType=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(name,anAssert.getAssetTypeByAssertType());
         String temp=devType.getAssetNumTemplate();
         model.addAttribute("dev",anAssert);
         model.addAttribute("temp",temp);
