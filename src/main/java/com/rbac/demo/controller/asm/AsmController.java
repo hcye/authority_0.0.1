@@ -47,12 +47,16 @@ public class AsmController {
         String loginUser= (String) SecurityUtils.getSubject().getPrincipal();  //操作者用户名
         Pageable pageable=PageRequest.of(0,pageSize);   //初始化第一页
         List<String> assertNames=jpaAssert.getDistinctAssertNames(assetTypes.get(0));
-
-        Page<Assert> asserts =jpaAssert.findAssertsByDevice(assertNames.get(0),pageable);  //初始化使用第一个类型，的第一个设备类型
+        if(assertNames==null){
+            assertNames=new ArrayList<>();
+        }
+        if(assertNames.size()>0){
+            Page<Assert> asserts =jpaAssert.findAssertsByDevice(assertNames.get(0),pageable);  //初始化使用第一个类型，的第一个设备类型
+            model.addAttribute("asserts",asserts);
+            model.addAttribute("assertList",asserts.getContent());
+        }
         model.addAttribute("operator",loginUser);
         model.addAttribute("assertTypes",assetTypes);
-        model.addAttribute("asserts",asserts);
-        model.addAttribute("assertList",asserts.getContent());
         model.addAttribute("assertNames",assertNames);
         return "/asm/bro";
     }
@@ -72,13 +76,20 @@ public class AsmController {
         List<AssetType> assetTypes=asmService.getPermitAsmAssetTypes();
         String firstType=assetTypes.get(0).getTypeName();
         List<String> names=jpaDevType.findDevTypesNameByAssertType(firstType);
-        DevType devType=jpaDevType.findDevTypeByDevName(names.get(0));
-        String maxNum=asmService.getMaxAssetNum(devType);
-        String code=devType.getAssetNumTemplate();
+        if(names.size()!=0){
+            DevType devType=jpaDevType.findDevTypeByDevName(names.get(0));
+            String maxNum=asmService.getMaxAssetNum(devType);
+            String code=devType.getAssetNumTemplate();
+            model.addAttribute("code",code);
+            model.addAttribute("maxNum",maxNum);
+        }else {
+            model.addAttribute("code","");
+            model.addAttribute("maxNum","");
+        }
+
         model.addAttribute("types",assetTypes);
         model.addAttribute("names",names);
-        model.addAttribute("code",code);
-        model.addAttribute("maxNum",maxNum);
+
         return "/asm/inp";
     }
 

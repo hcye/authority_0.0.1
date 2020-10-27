@@ -196,7 +196,7 @@
                     <label class="layui-form-label">资产类型</label>
                     <div class="layui-input-inline">
                         <select class="layui-form-select" id="dev_type" lay-filter="tp">
-                            <option  th:each="tp : ${types}" shiro:hasPermission="${tp.getPermiCode()}" th:text="${tp.getTypeName()}"></option>
+                            <option  th:each="tp : ${types}"  th:text="${tp.getTypeName()}"></option>
                         </select>
                     </div>
                 </div>
@@ -217,8 +217,8 @@
                     </div>
                     <button class="layui-btn " id="search"> <i class="layui-icon">&#xe615;</i> 查找</button>
                     <div class="layui-btn-group">
-                        <button class="layui-btn " id="in" lay-filter="upload"> <i class="layui-icon">&#xe67c;</i>导入</button>
-                        <button class="layui-btn " id="out" ><i class="layui-icon">&#xe601;</i>导出</button>
+                        <button class="layui-btn " id="in" lay-filter="upload" shiro:hasPermission="asm:item:leading-in" > <i class="layui-icon">&#xe67c;</i>导入</button>
+                        <button class="layui-btn " id="out" shiro:hasPermission="asm:item:leading-out"><i class="layui-icon" >&#xe601;</i>导出</button>
                         <button class="layui-btn " id="outPutTemplate">下载模板</button>
                     </div>
                 </div>

@@ -226,9 +226,12 @@ public class AsmRestController {
         List<String> codes=new ArrayList<>();
         List<String> devCodes=new ArrayList<>();
         List<String> names=jpaDevType.findDevTypesNameByAssertType(TpName);
-        DevType devType1=jpaDevType.findDevTypeByDevName(names.get(0));
+        if(names.size()!=0){
+            DevType devType1=jpaDevType.findDevTypeByDevName(names.get(0));
+            devCodes.add(devType1.getAssetNumTemplate());
+        }
+
         codes.add(code);
-        devCodes.add(devType1.getAssetNumTemplate());
         map.put("name",names);
         map.put("code",codes);
         map.put("devCode",devCodes);
@@ -680,7 +683,6 @@ public class AsmRestController {
 
     @GetMapping("asm/out_DevTypes")
     public void exportDevExcel(HttpServletResponse response) throws IOException {
-        System.out.println("---");
         // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("utf-8");

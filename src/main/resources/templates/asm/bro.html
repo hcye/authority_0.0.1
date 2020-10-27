@@ -180,6 +180,7 @@
                     <label class="layui-form-label" style="padding-left: 5px">资产名称:</label>
                     <div class="layui-input-inline">
                         <select id="devName" class="layui-form-select" >
+
                             <option th:each="devname : ${assertNames}" th:text="${devname}"></option>
                         </select>
                     </div>
@@ -221,14 +222,14 @@
                     <button class="layui-btn" id="pre" style="float: right">-</button>
                 </div>
                 <div class="layui-col-md2 layui-input-inline" style="margin: 0">
-                    <input type="text" class="layui-input" id="pageInput" th:value="${asserts.getNumber()+1}" />
+                    <input type="text" class="layui-input" id="pageInput" th:value="${asserts==null ? 0:asserts.getNumber()+1}" />
                 </div>
                 <div class="layui-col-md1">
                     <button class="layui-btn" id="next">+</button>
                 </div>
                 <div class="layui-col-md2">
                     <button class="layui-btn"  id="jump">跳转</button>
-                    <span id="PageCount" th:text="${' 共 '+asserts.getTotalPages()+' 页'}"></span>
+                    <span id="PageCount" th:text="${asserts==null?'共 0 页': ' 共 '+asserts.getTotalPages()+' 页'}"></span>
                 </div>
             </div>
         </div>
