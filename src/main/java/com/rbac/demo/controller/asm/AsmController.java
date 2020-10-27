@@ -3,7 +3,6 @@ import com.rbac.demo.entity.*;
 import com.rbac.demo.jpa.*;
 import com.rbac.demo.service.AsmRecordService;
 import com.rbac.demo.service.AsmService;
-import com.rbac.demo.tool.ConvertStrForSearch;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +13,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 @Controller
@@ -58,14 +55,14 @@ public class AsmController {
         model.addAttribute("operator",loginUser);
         model.addAttribute("assertTypes",assetTypes);
         model.addAttribute("assertNames",assertNames);
-        return "/asm/bro";
+        return "asm/bro";
     }
     @RequiresPermissions("asm:ret:view")
     @GetMapping("/asm/ret")
     public String retPage(Model model){
         String loginUser= (String) SecurityUtils.getSubject().getPrincipal();  //操作者用户名
         model.addAttribute("operator",loginUser);
-        return "/asm/ret";
+        return "asm/ret";
     }
 
     @RequiresPermissions("asm:inp:view")
@@ -90,7 +87,7 @@ public class AsmController {
         model.addAttribute("types",assetTypes);
         model.addAttribute("names",names);
 
-        return "/asm/inp";
+        return "asm/inp";
     }
 
     @RequiresPermissions("asm:list:view")
@@ -98,14 +95,14 @@ public class AsmController {
     public String listPage(Model model){
         List<AssetType> types= jpaAssetType.findAssertType();
         model.addAttribute("types",types);
-        return "/asm/list";
+        return "asm/list";
     }
 
     @RequiresPermissions("asm:type:view")
     @GetMapping("/asm/type")
     public String typePage(){
 
-        return "/asm/type";
+        return "asm/type";
     }
 
     @RequiresPermissions("asm:devType:view")
@@ -113,7 +110,7 @@ public class AsmController {
     public String devTypePage(Model model){
         List<AssetType> list=jpaAssetType.findAll();
         model.addAttribute("list",list);
-        return "/asm/devType";
+        return "asm/devType";
     }
 
     @RequiresPermissions("asm:type:add")
@@ -121,7 +118,7 @@ public class AsmController {
     public String addTypePage(Model model){
         List<Resources> list=jpaResources.findAll();
         model.addAttribute("list",list);
-        return "/asm/add_type";
+        return "asm/add_type";
     }
 
 
@@ -133,7 +130,7 @@ public class AsmController {
         model.addAttribute("page",records);
         model.addAttribute("action",AsmAction.getList());
         model.addAttribute("list",records.getContent());
-        return "/asm/log";
+        return "asm/log";
     }
 
     @RequiresPermissions("asm:log:view")
@@ -199,7 +196,7 @@ public class AsmController {
         model.addAttribute("list",page.getContent());
         model.addAttribute("page",page);
         model.addAttribute("timeRange",timeRange);
-        return "/asm/log";
+        return "asm/log";
     }
 
     @RequiresPermissions("asm:type:edit")
@@ -218,7 +215,7 @@ public class AsmController {
         list.add(0,ress);   //把已选内容前置
         model.addAttribute("tp",type);
         model.addAttribute("list",list);
-        return "/asm/edit_type";
+        return "asm/edit_type";
     }
 
 
@@ -234,7 +231,7 @@ public class AsmController {
         String temp=devType.getAssetNumTemplate();
         model.addAttribute("dev",anAssert);
         model.addAttribute("temp",temp);
-        return "/asm/edit_dev";
+        return "asm/edit_dev";
     }
 
 

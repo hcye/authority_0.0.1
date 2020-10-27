@@ -18,18 +18,18 @@ public class MenusController {
     @RequiresPermissions("asm:menu:view")
     @GetMapping("/menus/menus")
     public String menus(){
-        return "/menus/menus";
+        return "menus/menus";
     }
     @RequiresPermissions("asm:menus:add")
     @GetMapping("/menus/add")
     public String add(){
-        return "/menus/add";
+        return "menus/add";
     }
 
 
     @GetMapping("/menus/selectUpperMenu")
     public String getLeader(){
-        return "/menus/layer_select_upperMenu";
+        return "menus/layer_select_upperMenu";
     }
 
     @RequiresPermissions("asm:menus:edit")
@@ -47,6 +47,6 @@ public class MenusController {
         }
         model.addAttribute("types",types);
         model.addAttribute("res",resources);
-        return "/menus/edit";
+        return "menus/edit";
     }
 }

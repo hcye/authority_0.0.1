@@ -296,14 +296,19 @@ public class AsmRestController {
         DevType devType=jpaDevType.findDevTypeByDevName(name);
         String template=devType.getAssetNumTemplate();
         boolean flag=asmService.validDevTypeNum(num,template);
-        boolean repeatFlag=asmService.validRepeat(num);
+        boolean repeatFlag=false;
+        if(anAssert.getAssestnum().equalsIgnoreCase(num)){
+            repeatFlag=true;
+        }else {
+            repeatFlag=asmService.validRepeat(num);
+        }
         if(flag){
             map.put("ok","校验正确");
         }else {
             map.put("error","输入的资产编码不匹配设备类型约束！");
         }
         if(repeatFlag){
-            map.put("ok","不含重复");
+            map.put("ok","校验正确");
         }else {
             map.put("error","输入的资产编号重复！");
         }
