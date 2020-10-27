@@ -173,7 +173,7 @@
                 <label class="layui-form-label">设备类型:</label>
                 <div class="layui-input-inline">
                     <select id="type">
-                        <option th:each="tpName : ${list}" th:text="${tpName.getTypeName()}"></option>
+                        <option  th:each="tpName : ${list}" shiro:hasPermission="${tpName.getPermiCode()}" th:text="${tpName.getTypeName()}"></option>
                     </select>
                 </div>
             </div>

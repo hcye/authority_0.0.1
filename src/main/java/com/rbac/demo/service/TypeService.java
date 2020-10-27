@@ -62,7 +62,7 @@ public class TypeService {
             types =jpaDevType.findDevTypesByAssertType(type,pageable);
         } else {
             name= ConvertStrForSearch.getFormatedString(name);
-            types = jpaDevType.findDevTypesByDevNameLike(name, pageable);
+            types = jpaDevType.findDevTypesByDevNameLikeAndAssetType(name,type, pageable);
         }
 
 
