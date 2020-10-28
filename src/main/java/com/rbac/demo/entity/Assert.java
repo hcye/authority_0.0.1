@@ -25,8 +25,9 @@ public class Assert {
     private Employee employeeByBorrower;
 
     private Collection<OperatRecord> operatRecordsById;
-    private AssetType assetTypeByAssertType;
 
+    private Collection<EchangeDevs> echangeDevsById;
+    private AssetType assetTypeByAssertType;
 
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
@@ -236,6 +237,17 @@ public class Assert {
     public void setOperatRecordsById(Collection<OperatRecord> operatRecordsById) {
         this.operatRecordsById = operatRecordsById;
     }
+
+    @OneToMany(mappedBy = "devFK")
+    public Collection<EchangeDevs> getEchangeDevsById() {
+        return echangeDevsById;
+    }
+
+    public void setEchangeDevsById(Collection<EchangeDevs> echangeDevsById) {
+        this.echangeDevsById = echangeDevsById;
+    }
+
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "assert_type", referencedColumnName = "id")

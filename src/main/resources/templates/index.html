@@ -84,6 +84,23 @@
 
 
 
+	$(function () {
+		$(document).ready(function () {
+			$.post("/sys/sys_even", {},    //把name数据提交到ajaxRes action内，
+					function(dt) {
+						var ev=dt["exchange"];
+						if(ev.indexOf(':')!=-1){
+							layer.open({
+								type: 2,
+								title: "流转申请",
+								area: ['900px', '80%'],
+								content: ['/asm/exchange_resp'],
+							})
+						}
+					}, "json");
+		});
+	})
+
 
 	layui.extend({
 		dtree: '{/}layui_ext/dtree/dtree'

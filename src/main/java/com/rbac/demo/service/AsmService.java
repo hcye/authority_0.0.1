@@ -78,9 +78,9 @@ public class AsmService {
             page=jpaAssert.findAssertsBytype(type,damFlag,pageable);
         }else {
             search= ConvertStrForSearch.getFormatedString(search);
-            page=jpaAssert.findAssertsByAnameLikeAndDamFlag(search,damFlag,pageable);
+            page=jpaAssert.findAssertsByAnameLikeAndDamFlagAndType(type,search,damFlag,pageable);
             if(page.isEmpty()){
-                page=jpaAssert.findAssertsByAssestnumLikeAndDamFlag(search,damFlag,pageable);
+                page=jpaAssert.findAssertsByAssestnumLikeAndDamFlagAndType(type,search,damFlag,pageable);
                 if(page.isEmpty()){
                     page=jpaAssert.findAssertsByBorroworPingyinLikeAndDamFlag(search,damFlag,pageable);
                     if(page.isEmpty()){
@@ -102,9 +102,9 @@ public class AsmService {
             list=jpaAssert.findAssertsBytype(type,damFlag);
         }else {
             search= ConvertStrForSearch.getFormatedString(search);
-            list=jpaAssert.findAssertsByAnameLikeAndDamFlag(search,damFlag);
+            list=jpaAssert.findAssertsByAnameLikeAndDamFlagAndType(type,search,damFlag);
             if(list.isEmpty()){
-                list=jpaAssert.findAssertsByAssestnumLikeAndDamFlag(search,damFlag);
+                list=jpaAssert.findAssertsByAssestnumLikeAndDamFlagAndType(type,search,damFlag);
                 if(list.isEmpty()){
                     list=jpaAssert.findAssertsByBorroworPingyinLikeAndDamFlag(search,damFlag);
                     if(list.isEmpty()){
@@ -122,7 +122,7 @@ public class AsmService {
         }
         String dev_name=devType.getDevName();
 
-        List<Assert> list=jpaAssert.findAssertsByAname(dev_name);
+        List<Assert> list=jpaAssert.findAssertsByAnameAndAssetType(dev_name,devType.getAssetTypeByAssertTypeId());
         String template=devType.getAssetNumTemplate();
         if(template.equals("")){
             return "";

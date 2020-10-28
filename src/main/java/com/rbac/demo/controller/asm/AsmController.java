@@ -48,7 +48,7 @@ public class AsmController {
             assertNames=new ArrayList<>();
         }
         if(assertNames.size()>0){
-            Page<Assert> asserts =jpaAssert.findAssertsByDevice(assertNames.get(0),pageable);  //初始化使用第一个类型，的第一个设备类型
+            Page<Assert> asserts =jpaAssert.findAssertsByDevice(assertNames.get(0),assetTypes.get(0),pageable);  //初始化使用第一个类型，的第一个设备类型
             model.addAttribute("asserts",asserts);
             model.addAttribute("assertList",asserts.getContent());
         }
@@ -234,7 +234,25 @@ public class AsmController {
         model.addAttribute("temp",temp);
         return "asm/edit_dev";
     }
+    @RequiresPermissions("asm:exchange:view")
+    @GetMapping("/asm/exchange")
+    public String exchange(Model model){
+        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        List<AssetType> types=jpaAssetType.findAll();
+        model.addAttribute("oper",employee);
+        model.addAttribute("assertTypes",types);
+        return "asm/exchange/exchange_req";
+    }
 
+    @RequiresPermissions("asm:exchange:view")
+    @GetMapping("/asm/exchange_resp")
+    public String exchangeResp(Model model){
+        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        List<AssetType> types=jpaAssetType.findAll();
+        model.addAttribute("oper",employee);
+        model.addAttribute("assertTypes",types);
+        return "asm/exchange/exchange_resp";
+    }
 
 
     @RequiresPermissions("asm:edit:btn")

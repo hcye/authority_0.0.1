@@ -44,16 +44,16 @@
 
     $(function () {
         $("#doSearch").click(function () {
-            queryPage($("#devName").val(),$("#search").val(),"","",$("#pageInput").val(),"");
+            queryPage($("#astType").val(),$("#devName").val(),$("#search").val(),"","",$("#pageInput").val(),"");
         })
         $("#next").click(function () {
-            queryPage($("#devName").val(),$("#search").val(),"","next",$("#pageInput").val(),"");
+            queryPage($("#astType").val(),$("#devName").val(),$("#search").val(),"","next",$("#pageInput").val(),"");
         })
         $("#jump").click(function () {
-            queryPage($("#devName").val(),$("#search").val(),"","",$("#pageInput").val(),"jump");
+            queryPage($("#astType").val(),$("#devName").val(),$("#search").val(),"","",$("#pageInput").val(),"jump");
         })
         $("#pre").click(function () {
-            queryPage($("#devName").val(),$("#search").val(),"pre","",$("#pageInput").val(),"");
+            queryPage($("#astType").val(),$("#devName").val(),$("#search").val(),"pre","",$("#pageInput").val(),"");
         })
 
             $("#select").click(function () {
@@ -96,6 +96,7 @@
                 }
                 if(checkedItemId==''){
                     layer.alert("请至少勾选一个归还设备！");
+                    return;
                 }
                 $.post("/asm/operat", {name:$("#name").val(),selectDevIds:checkedItemId,actionFlag:'bo'},    //把name数据提交到ajaxRes action内，
                     function (data) {
@@ -132,8 +133,8 @@
         })
     })
 
-    function queryPage(name,searchKey,pre,next,pageIndex,jumpFlag) {
-        $.post("/asm/queryPage", {name:name,search:searchKey,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag},    //把name数据提交到ajaxRes action内，
+    function queryPage(type,name,searchKey,pre,next,pageIndex,jumpFlag) {
+        $.post("/asm/queryPage", {type:type,name:name,search:searchKey,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag},    //把name数据提交到ajaxRes action内，
             function(data) {
                 var bro = data["emp"][0];
                 var page = data["page"][0][0];
@@ -170,7 +171,7 @@
 <div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
     <p>资产借用</p>
 </div>
-<div class="layui-container">
+<div class="layui-container" style="width: 85%">
     <div class="layui-form">
         <div class="layui-form-item">
             <div class="layui-inline">
@@ -178,20 +179,12 @@
                 <div class="layui-input-inline">
                     <input class="layui-input"  id="name"/>
                 </div>
-                <button class="layui-btn" id="select">选择</button>
-            </div>
-            <div class="layui-inline">
-                <label class="layui-form-label" style="padding-left: 5px">操作人:</label>
-                <div class="layui-input-inline">
-                    <input class="layui-input" disabled="disabled" th:value="${operator}"  id="operator"/>
-                </div>
             </div>
             <div class="layui-inline layui-btn-group">
                 <button class="layui-btn" id="conform">借用</button>
             </div>
-        </div>
-        <div class="layui-form-item">
-            <div class="layui-row">
+
+
                 <div class="layui-inline">
                     <label class="layui-form-label" style="padding-left: 5px">资产分类:</label>
                     <div class="layui-input-inline">
@@ -215,7 +208,7 @@
                     </div>
                     <button class="layui-btn" id="doSearch"><i class="layui-icon">&#xe615;</i>查找</button>
                 </div>
-            </div>
+
         </div>
         <div class="layui-form-item">
             <table class="layui-table">
