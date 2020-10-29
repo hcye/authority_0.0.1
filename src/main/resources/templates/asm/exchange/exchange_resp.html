@@ -15,7 +15,7 @@
 <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
 <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
 <script type="text/javascript">
-    layui.use('form', function(){
+    layui.use('form', function () {
         var form = layui.form;
         //监听提交
         //checkbox 点击事件
@@ -24,64 +24,86 @@
     $(function () {
         $(document).ready(function () {
             $.post("/sys/getExchangeEven", {},    //把name数据提交到ajaxRes action内，
-                function(dt) {
+                function (dt) {
+
+
+  /*                  map.put("sender", echange.getSenderFK().getEname() + "-" + echange.getSenderFK().getLoginName());
+                    map.put("reason", echange.getReason());
+                    map.put("sendTime", echange.getSendTime().toString());
+                    Assert anAssert = echange.getDevFK();
+                    map.put("ast", anAssert);
+                    map.put("exid", echange.getId());
+                */
 
                     $("#name").val(dt["sender"]);
                     $("#reason").val(dt["reason"]);
                     $("#time").val(dt["sendTime"]);
-                    $("#tb").append("<tr><td>"+dt["ast"].aname+"</td><td>"+dt["ast"].model+"</td>" +
-                        "<td>"+dt["ast"].assestnum+"</td><td>"+dt["ast"].snnum+"</td><td>"+dt["ast"].remarks+"</td></tr>");
+                    $("#exid").val(dt["exid"]);
                     console.log(dt["ast"]);
+                    $("#tb").append("<tr><td><input id='hid' type='hidden' value='"+dt["ast"].id+"' />" + dt["ast"].aname + "</td><td>" + dt["ast"].model + "</td>" +
+                        "<td>" + dt["ast"].assestnum + "</td><td>" + dt["ast"].snnum + "</td><td>" + dt["ast"].remarks + "</td></tr>");
                 }, "json");
         })
+
+        $("#permit").click(function () {
+
+            $.post("/sys/exchangePermit", {exid:$("#exid").val(),permi:"agree"},    //把name数据提交到ajaxRes action内，
+                function (dt) {
+                    if(dt["ok"]!=null){
+                        layer.confirm('流转成功！', {
+                            btn: ['确定', '取消'] //可以无限个按钮
+                        }, function(index, layero){
+                            var index1 = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                            parent.layer.close(index1);
+                        }, function(index){
+                            //关闭弹出层
+                            var index1 = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                            parent.layer.close(index1);
+                        });
+                    }
+                }, "json");
+        })
+
+        $("#reject").click(function () {
+            $.post("/sys/exchangePermit", {exid:$("#exid").val(),permi:"disagree"},    //把name数据提交到ajaxRes action内，
+                function (dt) {
+                    var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                    parent.layer.close(index);
+                }, "json");
+        })
+
     })
 
-    function transformNullStr(str){
-        if (str==null){
+    function transformNullStr(str) {
+        if (str == null) {
             return "";
         }
         return str;
     }
 
 
-
-
-
 </script>
-<!--model.addAttribute("operator",loginUser);-->
-<!--model.addAttribute("assertTypes",assertTypes);-->
-<!--model.addAttribute("asserts",asserts);-->
+
 <body>
 <div class="layui-container">
     <div class="layui-form">
-<!--        <div class="layui-form-item">
-
-            <div class="layui-input-inline">
-                <span>发起时间:</span> <span id="time"></span>
-            </div>
-            <div class="layui-input-inline">
-               <span>申请原因：</span><span id="reason"></span>
-            </div>
-            <div class="layui-input-inline">
-                <span>发起人：</span><span id="name"></span>
-            </div>
-        </div>-->
+    <input id="exid" type="hidden"/>
         <div class="layui-form-item">
             <label class="layui-form-label">发起人:</label>
             <div class="layui-input-block">
-                <input class="layui-input" id="name" />
+                <input class="layui-input" id="name"/>
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">发起时间:</label>
             <div class="layui-input-block">
-                <input class="layui-input" id="time" />
+                <input class="layui-input" id="time"/>
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">申请原因:</label>
             <div class="layui-input-block">
-                <input class="layui-input" id="reason" />
+                <input class="layui-input" id="reason"/>
             </div>
         </div>
 
@@ -102,12 +124,11 @@
             </table>
         </div>
 
-        <div class="layui-row" style="float: right;margin-top: 8%">
-            <div class="layui-col-md2 layui-col-md-offset5">
+        <div class="layui-row" style="margin-top: 8%">
+            <div class="layui-col-md3 layui-col-md-offset5">
                 <button class="layui-btn" id="permit">同意</button>
                 <button class="layui-btn" id="reject">拒绝</button>
             </div>
-
         </div>
     </div>
 </div>

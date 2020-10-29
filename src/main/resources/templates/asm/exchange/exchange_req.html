@@ -88,11 +88,11 @@
                 }
                 $.post("/asm/exchange_req", {reason:$("#reason").val(),selectDevIds:checkedItemId},    //把name数据提交到ajaxRes action内，
                     function (data) {
-
                         layer.msg(data["ok"]);
                     }, "json");
             }, function(index){
                 //关闭弹出层
+                    layer.close(index);
                     return;
             });
 
@@ -105,6 +105,7 @@
         $.post("/asm/queryExchangePage", {type:type,search:searchKey,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag},    //把name数据提交到ajaxRes action内，
             function(data) {
                 var bro = data["emp"][0];
+                var me = data["me"][0];
                 var devs = data["devs"][0];
                 var page = data["page"][0][0];
                 var astList = page.content;
@@ -118,6 +119,10 @@
                         disable=" disabled='true' ";
                         trStyle="style='color: #9F9F9F'";
                     }else {
+                        if(bro[key].id==me[0].id){
+                            disable=" disabled='true' ";
+                            trStyle="style='color: #9F9F9F'";
+                        }
                         browser=bro[key].ename;
                     }
                     for(var k in devs){

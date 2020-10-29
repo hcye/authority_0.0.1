@@ -124,6 +124,7 @@ public class AsmRestController {
         Map<String,List<Object>> map=new HashMap<>();
         List<DevType> devTypes=jpaDevType.findAll();
         List<Employee> bros=new ArrayList<>();
+        List<Employee> me=new ArrayList<>();
         Page<Assert> page;
         Pageable pageable;
         List<Page<Assert>> pages=new ArrayList<>();
@@ -160,11 +161,12 @@ public class AsmRestController {
         }
 
 
-
+        me.add((Employee) SecurityUtils.getSubject().getSession().getAttribute("user"));
         pages.add(page);
         map.put("page", Collections.singletonList(pages));
         map.put("emp", Collections.singletonList(bros));
         map.put("devs", Collections.singletonList(devTypes));
+        map.put("me", Collections.singletonList(me));
         return map;
     }
 
@@ -249,12 +251,23 @@ public class AsmRestController {
 
     @RequiresPermissions("asm:devType:edit")
     @PostMapping("/asm/editDevType")
-    public Map<String, String> valid(int id,String input){
+    public Map<String, String> valid(int id,String input,boolean exc){
         Map<String ,String> map=new HashMap<>();
         DevType devType=jpaDevType.findById(id).get();
         AssetType assetType=devType.getAssetTypeByAssertTypeId();
         String name=devType.getDevName();
         List<Assert> list = jpaAssert.findAssertsByAnameAndAssetType(name,assetType);
+        if(exc==true&&devType.getExchangeable().equals("0")){
+            devType.setExchangeable("1");
+            jpaDevType.save(devType);
+            map.put("ok","该设备已经可以流转！");
+            return map;
+        }else if(exc==false&&devType.getExchangeable().equals("1")){
+            devType.setExchangeable("0");
+            jpaDevType.save(devType);
+            map.put("ok","设备被禁止流转！");
+            return map;
+        }
         if(!list.isEmpty()){
             map.put("error","设备类型关联有设备不能修改！");
             return map;
@@ -323,7 +336,7 @@ public class AsmRestController {
     }
     @RequiresPermissions("asm:devType:add")
     @PostMapping("/asm/addDevType")
-    public Map<String, String> addDevType(String devType,String dev_name,String desc,String temp){
+    public Map<String, String> addDevType(String devType,String dev_name,String desc,String temp,String exc){
         Map<String,String> map=new HashMap<>();
         AssetType assertType= jpaAssetType.findAssetTypeByName(devType);
         String assetCode=assertType.getAssetCode();
@@ -338,8 +351,13 @@ public class AsmRestController {
             map.put("error","资产名称重复！请重新填写");
             return map;
         }
-        DevType devType1=new DevType();
 
+        DevType devType1=new DevType();
+        if(exc.equals("是")){
+            devType1.setExchangeable("1");
+        }else {
+            devType1.setExchangeable("0");
+        }
         Timestamp ts=new Timestamp(new Date().getTime());
         String usname= (String) SecurityUtils.getSubject().getPrincipal();
         devType1.setCreateTime(ts);
@@ -575,8 +593,8 @@ public class AsmRestController {
             }
         }
         echangeDevs.setReason(reason);
-        echangeDevs.setSenderFK(asset.getEmployeeByBorrower());
-        echangeDevs.setResiverFK(employee);
+        echangeDevs.setSenderFK(employee);
+        echangeDevs.setResiverFK(asset.getEmployeeByBorrower());
         echangeDevs.setSendTime(new Timestamp(new Date().getTime()));
         echangeDevs.setDevFK(asset);
         jpaExchangeDevs.save(echangeDevs);

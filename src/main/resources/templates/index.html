@@ -85,21 +85,45 @@
 
 
 	$(function () {
+		onReady();
+	})
+
+	function onReady(){
 		$(document).ready(function () {
 			$.post("/sys/sys_even", {},    //把name数据提交到ajaxRes action内，
 					function(dt) {
+						if(dt["exchange"]==null){
+							return;
+						}
 						var ev=dt["exchange"];
 						if(ev.indexOf(':')!=-1){
 							layer.open({
 								type: 2,
-								title: "流转申请",
-								area: ['900px', '80%'],
+								title: "资产流转",
+								area:["1000px","800px"],
 								content: ['/asm/exchange_resp'],
 							})
+						}else {
+							if(dt["exchange"]==null){
+								layer.close(index)
+							}
+							if(dt["exchange"]!=null||dt["exchange"]!=""){
+								layer.confirm(dt["exchange"], {
+									btn: ['确定', '取消'] //可以无限个按钮
+								}, function(index, layero){
+									onReady();
+									layer.close(index);
+								}, function(index){
+									//关闭弹出层
+									onReady();
+									layer.close(index);
+								});
+							}
+
 						}
 					}, "json");
 		});
-	})
+	}
 
 
 	layui.extend({
