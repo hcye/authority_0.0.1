@@ -158,28 +158,30 @@ public class SysRestController {
     }
 
     @PostMapping("/sys/exchangePermit")
-    public Map<String, Object> exP(int exid,String permi) {
-        Map<String, Object> map = new HashMap<>();
-        EchangeDevs echangeDevs=jpaExchangeDevs.findById(exid).get();
-        if(permi.equals("agree")){
-            Assert anAssert=echangeDevs.getDevFK();
-            Employee employee = echangeDevs.getSenderFK();
-            anAssert.setEmployeeByBorrower(employee);
-            jpaAssert.save(anAssert);
-            echangeDevs.setReceviedTime(new Timestamp(new Date().getTime()));
-            echangeDevs.setReceived("agree");
-            jpaExchangeDevs.save(echangeDevs);
-            Employee me=(Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
-            asmRecordService.write(AsmAction.dev_exc, new Timestamp(new java.util.Date().getTime()), me, employee, anAssert, "");
-            map.put("ok","1");
+    public Map<String,String> exP(String[] data) {
+        Map<String, String> map = new HashMap<>();
+        if(data==null){
             return map;
-        }else {
-            echangeDevs.setReceived("disagree");
+        }
+        for (String str:data){
+
+            String[] re=str.split("-");
+            int id=Integer.parseInt(re[0]);
+            String td=re[1];
+            EchangeDevs echangeDevs=jpaExchangeDevs.findById(id).get();
+            Employee sender=echangeDevs.getSenderFK();
+            Assert ast=echangeDevs.getDevFK();
+            ast.setEmployeeByBorrower(sender);
+            if(td.equals("true")){
+                echangeDevs.setReceived("agree");
+            }else if (td.equals("false")){
+                echangeDevs.setReceived("disagree");
+            }
             jpaExchangeDevs.save(echangeDevs);
-            map.put("error","1");
+            jpaAssert.save(ast);
+        }
             return map;
         }
 
 
     }
-}

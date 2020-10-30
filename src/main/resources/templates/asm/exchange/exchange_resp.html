@@ -17,54 +17,63 @@
 <script type="text/javascript">
     layui.use('form', function () {
         var form = layui.form;
-        form.render();
         //监听提交
         //checkbox 点击事件
+        $(document).ready(function () {
+            form.render();
+        })
     });
 
+
+
     $(function () {
-        $(document).ready(function () {
-            $.post("/sys/getExchangeEven", {},    //把name数据提交到ajaxRes action内，
+
+
+        $("#confirm").click(function () {
+            if ($("#tb") == null) {
+                var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                parent.layer.close(index);
+                return;
+            }
+            var checkboxlist = $("#tb").find("input:checkbox");
+            var i = 0;
+            var res = new Array();
+            while (i < checkboxlist.length) {
+                var id = $(checkboxlist[i]).parent().parent().find("input:hidden")[0].value;
+                var re = $(checkboxlist[i]).parent().parent().find("td")[3].innerHTML;
+                console.log(re)
+                res.push(id + "-" + checkboxlist[i].checked);
+                i++;
+            }
+            jQuery.ajaxSettings.traditional = true;  //jquery post传递数组时必须这样
+            $.post("/sys/exchangePermit", {data: res},    //把name数据提交到ajaxRes action内，
                 function (dt) {
 
-
-
-
-                    $("#name").val(dt["sender"]);
-                    $("#reason").val(dt["reason"]);
-                    $("#time").val(dt["sendTime"]);
-                    $("#exid").val(dt["exid"]);
-                    console.log(dt["ast"]);
-                    $("#tb").append("<tr><td><input id='hid' type='hidden' value='"+dt["ast"].id+"' />" + dt["ast"].aname + "</td><td>" + dt["ast"].model + "</td>" +
-                        "<td>" + dt["ast"].assestnum + "</td><td>" + dt["ast"].snnum + "</td><td>" + dt["ast"].remarks + "</td></tr>");
-                }, "json");
-        })
-
-        $("#permit").click(function () {
-
-            $.post("/sys/exchangePermit", {exid:$("#exid").val(),permi:"agree"},    //把name数据提交到ajaxRes action内，
-                function (dt) {
-                    if(dt["ok"]!=null){
-                        layer.confirm('流转成功！', {
-                            btn: ['确定', '取消'] //可以无限个按钮
-                        }, function(index, layero){
-                            var index1 = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
-                            parent.layer.close(index1);
-                        }, function(index){
-                            //关闭弹出层
-                            var index1 = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
-                            parent.layer.close(index1);
-                        });
-                    }
-                }, "json");
-        })
-
-        $("#reject").click(function () {
-            $.post("/sys/exchangePermit", {exid:$("#exid").val(),permi:"disagree"},    //把name数据提交到ajaxRes action内，
-                function (dt) {
                     var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
                     parent.layer.close(index);
                 }, "json");
+
+            /* $.post("/sys/exchangePermit", {exid: $("#exid").val(), permi: "agree"},    //把name数据提交到ajaxRes action内，
+                 function (dt) {
+                     if (dt["ok"] != null) {
+                         layer.confirm('流转成功！', {
+                             btn: ['确定', '取消'] //可以无限个按钮
+                         }, function (index, layero) {
+                             var index1 = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                             parent.layer.close(index1);
+                         }, function (index) {
+                             //关闭弹出层
+                             var index1 = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                             parent.layer.close(index1);
+                         });
+                 }
+                 }, "json");*/
+        })
+
+        $("#cancel").click(function () {
+
+            var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+            parent.layer.close(index);
         })
 
     })
@@ -80,31 +89,31 @@
 </script>
 
 <body>
-<div class="layui-container">
+<div class="layui-container" style="width: 90%">
     <div class="layui-form">
-    <input id="exid" type="hidden"/>
+        <input id="exid" type="hidden"/>
         <div class="layui-form-item">
-        <table class="layui-table" id="dataTable">
-            <thead>
-            <tr>
-                <td>请求人</td>
-                <td>名称</td>
-                <td>型号</td>
-                <td>编号</td>
-                <td>理由</td>
-                <td>操作</td>
-            </tr>
-            </thead>
-            <tbody id="tb">
+            <table class="layui-table" id="dataTable">
+                <thead>
+                <tr>
+                    <td>请求人</td>
+                    <td>名称</td>
+                    <td>型号</td>
+                    <td>编号</td>
+                    <td>理由</td>
+                    <td>操作</td>
+                </tr>
+                </thead>
+                <tbody id="tb">
 
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+            </table>
+        </div>
         <div class="layui-form-item " id="resp">
         </div>
 
         <div class="layui-row" style="margin-top: 8%">
-            <div class="layui-col-md3 layui-col-md-offset5">
+            <div style="float: right">
                 <button class="layui-btn" id="confirm">确定</button>
                 <button class="layui-btn" id="cancel">取消</button>
             </div>

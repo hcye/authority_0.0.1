@@ -117,7 +117,7 @@
 							layer.open({
 								type: 2,
 								title: "资产流转",
-								area:["1000px","800px"],
+								area:["900px","350px"],
 								content: ['/asm/exchange_resp'],
 								success: function(layero, index){
 									var body = layer.getChildFrame('body', index);
@@ -144,12 +144,11 @@
 							layer.open({
 								type: 2,
 								title: "资产流转",
-								area:["1000px","800px"],
+								area:["900px","350px"],
 								content: ['/asm/exchange_resp'],
 								success: function(layero, index){
 									var body = layer.getChildFrame('body', index);
 									body.find('table').remove();
-
 									if(resp!=null){
 										var respdiv=body.find('#resp');
 										respdiv.append("<blockquote class='layui-elem-quote'>消息</blockquote>");
