@@ -17,6 +17,7 @@
 <script type="text/javascript">
     layui.use('form', function () {
         var form = layui.form;
+        form.render();
         //监听提交
         //checkbox 点击事件
     });
@@ -27,13 +28,7 @@
                 function (dt) {
 
 
-  /*                  map.put("sender", echange.getSenderFK().getEname() + "-" + echange.getSenderFK().getLoginName());
-                    map.put("reason", echange.getReason());
-                    map.put("sendTime", echange.getSendTime().toString());
-                    Assert anAssert = echange.getDevFK();
-                    map.put("ast", anAssert);
-                    map.put("exid", echange.getId());
-                */
+
 
                     $("#name").val(dt["sender"]);
                     $("#reason").val(dt["reason"]);
@@ -89,45 +84,29 @@
     <div class="layui-form">
     <input id="exid" type="hidden"/>
         <div class="layui-form-item">
-            <label class="layui-form-label">发起人:</label>
-            <div class="layui-input-block">
-                <input class="layui-input" id="name"/>
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">发起时间:</label>
-            <div class="layui-input-block">
-                <input class="layui-input" id="time"/>
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">申请原因:</label>
-            <div class="layui-input-block">
-                <input class="layui-input" id="reason"/>
-            </div>
-        </div>
+        <table class="layui-table" id="dataTable">
+            <thead>
+            <tr>
+                <td>请求人</td>
+                <td>名称</td>
+                <td>型号</td>
+                <td>编号</td>
+                <td>理由</td>
+                <td>操作</td>
+            </tr>
+            </thead>
+            <tbody id="tb">
 
-        <div class="layui-form-item">
-            <table class="layui-table">
-                <thead>
-                <tr>
-                    <td>名称</td>
-                    <td>型号</td>
-                    <td>编号</td>
-                    <td>sn号</td>
-                    <td>备注</td>
-                </tr>
-                </thead>
-                <tbody id="tb">
-
-                </tbody>
-            </table>
+            </tbody>
+        </table>
+    </div>
+        <div class="layui-form-item " id="resp">
         </div>
 
         <div class="layui-row" style="margin-top: 8%">
             <div class="layui-col-md3 layui-col-md-offset5">
-                <button class="layui-btn" id="permit">同意</button>
-                <button class="layui-btn" id="reject">拒绝</button>
+                <button class="layui-btn" id="confirm">确定</button>
+                <button class="layui-btn" id="cancel">取消</button>
             </div>
         </div>
     </div>

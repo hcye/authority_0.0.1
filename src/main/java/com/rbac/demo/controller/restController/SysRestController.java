@@ -15,10 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 public class SysRestController {
@@ -32,16 +29,23 @@ public class SysRestController {
     private AsmRecordService asmRecordService;
 
     @PostMapping("/sys/sys_even")
-    public Map<String, String> sysEvent() {
-        Map<String, String> map = new HashMap<>();
+    public Map<String, Object> sysEvent() {
+        Map<String, Object> map = new HashMap<>();
         List<EchangeDevs> list = jpaExchangeDevs.findAll();
+
+
+
         Employee employee = (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
         if(list.size()==0){
             return map;
         }
+
+        List<Employee> senderList=new ArrayList<>();
+        List<Assert> asserts=new ArrayList<>();
+        List<EchangeDevs> reqList=new ArrayList<>();
+        List<String> res=new ArrayList<>();
         for (EchangeDevs echangeDevs : list) {
             Employee resiverFK = echangeDevs.getResiverFK();
-            Employee senderFK = echangeDevs.getSenderFK();
             Employee currentBro=echangeDevs.getDevFK().getEmployeeByBorrower();
             /**
              *
@@ -55,12 +59,26 @@ public class SysRestController {
                      * */
                     echangeDevs.setReceived("error");
                     jpaExchangeDevs.save(echangeDevs);
-                    map.put("error", "");
-                    return map;
+                    continue;
                 }
-                map.put("exchange", "reseive:/sys/exchange_resp");
-                return map;
+                senderList.add(echangeDevs.getSenderFK());
+                reqList.add(echangeDevs);
+                asserts.add(echangeDevs.getDevFK());
             }
+        }
+
+        if(senderList.size()!=0){
+            map.put("senders",senderList);
+            map.put("req",reqList);
+            map.put("ast",asserts);
+        }
+
+
+
+
+
+        for (EchangeDevs echangeDevs : list) {
+            Employee senderFK = echangeDevs.getSenderFK();
             /**
              *
              * 我发给别人的申请,并且对方处理了
@@ -77,13 +95,11 @@ public class SysRestController {
                  *
                  * */
                 if (echangeDevs.getReceived() != null && echangeDevs.getReceived().equals("agree")) {
-                    map.put("exchange", echangeDevs.getResiverFK().getEname() + "同意了你的资产流转!");
+                    res.add(echangeDevs.getResiverFK().getEname() + "同意了你的资产流转!");
                     echangeDevs.setSenderFK(null);
                     echangeDevs.setDevFK(null);
                     echangeDevs.setResiverFK(null);
                     jpaExchangeDevs.delete(echangeDevs);
-                    System.out.println("删除了");
-                    return map;
                 }
                 /**
                  *
@@ -91,12 +107,11 @@ public class SysRestController {
                  *
                  * */
                 if (echangeDevs.getReceived() != null && echangeDevs.getReceived().equals("disagree")) {
-                    map.put("exchange", echangeDevs.getResiverFK().getEname() + "拒绝了你的资产流转!");
+                    res.add(echangeDevs.getResiverFK().getEname() + "拒绝了你的资产流转!");
                     echangeDevs.setSenderFK(null);
                     echangeDevs.setDevFK(null);
                     echangeDevs.setResiverFK(null);
                     jpaExchangeDevs.delete(echangeDevs);
-                    return map;
                 }
 
                 /**
@@ -105,16 +120,20 @@ public class SysRestController {
                  *
                  * */
                 if (echangeDevs.getReceived() != null && echangeDevs.getReceived().equals("error")) {
-                    map.put("exchange",  "资产已被流转到："+echangeDevs.getDevFK().getEmployeeByBorrower().getEname());
+                    res.add( "资产已被流转到："+echangeDevs.getDevFK().getEmployeeByBorrower().getEname());
                     echangeDevs.setSenderFK(null);
                     echangeDevs.setDevFK(null);
                     echangeDevs.setResiverFK(null);
                     jpaExchangeDevs.delete(echangeDevs);
-                    return map;
                 }
 
             }
         }
+
+        if(res.size()!=0){
+            map.put("resp",res);
+        }
+
         return map;
     }
 
