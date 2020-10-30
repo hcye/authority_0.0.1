@@ -11,40 +11,52 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface JpaAssert extends JpaRepository<Assert,Integer> {
-    @Query("select ast from Assert ast where ast.aname=:astName and ast.workless='0' and ast.employeeByBorrower is null")
-    Page<Assert> findAssertsByDevice(@Param("astName") String astName, Pageable pageable);
+    @Query("select ast from Assert ast where ast.aname=:astName and ast.workless='0' and ast.assetTypeByAssertType=:astType ")
+    Page<Assert> findAssertsByDevice(@Param("astName") String astName,@Param("astType") AssetType assetType, Pageable pageable);
+
+    @Query("select ast from Assert ast where ast.workless='0' and ast.aname like :name and ast.assetTypeByAssertType.typeName=:type")
+    Page<Assert> findAssertsByAnameAndAssetType(@Param("name")String name,@Param("type")String type,Pageable pageable);
+
+
     @Query("select distinct ast.aname from Assert ast where ast.assetTypeByAssertType=:astType and ast.workless='0'")
     List<String> getDistinctAssertNames(@Param("astType") AssetType astType);
-    @Query("select ast from Assert ast where ast.workless='0' and ast.aname like :name and ast.employeeByBorrower is null")
-    Page<Assert> findAssertsByAname(@Param("name")String name,Pageable pageable);
-    @Query("select ast from Assert ast where ast.workless='0' and ast.assestnum like :searchKey and ast.employeeByBorrower is null")
-    Page<Assert> findAssertsByAssestnum(@Param("searchKey")String searchKey,Pageable pageable);
 
     @Query("select ast from Assert ast where ast.workless=:dam and ast.assetTypeByAssertType.typeName=:tp")
     Page<Assert> findAssertsBytype(@Param("tp") String type,@Param("dam") String damFlag, Pageable pageable);
 
-    Assert  findAssertByAssestnum(String num);
-    @Query("select ast from Assert ast where ast.workless='0' and ast.aname = :name ")
-    List<Assert> findAssertsByAname(@Param("name")String name);
+    @Query("select ast from Assert ast where ast.workless='0' and ast.assestnum like :searchKey and ast.assetTypeByAssertType.typeName=:type")
+    Page<Assert> findAssertsByAssestnumAndAssetType(@Param("searchKey")String searchKey,@Param("type")String type,Pageable pageable);
 
-    @Query("select ast from Assert ast where ast.workless=:dam and ast.aname like :searchKey")
-    List<Assert> findAssertsByAnameLikeAndDamFlag(@Param("searchKey")String search,@Param("dam") String damFlag);
-    @Query("select ast from Assert ast where ast.workless=:dam and ast.assestnum like :searchKey ")
-    List<Assert> findAssertsByAssestnumLikeAndDamFlag(@Param("searchKey")String search,@Param("dam") String damFlag);
+
+    Assert  findAssertByAssestnum(String num);
+
+
+    @Query("select ast from Assert ast where ast.workless='0' and ast.aname = :name and ast.assetTypeByAssertType=:asttype")
+    List<Assert> findAssertsByAnameAndAssetType(@Param("name")String name,@Param("asttype")AssetType assetType);
+
+    @Query("select ast from Assert ast where ast.workless=:dam and ast.aname like :searchKey and ast.assetTypeByAssertType.typeName=:tp")
+    List<Assert> findAssertsByAnameLikeAndDamFlagAndType(@Param("tp")String type,@Param("searchKey")String search,@Param("dam") String damFlag);
+    @Query("select ast from Assert ast where ast.workless=:dam and ast.assestnum like :searchKey and ast.assetTypeByAssertType.typeName=:tp")
+    List<Assert> findAssertsByAssestnumLikeAndDamFlagAndType(@Param("tp")String type,@Param("searchKey")String search,@Param("dam") String damFlag);
     @Query("select ast from Assert ast where ast.workless=:dam and ast.employeeByBorrower.pingyin like :searchKey ")
     List<Assert> findAssertsByBorroworPingyinLikeAndDamFlag(@Param("searchKey")String search,@Param("dam") String damFlag);
-    @Query("select ast from Assert ast where ast.workless=:dam and ast.employeeByBorrower.ename like :searchKey ")
+    @Query("select ast from Assert ast where ast.workless=:dam and ast.employeeByBorrower.ename like :searchKey")
     List<Assert> findAssertsByBorroworNameLikeAndDamFlag(@Param("searchKey")String search,@Param("dam") String damFlag);
     @Query("select ast from Assert ast where ast.workless=:dam and ast.assetTypeByAssertType.typeName=:tp")
     List<Assert> findAssertsBytype(@Param("tp") String type,@Param("dam") String damFlag);
 
 
-    @Query("select ast from Assert ast where ast.workless=:dam and ast.aname like :searchKey")
-    Page<Assert> findAssertsByAnameLikeAndDamFlag(@Param("searchKey")String search,@Param("dam") String damFlag, Pageable pageable);
-    @Query("select ast from Assert ast where ast.workless=:dam and ast.assestnum like :searchKey ")
-    Page<Assert> findAssertsByAssestnumLikeAndDamFlag(@Param("searchKey")String search,@Param("dam") String damFlag, Pageable pageable);
-    @Query("select ast from Assert ast where ast.workless=:dam and ast.employeeByBorrower.pingyin like :searchKey ")
+
+
+
+    @Query("select ast from Assert ast where ast.workless=:dam and ast.aname like :searchKey and ast.assetTypeByAssertType.typeName=:tp")
+    Page<Assert> findAssertsByAnameLikeAndDamFlagAndType(@Param("tp")String type,@Param("searchKey")String search,@Param("dam") String damFlag, Pageable pageable);
+    @Query("select ast from Assert ast where ast.workless=:dam and ast.assestnum like :searchKey and ast.assetTypeByAssertType.typeName=:tp")
+    Page<Assert> findAssertsByAssestnumLikeAndDamFlagAndType(@Param("tp")String type,@Param("searchKey")String search,@Param("dam") String damFlag, Pageable pageable);
+    @Query("select ast from Assert ast where ast.workless=:dam and ast.employeeByBorrower.pingyin like :searchKey")
     Page<Assert> findAssertsByBorroworPingyinLikeAndDamFlag(@Param("searchKey")String search,@Param("dam") String damFlag,  Pageable pageable);
-    @Query("select ast from Assert ast where ast.workless=:dam and ast.employeeByBorrower.ename like :searchKey ")
+    @Query("select ast from Assert ast where ast.workless=:dam and ast.employeeByBorrower.ename like :searchKey")
     Page<Assert> findAssertsByBorroworNameLikeAndDamFlag(@Param("searchKey")String search,@Param("dam") String damFlag,  Pageable pageable);
+
+
 }

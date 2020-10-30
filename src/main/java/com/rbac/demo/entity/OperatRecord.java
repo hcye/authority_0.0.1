@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "operat_record", schema = "mydb1")
+@Table(name = "operat_record", schema = "mydb1", catalog = "")
 public class OperatRecord {
     private Integer id;
     private String action="";

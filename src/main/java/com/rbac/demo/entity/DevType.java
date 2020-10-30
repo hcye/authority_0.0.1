@@ -15,7 +15,9 @@ public class DevType {
     private Timestamp createTime;
     private String creator="";
     private String assetNumTemplate="";
+    private String exchangeable="0";
     private AssetType assetTypeByAssertTypeId;
+
 
 
 
@@ -34,6 +36,9 @@ public class DevType {
         this.id = id;
     }
 
+
+
+
     @Basic
     @Column(name = "dev_name", nullable = true, length = 255)
     public String getDevName() {
@@ -43,6 +48,19 @@ public class DevType {
     public void setDevName(String devName) {
         this.devName = devName;
     }
+
+
+    @Basic
+    @Column(name = "exchangeable", nullable = true, length = 255)
+    public String getExchangeable() {
+        return exchangeable;
+    }
+
+    public void setExchangeable(String exchangeable) {
+        this.exchangeable = exchangeable;
+    }
+
+
 
     @Basic
     @Column(name = "remarks", nullable = true, length = 255)

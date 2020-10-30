@@ -53,13 +53,13 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
         String snNum= assetDownloadModel.getSnNum();
         String templat = "";
         Assert anAssert = new Assert();
-        DateFormat format1 = new SimpleDateFormat("yyyy.MM.dd");
+        DateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
         int num=analysisContext.readRowHolder().getRowIndex();
         if (!assetDownloadModel.getDevName().equals("")) {
             anAssert.setAname(devName.trim());
             AssetType assetType = null;
 
-            DevType devType =jpaDevType.findDevTypeByDevName(devName.trim());
+            DevType devType =jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(devName.trim(),jpaAssetType.findAssetTypeByName(devName.trim()));
 
             if(devType==null){
                 throw new ExcelAnalysisException(num + "行" + "设备类型未预定义！");
@@ -166,10 +166,6 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
         listOthermeans.add(anAssert);
     }
 
-    @Override
-    public void onException(Exception exception, AnalysisContext context) throws Exception {
-        super.onException(exception, context);
-    }
 
     @Transactional(rollbackFor = ExcelAnalysisException.class)
     @Override

@@ -17,6 +17,7 @@ import com.rbac.demo.service.WriteLog;
 import com.rbac.demo.tool.ConvertStrForSearch;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.cache.ehcache.EhCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,7 +41,7 @@ import java.util.regex.Pattern;
 
 @RestController
 public class AsmRestController {
-    private static final int pageSize=10;
+    private static final int pageSize=15;
     @Autowired
     private JpaEmployee jpaEmployee;
     @Autowired
@@ -60,15 +61,21 @@ public class AsmRestController {
     private TypeService typeService;
     @Autowired
     private AsmRecordService asmRecordService;
+    @Autowired
+    private JpaExchangeDevs jpaExchangeDevs;
     @PostMapping("/asm/queryPage")
-    public Page<Assert> queryPage(String name,String search,String pre,String next,int pageIndex,String jumpFlag){
+    public Map<String,List<Object>> queryPage(String type,String name,String search,String pre,String next,int pageIndex,String jumpFlag){
         /**
          *
          * 确定是否是翻页
          *
          * */
+
+        Map<String,List<Object>> map=new HashMap<>();
+        List<Employee> bros=new ArrayList<>();
         Page<Assert> page;
         Pageable pageable;
+        List<Page<Assert>> pages=new ArrayList<>();
         if(!pre.equals("")||!next.equals("")||!jumpFlag.equals("")){
             pageIndex=pageIndex-1;
             pageable=PageRequest.of(pageIndex,pageSize);
@@ -81,16 +88,89 @@ public class AsmRestController {
             pageable=PageRequest.of(0,pageSize);
         }
         if(search.equals("")){
-            page=jpaAssert.findAssertsByAname(name,pageable);
+            page=jpaAssert.findAssertsByAnameAndAssetType(name,type,pageable);
         }else {
             search=ConvertStrForSearch.getFormatedString(search);
-            page=jpaAssert.findAssertsByAname(search,pageable);
+            page=jpaAssert.findAssertsByAnameAndAssetType(search,type,pageable);
             if(page.isEmpty()){
-                page=jpaAssert.findAssertsByAssestnum(search,pageable);
+                page=jpaAssert.findAssertsByAssestnumAndAssetType(search,type,pageable);
             }
         }
-        return page;
+        List<Assert> asserts=page.getContent();
+        for (Assert ast:asserts){
+            Employee bro=ast.getEmployeeByBorrower();
+            if(bro==null){
+                bros.add(null);
+            }else {
+                bros.add(bro);
+            }
+        }
+
+
+
+        pages.add(page);
+        map.put("page", Collections.singletonList(pages));
+        map.put("emp", Collections.singletonList(bros));
+        return map;
     }
+    @PostMapping("/asm/queryExchangePage")
+    public Map<String,List<Object>> queryExchangePage(String type,String search,String pre,String next,int pageIndex,String jumpFlag){
+        /**
+         *
+         * 确定是否是翻页
+         *
+         * */
+
+        Map<String,List<Object>> map=new HashMap<>();
+        List<DevType> devTypes=jpaDevType.findAll();
+        List<Employee> bros=new ArrayList<>();
+        List<Employee> me=new ArrayList<>();
+        Page<Assert> page;
+        Pageable pageable;
+        List<Page<Assert>> pages=new ArrayList<>();
+        if(!pre.equals("")||!next.equals("")||!jumpFlag.equals("")){
+            pageIndex=pageIndex-1;
+            pageable=PageRequest.of(pageIndex,pageSize);
+            if(!pre.equals("")){
+                pageable=pageable.previousOrFirst();
+            }else if(!next.equals("")){
+                pageable=pageable.next();
+            }
+        }else {
+            pageable=PageRequest.of(0,pageSize);
+        }
+        if(search.equals("")){
+            page=jpaAssert.findAssertsBytype(type,"0",pageable);
+        }else {
+            search=ConvertStrForSearch.getFormatedString(search);
+            page=jpaAssert.findAssertsByAnameAndAssetType(search,type,pageable);
+            if(page.isEmpty()){
+                page=jpaAssert.findAssertsByAssestnumAndAssetType(search,type,pageable);
+            }
+        }
+
+
+        List<Assert> asserts=page.getContent();
+        for (Assert ast:asserts){
+            Employee bro=ast.getEmployeeByBorrower();
+            if(bro==null){
+                bros.add(null);
+            }else {
+                bros.add(bro);
+            }
+        }
+
+
+        me.add((Employee) SecurityUtils.getSubject().getSession().getAttribute("user"));
+        pages.add(page);
+        map.put("page", Collections.singletonList(pages));
+        map.put("emp", Collections.singletonList(bros));
+        map.put("devs", Collections.singletonList(devTypes));
+        map.put("me", Collections.singletonList(me));
+        return map;
+    }
+
+
     @PostMapping("/asm/operat")
     public Map<String, List<Assert>> borrow(String selectDevIds,String name,String actionFlag){
         Map<String,List<Assert>> map=new HashMap<>();
@@ -124,9 +204,23 @@ public class AsmRestController {
     @PostMapping("/asm/devs")
     public Map<String, List<Assert>> getDevs(String name){
         Map<String,List<Assert>> map=new HashMap<>();
+        if(name.equalsIgnoreCase("")||!name.contains("-")){
+            return map;
+        }
+        List<AssetType> assetTypes=asmService.getPermitAsmAssetTypes();
+
         Employee returner=jpaEmployee.findEmployeeByLoginName(name.split("-")[1]);
         List<Assert> asserts= (List<Assert>) returner.getAssertsById();
-        map.put("devs",asserts);
+        List<Assert> assertsHasPermit=new ArrayList<>();
+        for(int i=0;i<asserts.size();i++){
+            for (int j=0;j<assetTypes.size();j++){
+                if(asserts.get(i).getAssetTypeByAssertType().equals(assetTypes.get(j))){
+                    assertsHasPermit.add(asserts.get(i));
+                }
+            }
+        }
+
+        map.put("devs",assertsHasPermit);
         return map;
     }
 
@@ -157,11 +251,23 @@ public class AsmRestController {
 
     @RequiresPermissions("asm:devType:edit")
     @PostMapping("/asm/editDevType")
-    public Map<String, String> valid(int id,String input){
+    public Map<String, String> valid(int id,String input,boolean exc){
         Map<String ,String> map=new HashMap<>();
         DevType devType=jpaDevType.findById(id).get();
+        AssetType assetType=devType.getAssetTypeByAssertTypeId();
         String name=devType.getDevName();
-        List<Assert> list = jpaAssert.findAssertsByAname(name);
+        List<Assert> list = jpaAssert.findAssertsByAnameAndAssetType(name,assetType);
+        if(exc==true&&devType.getExchangeable().equals("0")){
+            devType.setExchangeable("1");
+            jpaDevType.save(devType);
+            map.put("ok","该设备已经可以流转！");
+            return map;
+        }else if(exc==false&&devType.getExchangeable().equals("1")){
+            devType.setExchangeable("0");
+            jpaDevType.save(devType);
+            map.put("ok","设备被禁止流转！");
+            return map;
+        }
         if(!list.isEmpty()){
             map.put("error","设备类型关联有设备不能修改！");
             return map;
@@ -169,6 +275,7 @@ public class AsmRestController {
             String tem=devType.getAssetTypeByAssertTypeId().getAssetCode();
             if(asmService.valid(input,tem)){
                 devType.setAssetNumTemplate(input);
+                jpaDevType.save(devType);
                 map.put("ok","修改成功！");
 
             }else {
@@ -215,9 +322,13 @@ public class AsmRestController {
         List<String> codes=new ArrayList<>();
         List<String> devCodes=new ArrayList<>();
         List<String> names=jpaDevType.findDevTypesNameByAssertType(TpName);
-        DevType devType1=jpaDevType.findDevTypeByDevName(names.get(0));
+        if(names.size()!=0){
+            DevType devType1=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(names.get(0),assetType);
+
+            devCodes.add(devType1.getAssetNumTemplate());
+        }
+
         codes.add(code);
-        devCodes.add(devType1.getAssetNumTemplate());
         map.put("name",names);
         map.put("code",codes);
         map.put("devCode",devCodes);
@@ -225,7 +336,7 @@ public class AsmRestController {
     }
     @RequiresPermissions("asm:devType:add")
     @PostMapping("/asm/addDevType")
-    public Map<String, String> addDevType(String devType,String dev_name,String desc,String temp){
+    public Map<String, String> addDevType(String devType,String dev_name,String desc,String temp,String exc){
         Map<String,String> map=new HashMap<>();
         AssetType assertType= jpaAssetType.findAssetTypeByName(devType);
         String assetCode=assertType.getAssetCode();
@@ -240,8 +351,13 @@ public class AsmRestController {
             map.put("error","资产名称重复！请重新填写");
             return map;
         }
-        DevType devType1=new DevType();
 
+        DevType devType1=new DevType();
+        if(exc.equals("是")){
+            devType1.setExchangeable("1");
+        }else {
+            devType1.setExchangeable("0");
+        }
         Timestamp ts=new Timestamp(new Date().getTime());
         String usname= (String) SecurityUtils.getSubject().getPrincipal();
         devType1.setCreateTime(ts);
@@ -278,18 +394,24 @@ public class AsmRestController {
     public Map<String,String> valid(String num,int id){
         Map<String,String> map=new HashMap<>();
         Assert anAssert=jpaAssert.findById(id).get();
+
         String name=anAssert.getAname();
-        DevType devType=jpaDevType.findDevTypeByDevName(name);
+        DevType devType=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(name,anAssert.getAssetTypeByAssertType());
         String template=devType.getAssetNumTemplate();
         boolean flag=asmService.validDevTypeNum(num,template);
-        boolean repeatFlag=asmService.validRepeat(num);
+        boolean repeatFlag=false;
+        if(anAssert.getAssestnum().equalsIgnoreCase(num)){
+            repeatFlag=true;
+        }else {
+            repeatFlag=asmService.validRepeat(num);
+        }
         if(flag){
             map.put("ok","校验正确");
         }else {
             map.put("error","输入的资产编码不匹配设备类型约束！");
         }
         if(repeatFlag){
-            map.put("ok","不含重复");
+            map.put("ok","校验正确");
         }else {
             map.put("error","输入的资产编号重复！");
         }
@@ -324,7 +446,8 @@ public class AsmRestController {
     public Map<String,String> deleteDevType(int id){
         Map<String,String> map=new HashMap<>();
         DevType type= jpaDevType.findById(id).get();
-        List<Assert> list=jpaAssert.findAssertsByAname(type.getDevName());
+        AssetType assetType=type.getAssetTypeByAssertTypeId();
+        List<Assert> list=jpaAssert.findAssertsByAnameAndAssetType(type.getDevName(),assetType);
         if(list.isEmpty()){
             type.setAssetTypeByAssertTypeId(null);
             jpaDevType.delete(type);
@@ -338,9 +461,9 @@ public class AsmRestController {
 
 
     @PostMapping("/asm/getDevNumTemplate")
-    public Map<String, String> getNum(String devName){
+    public Map<String, String> getNum(String devName,String assetType){
         Map<String,String> map=new HashMap<>();
-        DevType devType=jpaDevType.findDevTypeByDevName(devName);
+        DevType devType=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(devName,jpaAssetType.findAssetTypeByName(assetType));
         String max=asmService.getMaxAssetNum(devType);
         String devTypeAssetNumTemplate=devType.getAssetNumTemplate();
         map.put("code",devTypeAssetNumTemplate);
@@ -377,7 +500,7 @@ public class AsmRestController {
     }
 
     @PostMapping("/asm/queryListPage")
-    public Page<Assert> queryListPage(String type,String isDam,String search,String pre,String next,int pageIndex,String jumpFlag){
+    public Map<String,List<Object>> queryListPage(String type,String isDam,String search,String pre,String next,int pageIndex,String jumpFlag){
         /**
          *
          * 确定是否是翻页
@@ -386,7 +509,9 @@ public class AsmRestController {
 
 
 
-        Page<Assert> page;
+        Map<String,List<Object>> map=new HashMap<>();
+        List<Employee> bros=new ArrayList<>();
+        List<Page<Assert>> pages=new ArrayList<>();
         Pageable pageable;
         if(!pre.equals("")||!next.equals("")||!jumpFlag.equals("")){
             pageIndex=pageIndex-1;
@@ -399,8 +524,20 @@ public class AsmRestController {
         }else {
             pageable=PageRequest.of(0,pageSize);
         }
-        page = asmService.queryPage(type,isDam,search,pageable);
-        return page;
+        Page<Assert> page = asmService.queryPage(type,isDam,search,pageable);
+        List<Assert> asserts=page.getContent();
+        for (Assert ast:asserts){
+            Employee bro=ast.getEmployeeByBorrower();
+            if(bro==null){
+                bros.add(null);
+            }else {
+                bros.add(bro);
+            }
+        }
+        pages.add(page);
+        map.put("emp", Collections.singletonList(bros));
+        map.put("page", Collections.singletonList(pages));
+        return map;
     }
 
     /**
@@ -441,8 +578,29 @@ public class AsmRestController {
         }
         return map;
     }
-
-
+    @RequiresPermissions("asm:exchange:view")
+    @PostMapping("/asm/exchange_req")
+    public Map<String,String> exchange(String  reason,String selectDevIds){
+        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        Map<String,String> map=new HashMap<>();
+        EchangeDevs echangeDevs=new EchangeDevs();
+        String[] ids=selectDevIds.split(",");
+        Assert asset=null;
+        for (String str:ids){
+            if(str.length()>0){
+                int id=Integer.parseInt(str);
+                asset=jpaAssert.findById(id).get();
+            }
+        }
+        echangeDevs.setReason(reason);
+        echangeDevs.setSenderFK(employee);
+        echangeDevs.setResiverFK(asset.getEmployeeByBorrower());
+        echangeDevs.setSendTime(new Timestamp(new Date().getTime()));
+        echangeDevs.setDevFK(asset);
+        jpaExchangeDevs.save(echangeDevs);
+        map.put("ok","发送成功！");
+        return map;
+    }
 
     /**
      *
@@ -610,7 +768,8 @@ public class AsmRestController {
         String path= ClassUtils.getDefaultClassLoader().getResource("static/excel").getPath();   //上传资源到项目路径的路径获得
 
         File file=new File(path+"/"+"moban1.xlsx");
-        InputStream inputStream =new FileInputStream(file);
+//        InputStream inputStream =new FileInputStream(file);
+        InputStream inputStream =this.getClass().getClassLoader().getResourceAsStream("static/excel/moban1.xlsx");
         response.setHeader("Content-disposition", "attachment; filename=" + "template.xlsx");
         response.setContentType("application/msexcel;charset=UTF-8");//设置类型
         response.setHeader("Pragma", "No-cache");//设置头
@@ -669,7 +828,6 @@ public class AsmRestController {
 
     @GetMapping("asm/out_DevTypes")
     public void exportDevExcel(HttpServletResponse response) throws IOException {
-        System.out.println("---");
         // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("utf-8");

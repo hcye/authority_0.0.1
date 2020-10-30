@@ -138,7 +138,7 @@ public class UserController {
     @RequiresPermissions("asm:user:view")
     @GetMapping("/user/user")
     public String user(){
-        return "/user/user";
+        return "user/user";
     }
 
 
@@ -156,7 +156,7 @@ public class UserController {
             sexs.add("男");
         }
         model.addAttribute("sexs",sexs);
-        return "/user/personal_center";
+        return "user/personal_center";
     }
 
     @GetMapping("/user/change_personal_info")
@@ -183,19 +183,19 @@ public class UserController {
         }
         model.addAttribute("sexs",sexs);
         model.addAttribute("user",employee);
-        return "/user/personal_center";
+        return "user/personal_center";
     }
 
     @GetMapping("/user/select_tx")
     public String change_tx(){
-        return "/user/select_tx";
+        return "user/select_tx";
     }
 
     @GetMapping("/user/change_password")
     public String change_pwd(Model model){
         Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
         model.addAttribute("user",employee);
-        return "/user/change_pwd";
+        return "user/change_pwd";
     }
 
 }

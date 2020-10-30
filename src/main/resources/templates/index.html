@@ -84,6 +84,88 @@
 
 
 
+	$(function () {
+		onReady();
+	})
+
+	function transformNullStr(str) {
+		if (str == null) {
+			return "";
+		}
+		return str;
+	}
+
+	function onReady(){
+		$(document).ready(function () {
+			$.post("/sys/sys_even", {},    //把name数据提交到ajaxRes action内，
+					function(dt) {
+					/*	map.put("senders",senderList);
+						map.put("req",reqList);
+						map.put("resp",res);*/
+
+						/**
+						 * 有申请
+						 * */
+						var senders=dt["senders"];
+						var req=dt["req"];
+						var ast=dt["ast"];
+						var resp=dt["resp"];
+						if(senders==null&&resp==null){
+							return;
+						}
+						if(senders!=null){
+							layer.open({
+								type: 2,
+								title: "资产流转",
+								area:["1000px","800px"],
+								content: ['/asm/exchange_resp'],
+								success: function(layero, index){
+									var body = layer.getChildFrame('body', index);
+									var tb=body.find('#tb');
+									for (var key in senders){
+										var assestnum=transformNullStr(ast[key].assestnum);
+										tb.append("<tr><td><input type='hidden' value='"+req[key].id+"' />"+senders[key].ename+"</td><td>"+ast[key].aname+"</td><td>"+ast[key].model+"" +
+												"</td><td>"+assestnum+"</td><td>"+req[key].reason+"</td><td><input type='checkbox' name='like[write]' title='同意'></td></tr>");
+									}
+									if(resp!=null){
+										var respdiv=body.find('#resp');
+										respdiv.append("<blockquote class='layui-elem-quote'>消息</blockquote>");
+										for (var key in resp){
+											respdiv.append("<span>"+resp[key]+"</span>");
+											respdiv.append("<hr>");
+										}
+									}
+
+								}
+							})
+						}
+
+						if(senders==null){
+							layer.open({
+								type: 2,
+								title: "资产流转",
+								area:["1000px","800px"],
+								content: ['/asm/exchange_resp'],
+								success: function(layero, index){
+									var body = layer.getChildFrame('body', index);
+									body.find('table').remove();
+
+									if(resp!=null){
+										var respdiv=body.find('#resp');
+										respdiv.append("<blockquote class='layui-elem-quote'>消息</blockquote>");
+										for (var key in resp){
+											respdiv.append("<span>"+resp[key]+"</span>");
+											respdiv.append("<hr>");
+										}
+									}
+
+								}
+							})
+						}
+					}, "json");
+		});
+	}
+
 
 	layui.extend({
 		dtree: '{/}layui_ext/dtree/dtree'

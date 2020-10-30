@@ -1,15 +1,18 @@
 package com.rbac.demo.service;
 
-import com.rbac.demo.entity.Assert;
-import com.rbac.demo.entity.DevType;
+import com.rbac.demo.entity.*;
 import com.rbac.demo.jpa.JpaAssert;
+import com.rbac.demo.jpa.JpaAssetType;
 import com.rbac.demo.jpa.JpaDevType;
+import com.rbac.demo.jpa.JpaResources;
 import com.rbac.demo.tool.ConvertStrForSearch;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +24,11 @@ public class AsmService {
     @Autowired
     private JpaAssert jpaAssert;
     @Autowired
-    private JpaDevType jpaDevType;
+    private JpaAssetType jpaAssetType;
+    @Autowired
+    private JpaResources jpaResources;
+    @Autowired
+    private PermissionService permissionService;
     public boolean valid(String inputCode, String tep){
         if(inputCode.equals("")&&tep.equals("")){
             return true;
@@ -71,9 +78,9 @@ public class AsmService {
             page=jpaAssert.findAssertsBytype(type,damFlag,pageable);
         }else {
             search= ConvertStrForSearch.getFormatedString(search);
-            page=jpaAssert.findAssertsByAnameLikeAndDamFlag(search,damFlag,pageable);
+            page=jpaAssert.findAssertsByAnameLikeAndDamFlagAndType(type,search,damFlag,pageable);
             if(page.isEmpty()){
-                page=jpaAssert.findAssertsByAssestnumLikeAndDamFlag(search,damFlag,pageable);
+                page=jpaAssert.findAssertsByAssestnumLikeAndDamFlagAndType(type,search,damFlag,pageable);
                 if(page.isEmpty()){
                     page=jpaAssert.findAssertsByBorroworPingyinLikeAndDamFlag(search,damFlag,pageable);
                     if(page.isEmpty()){
@@ -95,9 +102,9 @@ public class AsmService {
             list=jpaAssert.findAssertsBytype(type,damFlag);
         }else {
             search= ConvertStrForSearch.getFormatedString(search);
-            list=jpaAssert.findAssertsByAnameLikeAndDamFlag(search,damFlag);
+            list=jpaAssert.findAssertsByAnameLikeAndDamFlagAndType(type,search,damFlag);
             if(list.isEmpty()){
-                list=jpaAssert.findAssertsByAssestnumLikeAndDamFlag(search,damFlag);
+                list=jpaAssert.findAssertsByAssestnumLikeAndDamFlagAndType(type,search,damFlag);
                 if(list.isEmpty()){
                     list=jpaAssert.findAssertsByBorroworPingyinLikeAndDamFlag(search,damFlag);
                     if(list.isEmpty()){
@@ -110,8 +117,12 @@ public class AsmService {
     }
 
     public String getMaxAssetNum(DevType devType){
+        if(devType==null){
+            return "";
+        }
         String dev_name=devType.getDevName();
-        List<Assert> list=jpaAssert.findAssertsByAname(dev_name);
+
+        List<Assert> list=jpaAssert.findAssertsByAnameAndAssetType(dev_name,devType.getAssetTypeByAssertTypeId());
         String template=devType.getAssetNumTemplate();
         if(template.equals("")){
             return "";
@@ -137,6 +148,20 @@ public class AsmService {
 
 
     }
+
+    public List<AssetType> getPermitAsmAssetTypes(){
+        List<AssetType> assetTypes=new ArrayList<>();
+        List<AssetType> types=jpaAssetType.findAll();
+        for (AssetType assetType:types){
+            if(permissionService.isPermit(assetType.getPermiCode())){
+                assetTypes.add(assetType);
+            }
+        }
+        return assetTypes;
+
+
+    }
+
 
     public boolean validDevTypeNum(String inputCode, String tep) {
         if(inputCode.equals("")&&tep.equals("")){

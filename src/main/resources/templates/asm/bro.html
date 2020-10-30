@@ -44,16 +44,16 @@
 
     $(function () {
         $("#doSearch").click(function () {
-            queryPage($("#devName").val(),$("#search").val(),"","",$("#pageInput").val(),"");
+            queryPage($("#astType").val(),$("#devName").val(),$("#search").val(),"","",$("#pageInput").val(),"");
         })
         $("#next").click(function () {
-            queryPage($("#devName").val(),$("#search").val(),"","next",$("#pageInput").val(),"");
+            queryPage($("#astType").val(),$("#devName").val(),$("#search").val(),"","next",$("#pageInput").val(),"");
         })
         $("#jump").click(function () {
-            queryPage($("#devName").val(),$("#search").val(),"","",$("#pageInput").val(),"jump");
+            queryPage($("#astType").val(),$("#devName").val(),$("#search").val(),"","",$("#pageInput").val(),"jump");
         })
         $("#pre").click(function () {
-            queryPage($("#devName").val(),$("#search").val(),"pre","",$("#pageInput").val(),"");
+            queryPage($("#astType").val(),$("#devName").val(),$("#search").val(),"pre","",$("#pageInput").val(),"");
         })
 
             $("#select").click(function () {
@@ -66,6 +66,17 @@
                     //实现弹出层间不同frame的传值
                 });
             })
+
+        $("#name").click(function () {
+            layer.open({
+                type: 2,
+                title: "选择借用人",
+                area: ['1000px','500px'],
+                content: ['/layer/layer_edit_groupLeader.html', 'no'],
+                //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                //实现弹出层间不同frame的传值
+            });
+        })
 
         $("#conform").click(function () {
             if($("#name").val()==''){
@@ -85,6 +96,7 @@
                 }
                 if(checkedItemId==''){
                     layer.alert("请至少勾选一个归还设备！");
+                    return;
                 }
                 $.post("/asm/operat", {name:$("#name").val(),selectDevIds:checkedItemId,actionFlag:'bo'},    //把name数据提交到ajaxRes action内，
                     function (data) {
@@ -121,20 +133,33 @@
         })
     })
 
-    function queryPage(name,searchKey,pre,next,pageIndex,jumpFlag) {
-        $.post("/asm/queryPage", {name:name,search:searchKey,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag},    //把name数据提交到ajaxRes action内，
+    function queryPage(type,name,searchKey,pre,next,pageIndex,jumpFlag) {
+        $.post("/asm/queryPage", {type:type,name:name,search:searchKey,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag},    //把name数据提交到ajaxRes action内，
             function(data) {
-                var astList=data.content;
+                var bro = data["emp"][0];
+                var page = data["page"][0][0];
+                var astList = page.content;
                 $("#tb").find("tr").remove();
                 for (var key in astList){
+                    var browser;
+                    var disable="";
+                    if(bro[key]==null){
+                        browser='';
+                    }else {
+                        browser=bro[key].ename;
+                        disable=" disabled='true' ";
+                    }
+
+
+
                     var assestnum=transformNullStr(astList[key].assestnum);
                     $("#tb").append("<tr><td><input type='hidden' value='"+astList[key].id+"' />"+astList[key].aname+"</td><td>"+astList[key].model+"</td><td>"+assestnum+"" +
-                        "</td><td>"+astList[key].remarks+"</td><td><input type='checkbox' lay-skin='primary' /></td></tr>");
+                        "</td><td>"+browser+"</td><td>"+astList[key].remarks+"</td><td><input type='checkbox' "+disable+" lay-skin='primary'  /></td></tr>");
                 }
                 var form = layui.form;
                 form.render();//重新渲染
-                $("#pageInput").val(data.number+1);
-                $("#PageCount").html(' 共 '+data.totalPages+' 页');
+                $("#pageInput").val(page.number+1);
+                $("#PageCount").html(' 共 '+page.totalPages+' 页');
             }, "json");
     }
 
@@ -146,28 +171,20 @@
 <div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
     <p>资产借用</p>
 </div>
-<div class="layui-container">
+<div class="layui-container" style="width: 85%">
     <div class="layui-form">
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label" style="padding-left: 5px">借用人:</label>
                 <div class="layui-input-inline">
-                    <input class="layui-input" disabled="disabled" id="name"/>
-                </div>
-                <button class="layui-btn" id="select">选择</button>
-            </div>
-            <div class="layui-inline">
-                <label class="layui-form-label" style="padding-left: 5px">操作人:</label>
-                <div class="layui-input-inline">
-                    <input class="layui-input" disabled="disabled" th:value="${operator}"  id="operator"/>
+                    <input class="layui-input"  id="name"/>
                 </div>
             </div>
             <div class="layui-inline layui-btn-group">
                 <button class="layui-btn" id="conform">借用</button>
             </div>
-        </div>
-        <div class="layui-form-item">
-            <div class="layui-row">
+
+
                 <div class="layui-inline">
                     <label class="layui-form-label" style="padding-left: 5px">资产分类:</label>
                     <div class="layui-input-inline">
@@ -180,6 +197,7 @@
                     <label class="layui-form-label" style="padding-left: 5px">资产名称:</label>
                     <div class="layui-input-inline">
                         <select id="devName" class="layui-form-select" >
+
                             <option th:each="devname : ${assertNames}" th:text="${devname}"></option>
                         </select>
                     </div>
@@ -190,7 +208,7 @@
                     </div>
                     <button class="layui-btn" id="doSearch"><i class="layui-icon">&#xe615;</i>查找</button>
                 </div>
-            </div>
+
         </div>
         <div class="layui-form-item">
             <table class="layui-table">
@@ -199,6 +217,7 @@
                         <td>名称</td>
                         <td>型号</td>
                         <td>编号</td>
+                        <td>借用人</td>
                         <td>备注</td>
                         <td>操作</td>
                     </tr>
@@ -208,8 +227,9 @@
                         <td th:text="${ast.getAname()}"></td>
                         <td th:text="${ast.getModel()}"></td>
                         <td th:text="${ast.getAssestnum()}"></td>
+                        <td th:text="${ast.getEmployeeByBorrower()!=null?ast.getEmployeeByBorrower().getEname():''}"></td>
                         <td th:text="${ast.getRemarks()}"></td>
-                        <td><input type="hidden" th:value="${ast.getId()}" /><input type="checkbox" lay-skin="primary"/></td>
+                        <td><input type="hidden" th:value="${ast.getId()}" /><input th:attr="disabled=${ast.getEmployeeByBorrower()==null?'false':'true'}" type="checkbox" lay-skin="primary"/></td>
                     </tr>
                 </tbody>
             </table>
@@ -221,14 +241,14 @@
                     <button class="layui-btn" id="pre" style="float: right">-</button>
                 </div>
                 <div class="layui-col-md2 layui-input-inline" style="margin: 0">
-                    <input type="text" class="layui-input" id="pageInput" th:value="${asserts.getNumber()+1}" />
+                    <input type="text" class="layui-input" id="pageInput" th:value="${asserts==null ? 0:asserts.getNumber()+1}" />
                 </div>
                 <div class="layui-col-md1">
                     <button class="layui-btn" id="next">+</button>
                 </div>
                 <div class="layui-col-md2">
                     <button class="layui-btn"  id="jump">跳转</button>
-                    <span id="PageCount" th:text="${' 共 '+asserts.getTotalPages()+' 页'}"></span>
+                    <span id="PageCount" th:text="${asserts==null?'共 0 页': ' 共 '+asserts.getTotalPages()+' 页'}"></span>
                 </div>
             </div>
         </div>

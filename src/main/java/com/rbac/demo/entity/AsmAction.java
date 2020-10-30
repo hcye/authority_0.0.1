@@ -11,6 +11,7 @@ public class AsmAction {
     public static final String dev_dam="资产报损";
     public static final String dev_add_type="增加资产类型";
     public static final String dev_del="删除资产";
+    public static final String dev_exc="资产流转";
 
 
     public static List<String> getList(){
@@ -23,6 +24,7 @@ public class AsmAction {
         list.add(dev_edit);
         list.add(dev_return);
         list.add(dev_del);
+        list.add(dev_exc);
         return list;
     }
 }

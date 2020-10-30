@@ -36,7 +36,7 @@
         $("#conform").click(function () {
 
             var tx=window.top.document.getElementById("tx");
-            tx.src="http://localhost:8889/"+$("#res_uri").val();
+            tx.src=$("#res_uri").val();
             document.location.href="/user/change_personal_info?tx_uri="+$("#res_uri").val();
 
 
@@ -58,7 +58,7 @@
         });
         $("#cancel").click(function () {
 
-            document.location.href="/user/change_personal";
+            document.location.href="/user/change_personal_info";
         })
         $("img").click(function () {
             $("img").css("border","2px solid #ffffff");

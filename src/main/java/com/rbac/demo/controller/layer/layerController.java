@@ -10,6 +10,6 @@ public class layerController {
     @GetMapping("/layer/{uri}")
     public String getPage(@PathVariable("uri") String pageUri){
 
-        return "/layer/"+pageUri;
+        return "layer/"+pageUri;
     }
 }

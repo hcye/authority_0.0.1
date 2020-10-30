@@ -12,4 +12,9 @@ public class PermissionService {
         String btnClass=SecurityUtils.getSubject().isPermitted(permi) ? enableBtn : disableBtn;
         return btnClass;
     }
+
+    public boolean isPermit(String permi){
+        boolean btnClass=SecurityUtils.getSubject().isPermitted(permi) ? true : false;
+        return btnClass;
+    }
 }

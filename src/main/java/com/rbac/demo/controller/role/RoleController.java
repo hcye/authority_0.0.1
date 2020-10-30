@@ -27,11 +27,11 @@ public class RoleController {
     @RequiresPermissions("asm:role:add")
     @GetMapping("/role/add")
     public String toAddPage(){
-        return "/role/add";
+        return "role/add";
     }
 
     @RequiresPermissions("asm:role:edit")
-    @GetMapping("/role/edit")
+    @GetMapping("role/edit")
     public String edit(int id, Model model){
         Role role=jpaRole.findById(id).get();
 
@@ -46,7 +46,7 @@ public class RoleController {
         model.addAttribute("role",role);
         model.addAttribute("avalible",avalible);
         ShiroUtils.clearCachedAuthorizationInfo(); //清除缓存
-        return "/role/edit";
+        return "role/edit";
     }
 
     @RequiresPermissions("asm:role:delete")
@@ -56,13 +56,13 @@ public class RoleController {
         Collection<Role2Resources> role2Resources=role.getRole2ResourcesById();
         jpaRole2Resources.deleteAll(role2Resources);
         jpaRole.delete(role);
-        return "/role/role";
+        return "role/role";
     }
 
     @RequiresPermissions("asm:role:view")
     @GetMapping("/role/role")
     public String role(){
-        return "/role/role";
+        return "role/role";
     }
 
 }

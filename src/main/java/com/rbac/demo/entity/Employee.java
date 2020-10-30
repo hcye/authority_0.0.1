@@ -16,6 +16,12 @@ public class Employee {
     private String pwd="";
     private Collection<OperatRecord> operatRecordsById;
     private Collection<OperatRecord> operatRecordsById_0;
+
+    private Collection<EchangeDevs> exchangeSender;
+    private Collection<EchangeDevs> exchangeResiver;
+
+
+
     private Collection<User2Role> user2RolesById;
     private String loginName;
     private SysGroup sysGroupByGroupId;
@@ -171,6 +177,22 @@ public class Employee {
 
     public void setOperatRecordsById_0(Collection<OperatRecord> operatRecordsById_0) {
         this.operatRecordsById_0 = operatRecordsById_0;
+    }
+    @OneToMany(mappedBy = "senderFK")
+    public Collection<EchangeDevs> getExchangeSender() {
+        return exchangeSender;
+    }
+
+    public void setExchangeSender(Collection<EchangeDevs> exchangeSender) {
+        this.exchangeSender = exchangeSender;
+    }
+    @OneToMany(mappedBy = "resiverFK")
+    public Collection<EchangeDevs> getExchangeResiver() {
+        return exchangeResiver;
+    }
+
+    public void setExchangeResiver(Collection<EchangeDevs> exchangeResiver) {
+        this.exchangeResiver = exchangeResiver;
     }
 
 

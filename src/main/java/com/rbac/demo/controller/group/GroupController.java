@@ -61,7 +61,7 @@ public class GroupController {
         model.addAttribute("status",status);
         model.addAttribute("parent",groupNames);
         model.addAttribute("group",group);
-        return "/group/edit";
+        return "group/edit";
     }
   /*  @RequestMapping("/group/edit/setLeader")
     public String setLeader(int id,String name){
@@ -86,7 +86,7 @@ public class GroupController {
         }
 
         jpaGroup.saveAndFlush(group);
-        return "/group/group";
+        return "group/group";
     }
     @RequiresPermissions("asm:group:delete")
     @GetMapping("/group/delete")
@@ -98,14 +98,14 @@ public class GroupController {
             throw new RuntimeException("部门内有对象无法删除");
         }
         jpaGroup.saveAndFlush(group);
-        return "/group/group";
+        return "group/group";
     }
     @RequiresPermissions("asm:group:add")
     @GetMapping("/group/addPage")
     public String jumpToAddPage(Model model){
         List<String> names = jpaGroup.getDistinctGourpName();
         model.addAttribute("names",names);
-        return "/group/add";
+        return "group/add";
     }
     @RequiresPermissions("asm:group:add")
     @GetMapping("/group/add")
@@ -115,7 +115,7 @@ public class GroupController {
             model.addAttribute("names",names);
             model.addAttribute("flag","×");
             model.addAttribute("errPrompt","部门名重复,添加失败！");
-            return "/group/add";
+            return "group/add";
         }
         SysGroup newGroup=new SysGroup();
         SysGroup upperGroup =jpaGroup.findSysGroupByGname(upperDep);
@@ -133,18 +133,18 @@ public class GroupController {
             newGroup.setAvalible((byte) 0);
         }
         jpaGroup.saveAndFlush(newGroup);
-        return "/group/group";
+        return "group/group";
     }
 
     @RequiresPermissions("asm:group:view")
     @GetMapping("/group/group")
     public String group(){
-        return "/group/group";
+        return "group/group";
     }
 
     @RequiresPermissions("asm:group:view")
     @GetMapping("/group/selectGroupLeader")
     public String getLeader(){
-        return "/layer/layer_edit_groupLeader";
+        return "layer/layer_edit_groupLeader";
     }
 }

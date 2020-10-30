@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>流转申请</title>
+</head>
+<link rel="stylesheet" href="/layui/css/layui.css">
+<link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+<link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+<script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+<script type="text/javascript" src="/layui/layui.js"></script>
+<!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+<!--[if lt IE 9]>-->
+<script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+<script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+<script type="text/javascript">
+    layui.use('form', function () {
+        var form = layui.form;
+        form.render();
+        //监听提交
+        //checkbox 点击事件
+    });
+
+    $(function () {
+        $(document).ready(function () {
+            $.post("/sys/getExchangeEven", {},    //把name数据提交到ajaxRes action内，
+                function (dt) {
+
+
+
+
+                    $("#name").val(dt["sender"]);
+                    $("#reason").val(dt["reason"]);
+                    $("#time").val(dt["sendTime"]);
+                    $("#exid").val(dt["exid"]);
+                    console.log(dt["ast"]);
+                    $("#tb").append("<tr><td><input id='hid' type='hidden' value='"+dt["ast"].id+"' />" + dt["ast"].aname + "</td><td>" + dt["ast"].model + "</td>" +
+                        "<td>" + dt["ast"].assestnum + "</td><td>" + dt["ast"].snnum + "</td><td>" + dt["ast"].remarks + "</td></tr>");
+                }, "json");
+        })
+
+        $("#permit").click(function () {
+
+            $.post("/sys/exchangePermit", {exid:$("#exid").val(),permi:"agree"},    //把name数据提交到ajaxRes action内，
+                function (dt) {
+                    if(dt["ok"]!=null){
+                        layer.confirm('流转成功！', {
+                            btn: ['确定', '取消'] //可以无限个按钮
+                        }, function(index, layero){
+                            var index1 = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                            parent.layer.close(index1);
+                        }, function(index){
+                            //关闭弹出层
+                            var index1 = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                            parent.layer.close(index1);
+                        });
+                    }
+                }, "json");
+        })
+
+        $("#reject").click(function () {
+            $.post("/sys/exchangePermit", {exid:$("#exid").val(),permi:"disagree"},    //把name数据提交到ajaxRes action内，
+                function (dt) {
+                    var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                    parent.layer.close(index);
+                }, "json");
+        })
+
+    })
+
+    function transformNullStr(str) {
+        if (str == null) {
+            return "";
+        }
+        return str;
+    }
+
+
+</script>
+
+<body>
+<div class="layui-container">
+    <div class="layui-form">
+    <input id="exid" type="hidden"/>
+        <div class="layui-form-item">
+        <table class="layui-table" id="dataTable">
+            <thead>
+            <tr>
+                <td>请求人</td>
+                <td>名称</td>
+                <td>型号</td>
+                <td>编号</td>
+                <td>理由</td>
+                <td>操作</td>
+            </tr>
+            </thead>
+            <tbody id="tb">
+
+            </tbody>
+        </table>
+    </div>
+        <div class="layui-form-item " id="resp">
+        </div>
+
+        <div class="layui-row" style="margin-top: 8%">
+            <div class="layui-col-md3 layui-col-md-offset5">
+                <button class="layui-btn" id="confirm">确定</button>
+                <button class="layui-btn" id="cancel">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
