@@ -95,7 +95,7 @@ public class SysRestController {
                  *
                  * */
                 if (echangeDevs.getReceived() != null && echangeDevs.getReceived().equals("agree")) {
-                    res.add(echangeDevs.getResiverFK().getEname() + "同意了你的资产流转!");
+                    res.add("流转成功:"+echangeDevs.getResiverFK().getEname() + "同意了你的资产流转!");
                     echangeDevs.setSenderFK(null);
                     echangeDevs.setDevFK(null);
                     echangeDevs.setResiverFK(null);
@@ -107,7 +107,7 @@ public class SysRestController {
                  *
                  * */
                 if (echangeDevs.getReceived() != null && echangeDevs.getReceived().equals("disagree")) {
-                    res.add(echangeDevs.getResiverFK().getEname() + "拒绝了你的资产流转!");
+                    res.add("流转失败:"+echangeDevs.getResiverFK().getEname() + "拒绝了你的资产流转!");
                     echangeDevs.setSenderFK(null);
                     echangeDevs.setDevFK(null);
                     echangeDevs.setResiverFK(null);
@@ -120,7 +120,7 @@ public class SysRestController {
                  *
                  * */
                 if (echangeDevs.getReceived() != null && echangeDevs.getReceived().equals("error")) {
-                    res.add( "资产已被流转到："+echangeDevs.getDevFK().getEmployeeByBorrower().getEname());
+                    res.add( "流转失败:资产已被流转到"+echangeDevs.getDevFK().getEmployeeByBorrower().getEname());
                     echangeDevs.setSenderFK(null);
                     echangeDevs.setDevFK(null);
                     echangeDevs.setResiverFK(null);
@@ -160,20 +160,27 @@ public class SysRestController {
     @PostMapping("/sys/exchangePermit")
     public Map<String,String> exP(String[] data) {
         Map<String, String> map = new HashMap<>();
+
         if(data==null){
             return map;
         }
         for (String str:data){
-
+            Employee employee = (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
             String[] re=str.split("-");
             int id=Integer.parseInt(re[0]);
             String td=re[1];
             EchangeDevs echangeDevs=jpaExchangeDevs.findById(id).get();
             Employee sender=echangeDevs.getSenderFK();
             Assert ast=echangeDevs.getDevFK();
-            ast.setEmployeeByBorrower(sender);
+            Employee bros=ast.getEmployeeByBorrower();
             if(td.equals("true")){
-                echangeDevs.setReceived("agree");
+                if(!bros.getId().equals(employee.getId())){
+                    echangeDevs.setReceived("error");
+                }else {
+                    echangeDevs.setReceived("agree");
+                    ast.setEmployeeByBorrower(sender);
+                }
+
             }else if (td.equals("false")){
                 echangeDevs.setReceived("disagree");
             }

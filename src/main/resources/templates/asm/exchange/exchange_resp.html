@@ -46,7 +46,7 @@
                 i++;
             }
             jQuery.ajaxSettings.traditional = true;  //jquery post传递数组时必须这样
-            $.post("/sys/exchangePermit", {data: res},    //把name数据提交到ajaxRes action内，
+            $.post("/sys/exchangePermit", {data: res},
                 function (dt) {
 
                     var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
