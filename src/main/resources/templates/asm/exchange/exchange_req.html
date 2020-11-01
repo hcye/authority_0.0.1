@@ -15,7 +15,7 @@
 <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
 <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
 <script type="text/javascript">
-    layui.use('form', function(){
+    layui.use('form', function () {
         var form = layui.form;
         //监听提交
         //checkbox 点击事件
@@ -26,24 +26,31 @@
        checkedItemId+=$(checkboxlist[i]).parent().parent().find("input:hidden")[0].value+",";
        i++;
    }*/
-        form.on("checkbox",function (data) {
-            var checkedList=$("#tb").find("input:checkbox:checked");
-            var i=0;
-            while (i<checkedList.length){
+        form.on("checkbox", function (data) {
 
-                checkedList[i].checked='';
-                i++;
+            var checkedList = $("#tb").find("input:checkbox:checked");
+            var i = 0;
+            while (i < checkedList.length) {
+                var id1 = $(checkedList[i]).parent().parent().find("input:hidden")[0].value;
+                var id = $(data.elem).parent().parent().find("input:hidden")[0].value;
+                if (id1 == id) {
+                    i++;
+                    continue;
+                } else {
+                    checkedList[i].checked = false;
+                    i++;
+                }
+
 
             }
-            data.elem.checked='checked';
             form.render('checkbox');//重新渲染
         })
 
     });
 
 
-    function transformNullStr(str){
-        if (str==null){
+    function transformNullStr(str) {
+        if (str == null) {
             return "";
         }
         return str;
@@ -51,48 +58,48 @@
 
     $(function () {
         $("#doSearch").click(function () {
-            queryPage($("#assetType").val(),$("#search").val(),"","",$("#pageInput").val(),"");
+            queryPage($("#assetType").val(), $("#search").val(), "", "", $("#pageInput").val(), "");
         })
         $("#next").click(function () {
-            queryPage($("#assetType").val(),$("#search").val(),"","next",$("#pageInput").val(),"");
+            queryPage($("#assetType").val(), $("#search").val(), "", "next", $("#pageInput").val(), "");
         })
         $("#jump").click(function () {
-            queryPage($("#assetType").val(),$("#search").val(),"","",$("#pageInput").val(),"jump");
+            queryPage($("#assetType").val(), $("#search").val(), "", "", $("#pageInput").val(), "jump");
         })
         $("#pre").click(function () {
-            queryPage($("#assetType").val(),$("#search").val(),"pre","",$("#pageInput").val(),"");
+            queryPage($("#assetType").val(), $("#search").val(), "pre", "", $("#pageInput").val(), "");
         })
 
 
         $("input[type='checkbox']").click(function () {
-            $("#tb").find("input:checkbox:checked").attr("checked","false");
+            $("#tb").find("input:checkbox:checked").attr("checked", "false");
         })
 
 
         $("#confirm").click(function () {
             layer.confirm('确定发出申请！', {
                 btn: ['确定', '取消'] //可以无限个按钮
-            }, function(index, layero){
+            }, function (index, layero) {
 
-                var checkboxlist=$("#tb").find("input:checkbox:checked");
-                var checkedItemId='';
-                var i=0;
-                while (i<checkboxlist.length){
-                    checkedItemId+=$(checkboxlist[i]).parent().parent().find("input:hidden")[0].value+",";
+                var checkboxlist = $("#tb").find("input:checkbox:checked");
+                var checkedItemId = '';
+                var i = 0;
+                while (i < checkboxlist.length) {
+                    checkedItemId += $(checkboxlist[i]).parent().parent().find("input:hidden")[0].value + ",";
                     i++;
                 }
-                if(checkedItemId==''){
+                if (checkedItemId == '') {
                     layer.alert("请至少勾选一个设备！");
                     return;
                 }
-                $.post("/asm/exchange_req", {reason:$("#reason").val(),selectDevIds:checkedItemId},    //把name数据提交到ajaxRes action内，
+                $.post("/asm/exchange_req", {reason: $("#reason").val(), selectDevIds: checkedItemId},    //把name数据提交到ajaxRes action内，
                     function (data) {
                         layer.msg(data["ok"]);
                     }, "json");
-            }, function(index){
+            }, function (index) {
                 //关闭弹出层
-                    layer.close(index);
-                    return;
+                layer.close(index);
+                return;
             });
 
 
@@ -100,49 +107,54 @@
 
     })
 
-    function queryPage(type,searchKey,pre,next,pageIndex,jumpFlag) {
-        $.post("/asm/queryExchangePage", {type:type,search:searchKey,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag},    //把name数据提交到ajaxRes action内，
-            function(data) {
+    function queryPage(type, searchKey, pre, next, pageIndex, jumpFlag) {
+        $.post("/asm/queryExchangePage", {
+                type: type,
+                search: searchKey,
+                pre: pre,
+                next: next,
+                pageIndex: pageIndex,
+                jumpFlag: jumpFlag
+            },    //把name数据提交到ajaxRes action内，
+            function (data) {
                 var bro = data["emp"][0];
                 var me = data["me"][0];
                 var devs = data["devs"][0];
                 var page = data["page"][0][0];
                 var astList = page.content;
                 $("#tb").find("tr").remove();
-                for (var key in astList){
+                for (var key in astList) {
                     var browser;
-                    var disable="";
-                    var trStyle=""
-                    if(bro[key]==null){
-                        browser='';
-                        disable=" disabled='true' ";
-                        trStyle="style='color: #9F9F9F'";
-                    }else {
-                        if(bro[key].id==me[0].id){
-                            disable=" disabled='true' ";
-                            trStyle="style='color: #9F9F9F'";
+                    var disable = "";
+                    var trStyle = ""
+                    if (bro[key] == null) {
+                        browser = '';
+                        disable = " disabled='true' ";
+                        trStyle = "style='color: #9F9F9F'";
+                    } else {
+                        if (bro[key].id == me[0].id) {
+                            disable = " disabled='true' ";
+                            trStyle = "style='color: #9F9F9F'";
                         }
-                        browser=bro[key].ename;
+                        browser = bro[key].ename;
                     }
-                    for(var k in devs){
-                        if( devs[k].devName==astList[key].aname&&devs[k].exchangeable=='0'){
-                            disable=" disabled='true' ";
-                            trStyle="style='color: #9F9F9F'";
+                    for (var k in devs) {
+                        if (devs[k].devName == astList[key].aname && devs[k].exchangeable == '0') {
+                            disable = " disabled='true' ";
+                            trStyle = "style='color: #9F9F9F'";
                         }
 
                     }
-                    var assestnum=transformNullStr(astList[key].assestnum);
-                    $("#tb").append("<tr "+trStyle+" ><td><input type='hidden' value='"+astList[key].id+"' />"+astList[key].aname+"</td><td>"+astList[key].model+"</td><td>"+assestnum+"" +
-                        "</td><td>"+browser+"</td><td>"+astList[key].snnum+"</td><td>"+astList[key].remarks+"</td><td><input type='checkbox' "+disable+"  lay-skin='primary'  /></td></tr>");
+                    var assestnum = transformNullStr(astList[key].assestnum);
+                    $("#tb").append("<tr " + trStyle + " ><td><input type='hidden' value='" + astList[key].id + "' />" + astList[key].aname + "</td><td>" + astList[key].model + "</td><td>" + assestnum + "" +
+                        "</td><td>" + browser + "</td><td>" + astList[key].snnum + "</td><td>" + astList[key].remarks + "</td><td><input type='checkbox' " + disable + "  lay-skin='primary'  /></td></tr>");
                 }
-
-
 
 
                 var form = layui.form;
                 form.render();//重新渲染
-                $("#pageInput").val(page.number+1);
-                $("#PageCount").html(' 共 '+page.totalPages+' 页');
+                $("#pageInput").val(page.number + 1);
+                $("#PageCount").html(' 共 ' + page.totalPages + ' 页');
             }, "json");
     }
 
@@ -158,21 +170,22 @@
     <div class="layui-form">
 
         <div class="layui-form-item">
-      <!--      <label class="layui-form-label">申请人：</label>
-            <div class="layui-input-inline">
-                <input  class="layui-input" th:value="${oper.getEname()}" readonly="true"  />
-            </div>-->
+            <!--      <label class="layui-form-label">申请人：</label>
+                  <div class="layui-input-inline">
+                      <input  class="layui-input" th:value="${oper.getEname()}" readonly="true"  />
+                  </div>-->
 
             <label class="layui-form-label">资产类型：</label>
             <div class="layui-input-inline">
                 <select id="assetType">
-                    <option  shiro:hasPermission="${tp.getPermiCode()}" th:each="tp : ${assertTypes}" th:text="${tp.getTypeName()}"></option>
+                    <option shiro:hasPermission="${tp.getPermiCode()}" th:each="tp : ${assertTypes}"
+                            th:text="${tp.getTypeName()}"></option>
                 </select>
             </div>
 
             <label class="layui-form-label">搜索设备：</label>
             <div class="layui-input-inline">
-                <input  class="layui-input" placeholder="设备名称、用户名、编码查找" id="search"  />
+                <input class="layui-input" placeholder="设备名称、用户名、编码查找" id="search"/>
             </div>
             <button class="layui-btn" id="doSearch">查找</button>
 
@@ -183,7 +196,7 @@
         <div class="layui-form-item">
             <label class="layui-form-label">申请理由:</label>
             <div class="layui-input-block">
-                <input  class="layui-input" id="reason"/>
+                <input class="layui-input" id="reason"/>
             </div>
 
         </div>
@@ -212,14 +225,14 @@
                     <button class="layui-btn" id="pre" style="float: right">-</button>
                 </div>
                 <div class="layui-col-md2 layui-input-inline" style="margin: 0">
-                  <!--  <input type="text" class="layui-input" id="pageInput" th:value="${asserts==null ? 0:asserts.getNumber()+1}" />-->
-                    <input type="text" class="layui-input" id="pageInput" value="0" />
+                    <!--  <input type="text" class="layui-input" id="pageInput" th:value="${asserts==null ? 0:asserts.getNumber()+1}" />-->
+                    <input type="text" class="layui-input" id="pageInput" value="0"/>
                 </div>
                 <div class="layui-col-md1">
                     <button class="layui-btn" id="next">+</button>
                 </div>
                 <div class="layui-col-md2">
-                    <button class="layui-btn"  id="jump">跳转</button>
+                    <button class="layui-btn" id="jump">跳转</button>
                     <!--<span id="PageCount" th:text="${asserts==null?'共 0 页': ' 共 '+asserts.getTotalPages()+' 页'}"></span>-->
                     <span id="PageCount">共 0 页</span>
                 </div>

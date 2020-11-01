@@ -41,7 +41,6 @@
             while (i < checkboxlist.length) {
                 var id = $(checkboxlist[i]).parent().parent().find("input:hidden")[0].value;
                 var re = $(checkboxlist[i]).parent().parent().find("td")[3].innerHTML;
-                console.log(re)
                 res.push(id + "-" + checkboxlist[i].checked);
                 i++;
             }
