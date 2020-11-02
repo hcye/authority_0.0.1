@@ -1,8 +1,13 @@
 package com.rbac.demo;
 
+import com.rbac.demo.entity.DevType;
+import com.rbac.demo.entity.Employee;
+import com.rbac.demo.entity.Role;
+import com.rbac.demo.entity.User2Role;
 import com.rbac.demo.jpa.*;
 import com.rbac.demo.service.UpdateUserDB;
 import com.rbac.demo.shiro.ShiroUtils;
+import org.apache.catalina.User;
 import org.apache.shiro.util.ByteSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +21,7 @@ import javax.naming.NamingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 @SpringBootTest
 public class Test1 {
@@ -37,14 +43,12 @@ public class Test1 {
     JpaAssetType jpaAssetType;
     @Autowired
     JpaOperatRecord jpaOperatRecord;
+    @Autowired
+    JpaUser2Role jpaUser2Role;
     @Test
-    public void t() throws NamingException, ParseException {
-        String encryptPwd= ShiroUtils.encryption("admin", ByteSource.Util.bytes("admin").toHex());
-        System.out.println(encryptPwd);
-    /*    UpdateUserDB.updateUserTable(jpaEmployee,"192.168.100.10","hsaecd","yehangcheng@hsaecd.com","Yhc142536..");*/
+    public void t()  {
+        DevType devType =jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId("手机",jpaAssetType.findAssetTypeByName("手机"));
+        System.out.println(devType);
 
-
-        DateFormat format1 = new SimpleDateFormat("yyyy/MM/dd");
-        format1.parse("2020/07/01");
     }
 }

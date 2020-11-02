@@ -59,11 +59,6 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
             anAssert.setAname(devName.trim());
             AssetType assetType = null;
 
-            DevType devType =jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(devName.trim(),jpaAssetType.findAssetTypeByName(devName.trim()));
-
-            if(devType==null){
-                throw new ExcelAnalysisException(num + "行" + "设备类型未预定义！");
-            }
 
             if (assetTypeStr != null && assetTypeStr.trim().length() > 0) {
                 List<AssetType> types = jpaAssetType.findAll();
@@ -77,6 +72,10 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
                 }
                 if (flag) {
                     anAssert.setAssetTypeByAssertType(assetType);
+                    DevType devType =jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(devName.trim(),jpaAssetType.findAssetTypeByName(assetTypeStr.trim()));
+                    if(devType==null){
+                        throw new ExcelAnalysisException(num + "行" + "设备类型未预定义！");
+                    }
                     templat =devType.getAssetNumTemplate();
                 } else {
                     throw new ExcelAnalysisException(num + "行" + "类型不存在");
@@ -84,6 +83,9 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
             } else {
                 throw new ExcelAnalysisException(num + "行" + "类型 不能为空");
             }
+
+
+
             if (assetNum != null) {
                 if ((!assetNum.equals(""))&&jpaAssert.findAssertByAssestnum(assetNum.trim()) != null) {
                     throw new ExcelAnalysisException(num + "行的资产编号重复");

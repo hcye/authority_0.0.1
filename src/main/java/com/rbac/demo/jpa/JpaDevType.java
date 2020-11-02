@@ -25,7 +25,8 @@ public interface JpaDevType extends JpaRepository<DevType,Integer> {
     @Query("select dev from DevType dev where dev.assetTypeByAssertTypeId.typeName=:tp")
     Page<DevType> findDevTypesByAssertType(@Param("tp")String devType,Pageable pageable);
 
-    DevType findDevTypeByDevNameAndAssetTypeByAssertTypeId(String name,AssetType assetType);
+    @Query("select dev from DevType dev where dev.assetTypeByAssertTypeId=:tp and dev.devName=:name")
+    DevType findDevTypeByDevNameAndAssetTypeByAssertTypeId(@Param("name")String name,@Param("tp")AssetType assetType);
 
     Page<DevType> findDevTypesByDevNameLike(String name, Pageable pageable);
 

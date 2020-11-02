@@ -151,10 +151,12 @@
                 for (var key in astList) {
                     var browser;
                     var disable = "";
+                    var trStyle = ""
                     if (bro[key] == null) {
                         browser = '';
                     } else {
                         browser = bro[key].ename;
+                        trStyle = "style='color: #9F9F9F'";
                         disable = " disabled='true' ";
                     }
 
