@@ -10,10 +10,7 @@ import com.rbac.demo.easyExcel.DevTypeDownloadModel;
 import com.rbac.demo.easyExcel.ReadAssetEventListener;
 import com.rbac.demo.entity.*;
 import com.rbac.demo.jpa.*;
-import com.rbac.demo.service.AsmRecordService;
-import com.rbac.demo.service.AsmService;
-import com.rbac.demo.service.TypeService;
-import com.rbac.demo.service.WriteLog;
+import com.rbac.demo.service.*;
 import com.rbac.demo.tool.ConvertStrForSearch;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -63,6 +60,8 @@ public class AsmRestController {
     private AsmRecordService asmRecordService;
     @Autowired
     private JpaExchangeDevs jpaExchangeDevs;
+    @Autowired
+    private JpaMail jpaMail;
     @PostMapping("/asm/queryPage")
     public Map<String,List<Object>> queryPage(String type,String name,String search,String pre,String next,int pageIndex,String jumpFlag){
         /**
@@ -122,7 +121,7 @@ public class AsmRestController {
          * */
 
         Map<String,List<Object>> map=new HashMap<>();
-        List<DevType> devTypes=jpaDevType.findAll();
+        List<DevType> devTypes=jpaDevType.findDevTypesByAssertType(type);
         List<Employee> bros=new ArrayList<>();
         List<Employee> me=new ArrayList<>();
         Page<Assert> page;
@@ -582,6 +581,7 @@ public class AsmRestController {
     @PostMapping("/asm/exchange_req")
     public Map<String,String> exchange(String  reason,String selectDevIds){
         Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        SysMail sysMail=jpaMail.findSysMailByForwhat("asm");
         Map<String,String> map=new HashMap<>();
         EchangeDevs echangeDevs=new EchangeDevs();
         String[] ids=selectDevIds.split(",");
@@ -598,6 +598,17 @@ public class AsmRestController {
         echangeDevs.setSendTime(new Timestamp(new Date().getTime()));
         echangeDevs.setDevFK(asset);
         jpaExchangeDevs.save(echangeDevs);
+        if(sysMail!=null){
+//            String senderAddr,String senderAccount,String senderPwd,String host,String reciverAddr,String title,String textMsg
+            try {
+                Sendmail.send(sysMail.getSenderAddr(),sysMail.getSenderAccont(),sysMail.getSenderPwd(),sysMail.getHost(),asset.getEmployeeByBorrower().getEmail().trim(),
+                        "设备流转申请","申请设备："+asset.getAname()+" 访问 http://asm.hsaecd.com 审批！");
+            }catch (Exception e){
+                map.put("ok","发送成功！但是通知邮件发送失败，请通知管理员");
+                return map;
+            }
+
+        }
         map.put("ok","发送成功！");
         return map;
     }

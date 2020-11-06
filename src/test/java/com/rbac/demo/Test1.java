@@ -5,6 +5,7 @@ import com.rbac.demo.entity.Employee;
 import com.rbac.demo.entity.Role;
 import com.rbac.demo.entity.User2Role;
 import com.rbac.demo.jpa.*;
+import com.rbac.demo.service.Sendmail;
 import com.rbac.demo.service.UpdateUserDB;
 import com.rbac.demo.shiro.ShiroUtils;
 import org.apache.catalina.User;
@@ -45,10 +46,9 @@ public class Test1 {
     JpaOperatRecord jpaOperatRecord;
     @Autowired
     JpaUser2Role jpaUser2Role;
+
     @Test
     public void t()  {
-        DevType devType =jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId("手机",jpaAssetType.findAssetTypeByName("手机"));
-        System.out.println(devType);
 
     }
 }

@@ -59,4 +59,6 @@ public interface JpaAssert extends JpaRepository<Assert,Integer> {
     Page<Assert> findAssertsByBorroworNameLikeAndDamFlag(@Param("searchKey")String search,@Param("dam") String damFlag,  Pageable pageable);
 
 
+
+
 }

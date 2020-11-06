@@ -57,6 +57,33 @@
     }
 
     $(function () {
+
+        $("#setMail").click(function () {
+            layer.open({
+                type: 2,
+                title: "资产流转",
+                area: ["800px", "500px"],
+                content: ['/layer/layer_set_mail'],
+              /*  success: function (layero, index) {
+                    var body = layer.getChildFrame('body', index);
+                    var tb = body.find('#tb');
+                    for (var key in senders) {
+                        var assestnum = transformNullStr(ast[key].assestnum);
+                        tb.append("<tr><td><input type='hidden' value='" + req[key].id + "' />" + senders[key].ename + "</td><td>" + ast[key].aname + "</td><td>" + ast[key].model + "" +
+                            "</td><td>" + assestnum + "</td><td>" + req[key].reason + "</td><td><input type='checkbox' name='like[write]' title='同意'></td></tr>");
+                    }
+                    if (resp != null) {
+                        var respdiv = body.find('#resp');
+                        respdiv.append("<blockquote class='layui-elem-quote'>消息</blockquote>");
+                        for (var key in resp) {
+                            respdiv.append("<span>" + resp[key] + "</span>");
+                            respdiv.append("<hr>");
+                        }
+                    }
+
+                }*/
+            })
+        })
         $("#doSearch").click(function () {
             queryPage($("#assetType").val(), $("#search").val(), "", "", $("#pageInput").val(), "");
         })
@@ -142,6 +169,7 @@
                         if (devs[k].devName == astList[key].aname && devs[k].exchangeable == '0') {
                             disable = " disabled='true' ";
                             trStyle = "style='color: #9F9F9F'";
+
                         }
 
                     }
@@ -187,9 +215,12 @@
             <div class="layui-input-inline">
                 <input class="layui-input" placeholder="设备名称、用户名、编码查找" id="search"/>
             </div>
-            <button class="layui-btn" id="doSearch">查找</button>
+            <div class="layui-btn-group">
+                <button class="layui-btn" id="doSearch">查找</button>
+                <button class="layui-btn" id="confirm">发起申请</button>
+                <button class="layui-btn" id="setMail" shiro:hasPermission="asm:set:mail">设置邮箱</button>
+            </div>
 
-            <button class="layui-btn" id="confirm">发起申请</button>
 
         </div>
 

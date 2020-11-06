@@ -1,12 +1,10 @@
 package com.rbac.demo.controller.restController;
 
-import com.rbac.demo.entity.AsmAction;
-import com.rbac.demo.entity.Assert;
-import com.rbac.demo.entity.EchangeDevs;
-import com.rbac.demo.entity.Employee;
+import com.rbac.demo.entity.*;
 import com.rbac.demo.jpa.JpaAssert;
 import com.rbac.demo.jpa.JpaEmployee;
 import com.rbac.demo.jpa.JpaExchangeDevs;
+import com.rbac.demo.jpa.JpaMail;
 import com.rbac.demo.service.AsmRecordService;
 import com.rbac.demo.tool.JSON;
 import org.apache.shiro.SecurityUtils;
@@ -27,7 +25,8 @@ public class SysRestController {
     private JpaEmployee jpaEmployee;
     @Autowired
     private AsmRecordService asmRecordService;
-
+    @Autowired
+    private JpaMail jpaMail;
     @PostMapping("/sys/sys_even")
     public Map<String, Object> sysEvent() {
         Map<String, Object> map = new HashMap<>();
@@ -189,6 +188,43 @@ public class SysRestController {
         }
             return map;
         }
+
+
+    @PostMapping("/sys/setMail")
+//    host:host,sender:sender,accont:accont,pwd:pwd,forwhat:'流转服务',remark:$("#remark").val()
+    public Map<String,String> saveMail(Integer id,String host,String sender,String accont,String pwd,String remark) {
+
+        Map<String, String> map = new HashMap<>();
+        SysMail sysMail;
+        if(id==0){
+            sysMail=new SysMail();
+        }else {
+            sysMail=jpaMail.findById(id).get();
+        }
+        sysMail.setForwhat("asm");
+        sysMail.setHost(host);
+        sysMail.setRemark(remark);
+        sysMail.setSenderAccont(accont);
+        sysMail.setSenderPwd(pwd);
+        sysMail.setSenderAddr(sender);
+        jpaMail.save(sysMail);
+        map.put("success","保存成功");
+        return map;
+    }
+
+    @PostMapping("/sys/getAsmMail")
+//    host:host,sender:sender,accont:accont,pwd:pwd,forwhat:'流转服务',remark:$("#remark").val()
+    public Map<String,Object> getAsmMail() {
+        Map<String, Object> map = new HashMap<>();
+        SysMail sysMail=jpaMail.findSysMailByForwhat("asm");
+        if(sysMail==null){
+            map.put("info","no");
+        }else {
+            map.put("mail",sysMail);
+        }
+        return map;
+
+    }
 
 
     }
