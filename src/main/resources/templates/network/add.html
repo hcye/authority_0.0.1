@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>新增交换机</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+    <script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>-->
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <script type="text/javascript">
+        layui.use('form', function () {
+            var form = layui.form;
+        });
+
+        $(function () {
+            $("#confirm").click(function () {
+
+                var name=$("#name").val();
+                var ip=$("#ip").val();
+                var com=$("#com").val();
+                var cascade=$("#cascade").val();
+                if(name==""||name.trim()==""){
+                    layer.alert("交换机名必填");
+                    return;
+                }
+                if(ip==""||ip.trim()==""){
+                    layer.alert("管理地址必填");
+                    return;
+                }
+                var reg = /^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}$/g;
+                var reg1 = /^([1-5]?[0-9]?)(,[1-5]?[0-9]?)*/;
+                var arr1=reg1.exec(cascade);
+                var arr = reg.test(ip);
+                if(!arr){
+                    layer.alert("ip地址格式校验失败");
+                    return;
+                }
+                if(arr1.length>1&&arr1[0]!=cascade){
+                    layer.alert("接口组校验失败");
+                    return;
+                }
+                if(com==""||com.trim()==""){
+                    layer.alert("snmp团体字必填");
+                    return;
+                }
+                var checked = $("input:radio:checked");
+                var level=$(checked[0]).val();
+                var block_up=$(checked[1]).val();
+                $.post("/sw/add_commit", {name:name,com:com,
+                        level:level,block_up:block_up,
+                        ip:ip,firm:$("#firm").val(),
+                        remark:$("#remark").val(), location:$("#location").val(),label:$("#label").val(),cascade:cascade},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+                        if(data["error"]!=null){
+                            layer.alert(data["error"]);
+                        }
+                        if(data["success"]!=null){
+                            layer.alert(data["success"]);
+                        }
+                        document.location.href="/sw/sw";
+                    }, "json");
+            });
+        })
+
+    </script>
+</head>
+<body>
+<div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
+    <p>添加交换机</p>
+</div>
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-form">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span style="color: red">*</span>交换机名:</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="name"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span style="color: red">*</span>管理地址:</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="ip"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span style="color: red">*</span>snmp团体:</label>
+                <div class="layui-input-block">
+                    <input type="password" class="layui-input" id="com"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">级别:</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="level" value="0" title="核心交换机">
+                    <input type="radio" name="level" value="1" title="接入交换机" checked>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">级联口:</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="cascade" placeholder="端口逗号分割，逗号必须是英文模式，格式：xx,xx"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">品牌:</label>
+                <div class="layui-input-block">
+                    <select id="firm">
+                        <option>华为</option>
+                        <option>华三</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">位置:</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="location"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">标签:</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="label"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">启用:</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="on_off" value="on" title="启用" checked>
+                    <input type="radio" name="on_off" value="off" title="停用" >
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注:</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="remark"/>
+                </div>
+            </div>
+            <div class="layui-row">
+                <div class="layui-col-md-offset4">
+                    <button class="layui-btn" type="button" id="confirm">确定</button>
+                    <button class="layui-btn" type="button" id="cancel">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

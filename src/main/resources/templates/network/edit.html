@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑交换机</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+    <script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>-->
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <script type="text/javascript">
+        layui.use('form', function () {
+            var form = layui.form;
+        });
+
+        $(function () {
+            $("#confirm").click(function () {
+
+                var name=$("#name").val();
+                var ip=$("#ip").val();
+                var com=$("#com").val();
+                var cascade=$("#cascade").val();
+                if(name==""||name.trim()==""){
+                    layer.alert("交换机名必填");
+                    return;
+                }
+                if(ip==""||ip.trim()==""){
+                    layer.alert("管理地址必填");
+                    return;
+                }
+                var reg = /^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}$/g;
+                var reg1 = /^([1-5]?[0-9]?)(,[1-5]?[0-9]?)*/;
+                var arr1=reg1.exec(cascade);
+                var arr = reg.test(ip);
+                if(!arr){
+                    layer.alert("ip地址格式校验失败");
+                    return;
+                }
+                if(arr1.length>1&&arr1[0]!=cascade){
+                    layer.alert("接口组校验失败");
+                    return;
+                }
+                if(com==""||com.trim()==""){
+                    layer.alert("snmp团体字必填");
+                    return;
+                }
+                var checked = $("input:radio:checked");
+                var level=$(checked[0]).val();
+                var block_up=$(checked[1]).val();
+                $.post("/sw/add_commit", {id:$("#id").val(),name:name,com:com,
+                        level:level,block_up:block_up,
+                        ip:ip,firm:$("#firm").val(),
+                        remark:$("#remark").val(), location:$("#location").val(),label:$("#label").val(),cascade:cascade},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+
+
+                        if(data["error"]!=null){
+                            layer.confirm(data["error"], {
+                                btn: ['确定'] //可以无限个按钮
+                            }, function(index, layero){
+                                //关闭弹出层
+                                document.location.href="/sw/sw";
+                            });
+                        }
+                        if(data["success"]!=null){
+                            layer.confirm(data["success"], {
+                                btn: ['确定'] //可以无限个按钮
+                            }, function(index, layero){
+                                //关闭弹出层
+                                document.location.href="/sw/sw";
+                            });
+                        }
+                    }, "json");
+            });
+        })
+
+        /*
+                $(function () {
+                    $(document).ready(function () {
+                        $.post("/resource/getResourceTree", {},    //把name数据提交到ajaxRes action内，
+                            function (data) {
+        //------------绘制dtree-----------
+                                layui.extend({
+                                    dtree: '/layui_ext/dtree/dtree'
+                                }).use(['dtree', 'layer', 'jquery'], function () {
+                                    var dtree = layui.dtree, layer = layui.layer, $ = layui.jquery;
+
+                                    // 初始化树，渲染树
+                                    dtree.render({
+                                        elem: "#ResourceTree",
+                                        data: data,
+                                        scroll: "#toolbarDiv",
+                                        toolbar: true,
+                                        checkbar: true  //开启复选框
+                                    });
+
+        //------------绘制dtree-----------
+
+                                    dtree.on("node('depTree')", function (obj) {
+                                        /!*      $("#selectedDepId").val(obj.param.nodeId);
+                                              queryDepUser(obj.param.nodeId, 1, 'noAction','',"noAction");
+                                              $("#searchInput").val("");*!/
+                                    });
+                                });
+                            }, "json");
+                    })
+                })
+                $(function () {
+                    $("#conform").click(function () {
+                        var dtree=layui.dtree;
+                        if($("#name").val()==''||$("#code").val()==''|| dtree.getCheckbarNodesParam("ResourceTree").length==0){
+                            layer.alert("角色名称和权限字符是必填项,角色必须拥有至少一个权限！");
+                        }else {
+                            var powers=dtree.getCheckbarNodesParam("ResourceTree");
+                            var powerString="";
+                            for (var key in powers){
+                                powers[key].nodeId;
+                                powerString=powerString+powers[key].nodeId+'-';
+                            }
+                            $.post("/role/addRole", {name:$("#name").val(),code:$("#code").val(),status:$("#status").val(),powers:powerString,remarks:$("#remarks").val()},    //把name数据提交到ajaxRes action内，
+                                function (data) {
+
+                                    if(data["error"]!=null){
+                                        layer.alert("保存失败,角色名或权限字符重复！");
+                                    }
+                                    if(data["ok"]!=null){
+                                        document.location.href="/role/role";
+                                    }
+                                }, "json");
+                        };
+                    });
+                    $("#reset").click(function () {
+                        document.location.href="/role/role";
+                    });
+                })*/
+    </script>
+</head>
+<body>
+<div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
+    <p>编辑交换机</p>
+</div>
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-form">
+            <input type="hidden" th:value="${sw.getId()}" id="id"/>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span style="color: red">*</span>交换机名:</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="name" th:value="${sw.getSname()}"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span style="color: red">*</span>管理地址:</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="ip" th:value="${sw.getIpAddr()}"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span style="color: red">*</span>snmp团体:</label>
+                <div class="layui-input-block">
+                    <input type="password" class="layui-input" id="com" th:value="${sw.getSnmpComm()}"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">级别:</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="level" value="0" title="核心交换机" th:checked="${sw.level=='0'?'true':'false'}">
+                    <input type="radio" name="level" value="1" title="接入交换机" th:checked="${sw.level=='1'?'true':'false'}">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">级联口:</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="cascade" th:value="${sw.getCascadePort()}" placeholder="端口逗号分割，逗号必须是英文模式，格式：xx,xx"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">品牌:</label>
+                <div class="layui-input-block">
+                    <select id="firm" >
+                        <option th:text="${sw.getFirmByFirm().getFname()}"></option>
+                        <option>华三</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">位置:</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="location" th:value="${sw.getLocation()}"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">标签:</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="label" th:value="${sw.getLabel()}"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">启用:</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="on_off" value="on" title="启用" th:checked="${sw.getBlockUp()=='on'?true:false}">
+                    <input type="radio" name="on_off" value="off" title="停用" th:checked="${sw.getBlockUp()=='off'?true:false}">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注:</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="remark" th:value="${sw.getRemark()}"/>
+                </div>
+            </div>
+            <div class="layui-row">
+                <div class="layui-col-md-offset4">
+                    <button class="layui-btn" type="button" id="confirm">确定</button>
+                    <button class="layui-btn" type="button" id="cancel">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
