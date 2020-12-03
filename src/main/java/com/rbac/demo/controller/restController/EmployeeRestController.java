@@ -52,6 +52,24 @@ public class EmployeeRestController {
         }
         return names;
     }
+
+    @PostMapping("/user/findUserByNameLikeForReturn")
+    public List<String> findUsersForReturn(String name){
+        List<String> names=new ArrayList<>();
+        name= ConvertStrForSearch.getFormatedString(name);
+        List<Employee> employees;
+        employees=jpaEmployee.findEmployeesByEnameLikeForReturn(name);
+        if(employees.size()==0){
+            employees=jpaEmployee.findEmployeesByPingyinLikeForReturn(name);
+        }
+        String str="";
+        for (Employee employee:employees){
+            str=employee.getEname()+"-"+employee.getLoginName();
+            names.add(str);
+        }
+        return names;
+    }
+
     @PostMapping("/user/doEdit")
 //    id:$("#id").val(),email:$("#email").val(),sex:$("#sex").val(),status:$("#status"),group:$("#group"),pwd:$("#pwd"),roles:$("#roles").val()
     public Map<String,String> editUser(int id,String email,String sex,String status,String group,String pwd,String roles){
