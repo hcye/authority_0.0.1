@@ -30,32 +30,36 @@ public class UpdateUserDB {
         NamingEnumeration<SearchResult> answer=getNamingEnumeration( adip,  adname,  username,  userpwd);
         List<String> allLADPUserList = new ArrayList<String>();
         List<Employee> allUser = jpaEmployee.findAll();
-        String[] results;
+
         int flag = 0;
-        String adUserName = "";
-        String depart = "";
-        String mail = "";
-        String result = "";
-        String loginName = "";
         //遍历AD域
         while (answer.hasMoreElements()) {
+            String[] results;
+            String adUserName = "";
+            String depart = "";
+            String result = "";
+            String loginName = "";
+            String mail = "";
             SearchResult sr = answer.next();
-            result = sr.getName() + "," + sr.getAttributes().get("mail") + "," + sr.getAttributes().get("userPrincipalName");
+            if(sr.getAttributes().get("mail")!=null){
+                mail=sr.getAttributes().get("mail").toString().split(": ")[1];
+            }
+            result = sr.getName() + "," + mail + "," + sr.getAttributes().get("userPrincipalName");
             results = result.split(",");
-
             depart = results[1].split("=")[1];
             adUserName = result.split("=")[1].split(",")[0];
             if (results.length > 4) {
-
-                loginName = results[4].split(": ")[1].split("@")[0];
+                loginName = sr.getAttributes().get("sAMAccountName").toString().split(": ")[1];;
             } else {
                 continue;
             }
 
 
-            if (results.length > 3) {
+            if (results.length > 2) {
                 if (results[3].length() > 12) {
-                    mail = results[3].split(": ")[1];
+                    if(sr.getAttributes().get("mail")!=null){
+                        mail=sr.getAttributes().get("mail").toString().split(": ")[1];
+                    }
                 }
             }
             if (adUserName.length() > 15) {

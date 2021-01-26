@@ -23,10 +23,10 @@ import java.util.Properties;
 public class GetAllAduser {
 	private String result;
 	private String[] results;
-	public void getUsers(JpaEmployee jpaEmployee) {
+	public void getUsers() {
 		Properties env = new Properties();
 		String adminName = "yehangcheng@hsaecd.com";//username@domain
-		String adminPassword = "Yhc14253666";//password
+		String adminPassword = "Yhc142536...";//password
 		String ldapURL = "LDAP://192.168.100.10:389";//ip:port
 		env.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
 		env.put(Context.SECURITY_AUTHENTICATION, "simple");//"none","simple","strong"
@@ -44,31 +44,14 @@ public class GetAllAduser {
 			NamingEnumeration<SearchResult> answer = ctx.search(searchBase, searchFilter,searchCtls);
 			while (answer.hasMoreElements()) {
 				SearchResult sr = answer.next();
-				result=sr.getName()+","+sr.getAttributes().get("mail");
-				results=result.split(",");
-				String adUserName=results[0].split("=")[1];
-				String depart=results[1].split("=")[1];
-				String mail="";
-				if(results.length>3) {
-					if(results[3].length()>12) {
-						mail=results[3].split(": ")[1];
-					}
-				}
-				if(adUserName.length()>15){
-					continue;
-				}
-				Employee employee;
-				if(jpaEmployee.findEmployeesByEname(adUserName).size()>0){
-					employee=jpaEmployee.findEmployeesByEname(adUserName).get(0);
+//				System.out.println(sr);
+				String res="";
+				if(sr.getAttributes().get("mail")!=null){
+					res=sr.getAttributes().get("mail").toString();
 
-				}else{
-					employee=new Employee();
-					employee.setEname(adUserName);
-					employee.setPingyin(Chinese2Eng.convertHanzi2Pinyin(adUserName,true));
 				}
-				employee.setEmail(mail);
-				employee.setEdepart(depart);
-				jpaEmployee.save(employee);
+				result=sr.getAttributes().get("sAMAccountName").toString().split(": ")[1];
+				System.out.println(result+"-"+res);
 			}
 			ctx.close();
 		}catch (NamingException e) {

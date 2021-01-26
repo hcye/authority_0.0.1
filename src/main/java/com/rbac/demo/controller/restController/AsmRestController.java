@@ -175,7 +175,19 @@ public class AsmRestController {
         Map<String,List<Assert>> map=new HashMap<>();
         String[] ids=selectDevIds.split(",");
 
-        Employee borrower=jpaEmployee.findEmployeeByLoginName(name.split("-")[1]);
+        String[] res=name.split("-");
+        Employee borrower=null;
+        if(res.length==2){
+            borrower=jpaEmployee.findEmployeeByLoginName(name.split("-")[1]);
+        }else if(res.length>2){
+            String login_name="";
+            for (int i=1;i<res.length-1;i++){
+                login_name=login_name+res[i]+"-";
+            }
+            login_name=login_name+res[res.length-1];
+            borrower=jpaEmployee.findEmployeeByLoginName(login_name);
+        }
+
         if(actionFlag.equals("bo")){
             for (String str:ids){
                 if(!str.trim().equals("")){
@@ -207,8 +219,19 @@ public class AsmRestController {
             return map;
         }
         List<AssetType> assetTypes=asmService.getPermitAsmAssetTypes();
+        String[] res=name.split("-");
+        Employee returner=null;
+        if(res.length==2){
+            returner=jpaEmployee.findEmployeeByLoginName(name.split("-")[1]);
+        }else if(res.length>2){
+            String login_name="";
+            for (int i=1;i<res.length-1;i++){
+                login_name=login_name+res[i]+"-";
+            }
+            login_name=login_name+res[res.length-1];
+            returner=jpaEmployee.findEmployeeByLoginName(login_name);
+        }
 
-        Employee returner=jpaEmployee.findEmployeeByLoginName(name.split("-")[1]);
         List<Assert> asserts= (List<Assert>) returner.getAssertsById();
         List<Assert> assertsHasPermit=new ArrayList<>();
         for(int i=0;i<asserts.size();i++){

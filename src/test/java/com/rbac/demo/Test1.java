@@ -5,6 +5,7 @@ import com.rbac.demo.entity.Employee;
 import com.rbac.demo.entity.Role;
 import com.rbac.demo.entity.User2Role;
 import com.rbac.demo.jpa.*;
+import com.rbac.demo.service.GetAllAduser;
 import com.rbac.demo.service.Sendmail;
 import com.rbac.demo.service.UpdateUserDB;
 import com.rbac.demo.shiro.ShiroUtils;
@@ -49,6 +50,7 @@ public class Test1 {
 
     @Test
     public void t()  {
-
+        GetAllAduser getAllAduser=new GetAllAduser();
+        getAllAduser.getUsers();
     }
 }
