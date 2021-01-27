@@ -64,7 +64,10 @@ public class AsmController {
         model.addAttribute("operator",loginUser);
         return "asm/ret";
     }
-
+    @GetMapping("/rtc/rtc")
+    public String rtcPage(){
+        return "rtc/file_convert";
+    }
     @RequiresPermissions("asm:inp:view")
     @GetMapping("/asm/inp")
     public String inpPage(Model model){

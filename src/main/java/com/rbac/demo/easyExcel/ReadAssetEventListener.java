@@ -178,9 +178,6 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
         record.setActionTime(new Timestamp(new java.util.Date().getTime()));
         record.setEmployeeByDealer(employee);
         jpaOperatRecord.save(record);
-        for (Assert o : listOthermeans) {
-            jpaAssert.save(o);
-        }
-
+        jpaAssert.saveAll(listOthermeans);
     }
 }

@@ -3,7 +3,6 @@ package com.rbac.demo.easyExcel;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.metadata.BaseRowModel;
 
-import java.sql.Timestamp;
 
 public class DevTypeDownloadModel extends BaseRowModel {
     @ExcelProperty(value = "设备名称",index = 0)

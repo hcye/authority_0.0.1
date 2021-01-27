@@ -4,10 +4,7 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelReader;
 import com.alibaba.excel.read.metadata.ReadSheet;
 import com.alibaba.excel.support.ExcelTypeEnum;
-import com.rbac.demo.easyExcel.AssetDownloadModel;
-import com.rbac.demo.easyExcel.AssetTypeDownloadModel;
-import com.rbac.demo.easyExcel.DevTypeDownloadModel;
-import com.rbac.demo.easyExcel.ReadAssetEventListener;
+import com.rbac.demo.easyExcel.*;
 import com.rbac.demo.entity.*;
 import com.rbac.demo.jpa.*;
 import com.rbac.demo.service.*;
@@ -49,7 +46,8 @@ public class AsmRestController {
     private WriteLog writeLog;
     @Autowired
     private JpaDevType jpaDevType;
-
+    @Autowired
+    private JpaRtcBug jpaRtcBug;
     @Autowired
     private JpaOperatRecord jpaOperatRecord;
     @Autowired
@@ -805,7 +803,7 @@ public class AsmRestController {
 //        InputStream inputStream =new FileInputStream(file);
         InputStream inputStream =this.getClass().getClassLoader().getResourceAsStream("static/excel/moban1.xlsx");
         response.setHeader("Content-disposition", "attachment; filename=" + "template.xlsx");
-        response.setContentType("application/msexcel;charset=UTF-8");//设置类型
+        response.setContentType("application/octet-stream;charset=UTF-8");//设置类型
         response.setHeader("Pragma", "No-cache");//设置头
         response.setHeader("Cache-Control", "no-cache");//设置头
         response.setDateHeader("Expires", 0);//设置日期头
@@ -834,7 +832,7 @@ public class AsmRestController {
     public void exportExcel(String type,String isDam,String search,HttpServletResponse response) throws IOException {
 
         // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
-        response.setContentType("application/vnd.ms-excel");
+        response.setContentType("application/octet-stream");
         response.setCharacterEncoding("utf-8");
         // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
         String fileName = URLEncoder.encode("export", "UTF-8").replaceAll("\\+", "%20");
@@ -850,7 +848,7 @@ public class AsmRestController {
     public void exportExcel(HttpServletResponse response) throws IOException {
 
         // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
-        response.setContentType("application/vnd.ms-excel");
+        response.setContentType("application/octet-stream");
         response.setCharacterEncoding("utf-8");
         // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
         String fileName = URLEncoder.encode("type_export", "UTF-8").replaceAll("\\+", "%20");
@@ -863,7 +861,7 @@ public class AsmRestController {
     @GetMapping("asm/out_DevTypes")
     public void exportDevExcel(HttpServletResponse response) throws IOException {
         // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
-        response.setContentType("application/vnd.ms-excel");
+        response.setContentType("application/octet-stream");
         response.setCharacterEncoding("utf-8");
         // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
         String fileName = URLEncoder.encode("dev_type_export", "UTF-8").replaceAll("\\+", "%20");
