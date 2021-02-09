@@ -96,7 +96,6 @@ public class ExcelConvertController {
     }
     @GetMapping("/rtc/out")
     public void exportExcel(HttpServletResponse response) throws IOException {
-        // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
         response.setContentType("application/octet-stream");
         response.setCharacterEncoding("utf-8");
         // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
@@ -104,7 +103,6 @@ public class ExcelConvertController {
         response.setHeader("Content-disposition", "attachment;filename="+fileName);
         WriteCellStyle headWriteCellStyle = new WriteCellStyle();
 
-        // 背景设置为红色
         headWriteCellStyle.setFillForegroundColor(IndexedColors.WHITE.getIndex());
         WriteFont headWriteFont = new WriteFont();
         headWriteFont.setFontHeightInPoints((short)11);

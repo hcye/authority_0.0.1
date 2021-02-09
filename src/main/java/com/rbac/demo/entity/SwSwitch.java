@@ -1,12 +1,14 @@
 package com.rbac.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
-@Table(name = "sys_switch", schema = "mydb1", catalog = "")
-public class SysSwitch {
+@Table(name = "sw_switch", schema = "mydb1", catalog = "")
+public class SwSwitch {
     private int id;
     private String level;
     private String ipAddr;
@@ -16,7 +18,6 @@ public class SysSwitch {
     private String remark;
     private String online;
     private String blockUp;
-    private String sname;
     private String cascadePort;
     private SwFirm swFirmByFirm;
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -111,16 +112,6 @@ public class SysSwitch {
     }
 
     @Basic
-    @Column(name = "sname", nullable = false, length = 32)
-    public String getSname() {
-        return sname;
-    }
-
-    public void setSname(String sname) {
-        this.sname = sname;
-    }
-
-    @Basic
     @Column(name = "cascade_port", nullable = true, length = 255)
     public String getCascadePort() {
         return cascadePort;
@@ -134,39 +125,22 @@ public class SysSwitch {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
-        SysSwitch sysSwitch = (SysSwitch) o;
-
-        if (id != sysSwitch.id) return false;
-        if (level != null ? !level.equals(sysSwitch.level) : sysSwitch.level != null) return false;
-        if (ipAddr != null ? !ipAddr.equals(sysSwitch.ipAddr) : sysSwitch.ipAddr != null) return false;
-        if (snmpComm != null ? !snmpComm.equals(sysSwitch.snmpComm) : sysSwitch.snmpComm != null) return false;
-        if (location != null ? !location.equals(sysSwitch.location) : sysSwitch.location != null) return false;
-        if (label != null ? !label.equals(sysSwitch.label) : sysSwitch.label != null) return false;
-        if (remark != null ? !remark.equals(sysSwitch.remark) : sysSwitch.remark != null) return false;
-        if (online != null ? !online.equals(sysSwitch.online) : sysSwitch.online != null) return false;
-        if (blockUp != null ? !blockUp.equals(sysSwitch.blockUp) : sysSwitch.blockUp != null) return false;
-        if (sname != null ? !sname.equals(sysSwitch.sname) : sysSwitch.sname != null) return false;
-        if (cascadePort != null ? !cascadePort.equals(sysSwitch.cascadePort) : sysSwitch.cascadePort != null)
-            return false;
-
-        return true;
+        SwSwitch swSwitch = (SwSwitch) o;
+        return id == swSwitch.id &&
+                Objects.equals(level, swSwitch.level) &&
+                Objects.equals(ipAddr, swSwitch.ipAddr) &&
+                Objects.equals(snmpComm, swSwitch.snmpComm) &&
+                Objects.equals(location, swSwitch.location) &&
+                Objects.equals(label, swSwitch.label) &&
+                Objects.equals(remark, swSwitch.remark) &&
+                Objects.equals(online, swSwitch.online) &&
+                Objects.equals(blockUp, swSwitch.blockUp) &&
+                Objects.equals(cascadePort, swSwitch.cascadePort);
     }
 
     @Override
     public int hashCode() {
-        int result = id;
-        result = 31 * result + (level != null ? level.hashCode() : 0);
-        result = 31 * result + (ipAddr != null ? ipAddr.hashCode() : 0);
-        result = 31 * result + (snmpComm != null ? snmpComm.hashCode() : 0);
-        result = 31 * result + (location != null ? location.hashCode() : 0);
-        result = 31 * result + (label != null ? label.hashCode() : 0);
-        result = 31 * result + (remark != null ? remark.hashCode() : 0);
-        result = 31 * result + (online != null ? online.hashCode() : 0);
-        result = 31 * result + (blockUp != null ? blockUp.hashCode() : 0);
-        result = 31 * result + (sname != null ? sname.hashCode() : 0);
-        result = 31 * result + (cascadePort != null ? cascadePort.hashCode() : 0);
-        return result;
+        return Objects.hash(id, level, ipAddr, snmpComm, location, label, remark, online, blockUp, cascadePort);
     }
     @JsonIgnore
     @ManyToOne

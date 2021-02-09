@@ -17,7 +17,11 @@
         layui.use('form', function () {
             var form = layui.form;
         });
-
+        $(function (){
+            $("#cancel").click(function(){
+                document.location.href="/asm/network";
+            });
+        })
         $(function () {
             $("#confirm").click(function () {
 
@@ -49,21 +53,23 @@
                     layer.alert("snmp团体字必填");
                     return;
                 }
-                var checked = $("input:radio:checked");
-                var level=$(checked[0]).val();
-                var block_up=$(checked[1]).val();
                 $.post("/sw/add_commit", {name:name,com:com,
-                        level:level,block_up:block_up,
                         ip:ip,firm:$("#firm").val(),
-                        remark:$("#remark").val(), location:$("#location").val(),label:$("#label").val(),cascade:cascade},    //把name数据提交到ajaxRes action内，
+                        remark:$("#remark").val(), location:$("#location").val(),
+                        cascade:cascade,level:$("input[name='level']:checked").val(),
+                        block_up:$("input[name='on_off']:checked").val()},    //把name数据提交到ajaxRes action内，
                     function (data) {
-                        if(data["error"]!=null){
-                            layer.alert(data["error"]);
+                        if(data["ERROR"]!=null){
+                            layer.alert(data["ERROR"]);
+                        }else {
+                            layer.confirm(data["SUCCESS"], {
+                                btn: ['确定'] //可以无限个按钮
+                            }, function(index, layero){
+                                //关闭弹出层
+                                document.location.href="/asm/network";
+                            });
                         }
-                        if(data["success"]!=null){
-                            layer.alert(data["success"]);
-                        }
-                        document.location.href="/sw/sw";
+                        // document.location.href="/sw/sw";
                     }, "json");
             });
         })
@@ -98,8 +104,9 @@
             <div class="layui-form-item">
                 <label class="layui-form-label">级别:</label>
                 <div class="layui-input-block">
-                    <input type="radio" name="level" value="0" title="核心交换机">
-                    <input type="radio" name="level" value="1" title="接入交换机" checked>
+                    <input type="radio" name="level" value="核心" title="核心交换机">
+                    <input type="radio" name="level" value="汇聚" title="核心交换机">
+                    <input type="radio" name="level" value="接入" title="接入交换机" checked>
                 </div>
             </div>
             <div class="layui-form-item">
@@ -112,8 +119,7 @@
                 <label class="layui-form-label">品牌:</label>
                 <div class="layui-input-block">
                     <select id="firm">
-                        <option>华为</option>
-                        <option>华三</option>
+                        <option th:each="firm : ${firms}" th:text="${firm.getFname()}"></option>
                     </select>
                 </div>
             </div>
@@ -124,16 +130,10 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">标签:</label>
-                <div class="layui-input-block">
-                    <input class="layui-input" id="label"/>
-                </div>
-            </div>
-            <div class="layui-form-item">
                 <label class="layui-form-label">启用:</label>
                 <div class="layui-input-block">
-                    <input type="radio" name="on_off" value="on" title="启用" checked>
-                    <input type="radio" name="on_off" value="off" title="停用" >
+                    <input type="radio" name="on_off" value="启用" title="启用" checked>
+                    <input type="radio" name="on_off" value="停用" title="停用" >
                 </div>
             </div>
 

@@ -2,12 +2,17 @@ package com.rbac.demo;
 
 import com.rbac.demo.entity.Employee;
 import com.rbac.demo.entity.Role;
+import com.rbac.demo.entity.SwSwitch;
 import com.rbac.demo.jpa.JpaEmployee;
 import com.rbac.demo.jpa.JpaRole;
+import com.rbac.demo.jpa.JpaSwSwitch;
 import com.rbac.demo.service.RoleService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,12 +26,11 @@ public class JpaTests {
     @Autowired
     JpaRole jpaRole;
     @Autowired
-    RoleService roleService;
+    JpaSwSwitch jpaSwSwitch;
     @Test
     public void t1(){
-        Employee employee =jpaEmployee.findEmployeeById(169);
-
-        List<Role> roles=jpaEmployee.findRoleByEmployee(employee);
-        System.out.println(roles);
+        Pageable pageable= PageRequest.of(1,10);
+        Page<SwSwitch> page=jpaSwSwitch.findSwSwitchesByLabelLikeAndsAndfirm("%%","华为",pageable);
+        System.out.println(page.toList().size());
     }
 }

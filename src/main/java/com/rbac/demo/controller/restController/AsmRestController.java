@@ -812,7 +812,7 @@ public class AsmRestController {
             //除放在static下和templates下的资源
             //idea必须使用项目路径，即以src开头的路径
 
-            //jspringboot文件下载，的输入流智能按以上方式获得
+            //jspringboot文件下载，的输入流只能按以上方式获得
             int i=0;
             while(((i=inputStream.read(bytes))!=-1)){
                 stream.write(bytes,0,i);
@@ -847,7 +847,6 @@ public class AsmRestController {
     @GetMapping("asm/out_types")
     public void exportExcel(HttpServletResponse response) throws IOException {
 
-        // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
         response.setContentType("application/octet-stream");
         response.setCharacterEncoding("utf-8");
         // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
@@ -860,7 +859,6 @@ public class AsmRestController {
 
     @GetMapping("asm/out_DevTypes")
     public void exportDevExcel(HttpServletResponse response) throws IOException {
-        // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
         response.setContentType("application/octet-stream");
         response.setCharacterEncoding("utf-8");
         // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系

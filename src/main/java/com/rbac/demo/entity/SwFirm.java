@@ -2,6 +2,7 @@ package com.rbac.demo.entity;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.Objects;
 
 @Entity
 @Table(name = "sw_firm", schema = "mydb1", catalog = "")
@@ -9,8 +10,8 @@ public class SwFirm {
     private int id;
     private String fname;
     private String remark;
-    private Collection<Oid> oidsById;
-    private Collection<SysSwitch> sysSwitchesById;
+    private Collection<SwOidTemp> swOidTempsById;
+    private Collection<SwSwitch> swSwitchesById;
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
@@ -46,39 +47,32 @@ public class SwFirm {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         SwFirm swFirm = (SwFirm) o;
-
-        if (id != swFirm.id) return false;
-        if (fname != null ? !fname.equals(swFirm.fname) : swFirm.fname != null) return false;
-        if (remark != null ? !remark.equals(swFirm.remark) : swFirm.remark != null) return false;
-
-        return true;
+        return id == swFirm.id &&
+                Objects.equals(fname, swFirm.fname) &&
+                Objects.equals(remark, swFirm.remark);
     }
 
     @Override
     public int hashCode() {
-        int result = id;
-        result = 31 * result + (fname != null ? fname.hashCode() : 0);
-        result = 31 * result + (remark != null ? remark.hashCode() : 0);
-        return result;
+        return Objects.hash(id, fname, remark);
+    }
+
+    @OneToMany(mappedBy = "swFirmBySwFirm")
+    public Collection<SwOidTemp> getSwOidTempsById() {
+        return swOidTempsById;
+    }
+
+    public void setSwOidTempsById(Collection<SwOidTemp> swOidTempsById) {
+        this.swOidTempsById = swOidTempsById;
     }
 
     @OneToMany(mappedBy = "swFirmByFirm")
-    public Collection<Oid> getOidsById() {
-        return oidsById;
+    public Collection<SwSwitch> getSwSwitchesById() {
+        return swSwitchesById;
     }
 
-    public void setOidsById(Collection<Oid> oidsById) {
-        this.oidsById = oidsById;
-    }
-
-    @OneToMany(mappedBy = "swFirmByFirm")
-    public Collection<SysSwitch> getSysSwitchesById() {
-        return sysSwitchesById;
-    }
-
-    public void setSysSwitchesById(Collection<SysSwitch> sysSwitchesById) {
-        this.sysSwitchesById = sysSwitchesById;
+    public void setSwSwitchesById(Collection<SwSwitch> swSwitchesById) {
+        this.swSwitchesById = swSwitchesById;
     }
 }

@@ -20,43 +20,64 @@
         layui.use('form', function(){
             var form = layui.form;
         });
-        $(function () {
-            $(document).ready(function () {
-                $.post("/sw/getAll", {},    //把name数据提交到ajaxRes action内，
-                    function (data) {
-                        var sws=data["sws"];
-                        var firms=data["firms"];
+        function getPage(pre,next,searchFlag){
+            $.get("/sw/getAll", {
+                    name: $("#rname").val(),
+                    firm:$("#fname").val(),
+                    pre: pre,
+                    next: next,
+                    searchFlag: searchFlag,
+                    pageIndex: $("#pageInput").val(),
+                },    //把name数据提交到ajaxRes action内，
+                function (data) {
+                    var sws=data["sws"][0].content;
+                    $("#pageInput").val(data["sws"][0].number+1);
+                    $("#PageCount").html(data["sws"][0].totalPages);
+                    var firms=data["firms"][0];
+                    $("#tb").find("tr").remove();
+                    for (var key in sws){
+                        var st='';
+                        $("#tb").append("<tr "+st+" ><td><input type='hidden' value='"+sws[key].id+"'/>"+sws[key].label+"</td><td>"+firms[key]+"" +
+                            "</td><td>"+sws[key].level+"</td><td>"+sws[key].ipAddr+"</td><td>"+sws[key].blockUp+"</td>" +
+                            "<td><button class='layui-btn layui-btn-sm' name='edit'>编辑</button>" +
+                            "<button class='layui-btn layui-btn-sm' name='delete'>删除</button></td></tr>")
+                    }
+                    $("#tb").find("button[name='edit']").click(function () {
+                        document.location.href = "/sw/edit?id=" + $(this).parent().parent().find("input")[0].value;
+                    });
 
-                        for (var key in sws){
-                            var le;
-                            var bl;
-                            var st='';
-                            if(sws[key].level=='1'){
-                                le="接入交换机";
-                            }else {
-                                le="核心交换机";
-                            }
-                            if(sws[key].blockUp=='on'){
-                                bl="可用";
-                            }else {
-                                bl="禁用";
-                                st=" style='color: #9F9F9F' ";
-                            }
-                            $("#tb").append("<tr "+st+" ><td><input type='hidden' value='"+sws[key].id+"'/>"+sws[key].sname+"</td><td>"+firms[key].fname+"" +
-                                "</td><td>"+le+"</td><td>"+sws[key].ipAddr+"</td><td>"+sws[key].online+"</td>" +
-                                "<td>"+bl+"</td><td><button class='layui-btn layui-btn-sm' name='edit'>编辑</button>" +
-                                "<button class='layui-btn layui-btn-sm' name='delete'>删除</button></td></tr>")
-                        }
-                        $("#tb").find("button[name='edit']").click(function () {
-                            document.location.href = "/sw/edit?id=" + $(this).parent().parent().find("input")[0].value;
-                        });
-                        $("#tb").find("button[name='delete']").click(function () {
-                            console.log("删除");
-                        });
-                    }, "json");
-            });
+                    $("#tb").find("button[name='delete']").click(function () {
+                        var id=$(this).parent().parent().find("input")[0].value;
+
+                        layer.confirm("删除交换机？", {
+                            btn: ['确定','取消'] //可以无限个按钮
+                        , btn1:function(index, layero){
+                            //关闭弹出层
+                            document.location.href = "/sw/del?id=" + id;
+
+                        }, btn2:function (index) {
+                            //关闭弹出层
+                            layer.close(index);
+                        }});
+                    });
+                }, "json");
+        }
+        $(function () {
+            $(document).ready(getPage(0,0,''));
             $("#add").click(function () {
                 document.location.href="/sw/add";
+            });
+            $("#next").click(function (){
+                getPage(0,1,'');
+            });
+            $("#pre").click(function (){
+                getPage(1,0,'');
+            });
+            $("#jump").click(function (){
+                getPage(0,0,'');
+            });
+            $("#search").click(function (){
+                getPage(0,0,'1');
             });
 
         })
@@ -85,9 +106,8 @@
             <div class="layui-inline">
                 <label class="layui-form-label">品牌:</label>
                 <div class="layui-input-inline">
-                    <select id="type">
-                        <option>华为</option>
-                        <option>华三</option>
+                    <select id="fname">
+                        <option th:each="firm : ${firms}" th:text="${firm.getFname()}"></option>
                     </select>
                 </div>
             </div>
@@ -108,8 +128,7 @@
                     <td>品牌</td>
                     <td>角色</td>
                     <td>ip地址</td>
-                    <td>在线</td>
-                    <td>停用</td>
+                    <td>启用/停用</td>
                     <td>操作</td>
                 </tr>
                 </thead>
@@ -124,14 +143,14 @@
                 <button class="layui-btn" id="pre" style="float: right">-</button>
             </div>
             <div class="layui-col-md2 layui-input-inline">
-                <input type="text" class="layui-input" id="pageInput" />
+                <input type="text" class="layui-input" id="pageInput"  />
             </div>
             <div class="layui-col-md1">
                 <button class="layui-btn" id="next">+</button>
             </div>
             <div class="layui-col-md2">
                 <button class="layui-btn" id="jump">跳转</button>
-                <span id="PageCount"></span>
+                <span>共 </span><span id="PageCount"></span><span> 页</span>
             </div>
         </div>
     </div>

@@ -27,7 +27,6 @@
             if(pri!=""){
                 var regx=/[0-9]+[\.]?[0-9]+/;
                 var a=regx.exec(pri);
-                console.log(a);
                 if(a==null||a[0]!=pri){
                     $("#price").val("");
                     layer.alert("价格字符输入错误");

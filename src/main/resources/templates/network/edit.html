@@ -17,9 +17,13 @@
         layui.use('form', function () {
             var form = layui.form;
         });
-
+        $(function (){
+            $("#cancel").click(function(){
+                document.location.href="/asm/network";
+            });
+        })
         $(function () {
-            $("#confirm").click(function () {
+            $("#save").click(function () {
 
                 var name=$("#name").val();
                 var ip=$("#ip").val();
@@ -49,95 +53,28 @@
                     layer.alert("snmp团体字必填");
                     return;
                 }
-                var checked = $("input:radio:checked");
-                var level=$(checked[0]).val();
-                var block_up=$(checked[1]).val();
-                $.post("/sw/add_commit", {id:$("#id").val(),name:name,com:com,
-                        level:level,block_up:block_up,
+                $.post("/sw/edit_commit", {id:$("#id").val(),name:name,com:com,
                         ip:ip,firm:$("#firm").val(),
-                        remark:$("#remark").val(), location:$("#location").val(),label:$("#label").val(),cascade:cascade},    //把name数据提交到ajaxRes action内，
+                        remark:$("#remark").val(), location:$("#location").val(),
+                        cascade:cascade,level:$("input[name='level']:checked").val(),
+                        block_up:$("input[name='on_off']:checked").val()},    //把name数据提交到ajaxRes action内，
                     function (data) {
-
-
-                        if(data["error"]!=null){
-                            layer.confirm(data["error"], {
+                        if(data["ERROR"]!=null){
+                            layer.alert(data["ERROR"]);
+                        }else {
+                            layer.confirm(data["SUCCESS"], {
                                 btn: ['确定'] //可以无限个按钮
                             }, function(index, layero){
                                 //关闭弹出层
-                                document.location.href="/sw/sw";
+                                document.location.href="/asm/network";
                             });
                         }
-                        if(data["success"]!=null){
-                            layer.confirm(data["success"], {
-                                btn: ['确定'] //可以无限个按钮
-                            }, function(index, layero){
-                                //关闭弹出层
-                                document.location.href="/sw/sw";
-                            });
-                        }
+                        // document.location.href="/sw/sw";
                     }, "json");
             });
         })
 
-        /*
-                $(function () {
-                    $(document).ready(function () {
-                        $.post("/resource/getResourceTree", {},    //把name数据提交到ajaxRes action内，
-                            function (data) {
-        //------------绘制dtree-----------
-                                layui.extend({
-                                    dtree: '/layui_ext/dtree/dtree'
-                                }).use(['dtree', 'layer', 'jquery'], function () {
-                                    var dtree = layui.dtree, layer = layui.layer, $ = layui.jquery;
 
-                                    // 初始化树，渲染树
-                                    dtree.render({
-                                        elem: "#ResourceTree",
-                                        data: data,
-                                        scroll: "#toolbarDiv",
-                                        toolbar: true,
-                                        checkbar: true  //开启复选框
-                                    });
-
-        //------------绘制dtree-----------
-
-                                    dtree.on("node('depTree')", function (obj) {
-                                        /!*      $("#selectedDepId").val(obj.param.nodeId);
-                                              queryDepUser(obj.param.nodeId, 1, 'noAction','',"noAction");
-                                              $("#searchInput").val("");*!/
-                                    });
-                                });
-                            }, "json");
-                    })
-                })
-                $(function () {
-                    $("#conform").click(function () {
-                        var dtree=layui.dtree;
-                        if($("#name").val()==''||$("#code").val()==''|| dtree.getCheckbarNodesParam("ResourceTree").length==0){
-                            layer.alert("角色名称和权限字符是必填项,角色必须拥有至少一个权限！");
-                        }else {
-                            var powers=dtree.getCheckbarNodesParam("ResourceTree");
-                            var powerString="";
-                            for (var key in powers){
-                                powers[key].nodeId;
-                                powerString=powerString+powers[key].nodeId+'-';
-                            }
-                            $.post("/role/addRole", {name:$("#name").val(),code:$("#code").val(),status:$("#status").val(),powers:powerString,remarks:$("#remarks").val()},    //把name数据提交到ajaxRes action内，
-                                function (data) {
-
-                                    if(data["error"]!=null){
-                                        layer.alert("保存失败,角色名或权限字符重复！");
-                                    }
-                                    if(data["ok"]!=null){
-                                        document.location.href="/role/role";
-                                    }
-                                }, "json");
-                        };
-                    });
-                    $("#reset").click(function () {
-                        document.location.href="/role/role";
-                    });
-                })*/
     </script>
 </head>
 <body>
@@ -151,7 +88,7 @@
             <div class="layui-form-item">
                 <label class="layui-form-label"><span style="color: red">*</span>交换机名:</label>
                 <div class="layui-input-block">
-                    <input class="layui-input" id="name" th:value="${sw.getSname()}"/>
+                    <input class="layui-input" id="name" th:value="${sw.getLabel()}"/>
                 </div>
             </div>
             <div class="layui-form-item">
@@ -169,8 +106,9 @@
             <div class="layui-form-item">
                 <label class="layui-form-label">级别:</label>
                 <div class="layui-input-block">
-                    <input type="radio" name="level" value="0" title="核心交换机" th:checked="${sw.level=='0'?'true':'false'}">
-                    <input type="radio" name="level" value="1" title="接入交换机" th:checked="${sw.level=='1'?'true':'false'}">
+                    <input type="radio" name="level" value="核心" title="核心交换机" th:checked="${sw.level=='核心'?'true':'false'}" />
+                    <input type="radio" name="level" value="汇聚" title="接入交换机" th:checked="${sw.level=='汇聚'?'true':'false'}" />
+                    <input type="radio" name="level" value="接入" title="接入交换机" th:checked="${sw.level=='接入'?'true':'false'}" />
                 </div>
             </div>
             <div class="layui-form-item">
@@ -183,8 +121,7 @@
                 <label class="layui-form-label">品牌:</label>
                 <div class="layui-input-block">
                     <select id="firm" >
-                        <option th:text="${sw.getFirmByFirm().getFname()}"></option>
-                        <option>华三</option>
+                        <option th:each="firm : ${firms}" th:text="${firm.getFname()}"></option>
                     </select>
                 </div>
             </div>
@@ -195,16 +132,10 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">标签:</label>
-                <div class="layui-input-block">
-                    <input class="layui-input" id="label" th:value="${sw.getLabel()}"/>
-                </div>
-            </div>
-            <div class="layui-form-item">
                 <label class="layui-form-label">启用:</label>
                 <div class="layui-input-block">
-                    <input type="radio" name="on_off" value="on" title="启用" th:checked="${sw.getBlockUp()=='on'?true:false}">
-                    <input type="radio" name="on_off" value="off" title="停用" th:checked="${sw.getBlockUp()=='off'?true:false}">
+                    <input type="radio" name="on_off" value="启用" title="启用" th:checked="${sw.getBlockUp()=='启用'?true:false}">
+                    <input type="radio" name="on_off" value="停用" title="停用" th:checked="${sw.getBlockUp()=='停用'?true:false}">
                 </div>
             </div>
 
@@ -216,7 +147,7 @@
             </div>
             <div class="layui-row">
                 <div class="layui-col-md-offset4">
-                    <button class="layui-btn" type="button" id="confirm">确定</button>
+                    <button class="layui-btn" type="button" id="save">保存</button>
                     <button class="layui-btn" type="button" id="cancel">取消</button>
                 </div>
             </div>

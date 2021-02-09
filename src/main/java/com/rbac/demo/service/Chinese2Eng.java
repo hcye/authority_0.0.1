@@ -113,8 +113,5 @@ public class Chinese2Eng {
     /**
      * 测试方法
      */
-    public static void main(String[] args) {
-        System.out.println(convertHanzi2Pinyin("叶航呈",false));
-    }
 
 }
