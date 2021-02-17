@@ -1,8 +1,10 @@
 package com.rbac.demo.controller.network;
 
 import com.rbac.demo.entity.SwFirm;
+import com.rbac.demo.entity.SwOidTemp;
 import com.rbac.demo.entity.SwSwitch;
 import com.rbac.demo.jpa.JpaSwFirm;
+import com.rbac.demo.jpa.JpaSwOidTemp;
 import com.rbac.demo.jpa.JpaSwSwitch;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,9 @@ public class NetworkController {
     @Autowired
     private JpaSwSwitch jpaSwSwitch;
     @Autowired
-    JpaSwFirm jpaSwFirm;
+    private JpaSwFirm jpaSwFirm;
+    @Autowired
+    private JpaSwOidTemp jpaSwOidTemp;
     @RequiresPermissions("asm:network:view")
     @GetMapping("/asm/network")
     public String sw(Model model){
@@ -35,8 +39,15 @@ public class NetworkController {
         return "network/add";
     }
 
+    @GetMapping("/oid/add")
+    public String oid_add(Model model){
+        List<SwFirm> firmList=jpaSwFirm.findAll();
+        model.addAttribute("firms",firmList);
+        return "network/oid/oid_add";
+    }
+
     @GetMapping("/sw/edit")
-    public String add(int id, Model model){
+    public String edit(int id, Model model){
 
        SwSwitch swSwitch=jpaSwSwitch.findById(id).get();
        List<SwFirm> firmList=jpaSwFirm.findAll();
@@ -52,9 +63,45 @@ public class NetworkController {
        model.addAttribute("sw",swSwitch);
        return "network/edit";
     }
+
+    @GetMapping("/oid/edit")
+    public String oid_edit(int id, Model model){
+
+        SwOidTemp swOidTemp=jpaSwOidTemp.findById(id).get();
+        List<SwFirm> firmList=jpaSwFirm.findAll();
+        SwFirm cuFirm=swOidTemp.getSwFirmBySwFirm();
+        for (SwFirm swFirm:firmList){
+            if (swFirm.getFname()==cuFirm.getFname()){
+                firmList.remove(swFirm);
+                break;
+            }
+        }
+        firmList.add(0,cuFirm);
+        model.addAttribute("firms",firmList);
+        model.addAttribute("oid",swOidTemp);
+        return "network/oid/oid_edit";
+    }
+
     @GetMapping("/sw/del")
     public String del(int id){
         jpaSwSwitch.deleteById(id);
         return "redirect:/asm/network";
+    }
+
+    @GetMapping("/oid/del")
+    public String oid_del(int id){
+        jpaSwOidTemp.deleteById(id);
+        return "redirect:/network/oid_mgmt";
+    }
+
+    @RequiresPermissions("asm:oid:view")
+    @GetMapping("/network/oid_mgmt")
+    public String oid(Model model){
+        List<SwFirm> firms=jpaSwFirm.findAll();
+        SwFirm swFirm=new SwFirm();
+        swFirm.setFname("全部");
+        firms.add(0,swFirm);
+        model.addAttribute("firms",firms);
+        return "network/oid/oid_temp";
     }
 }

@@ -13,6 +13,8 @@ public class SwOidTemp {
     private String oidName;
     private String oidTemp;
     private SwFirm swFirmBySwFirm;
+    private String remark;
+
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
@@ -58,6 +60,7 @@ public class SwOidTemp {
     public int hashCode() {
         return Objects.hash(id, oidName, oidTemp);
     }
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "sw_firm", referencedColumnName = "id")
@@ -67,5 +70,15 @@ public class SwOidTemp {
 
     public void setSwFirmBySwFirm(SwFirm swFirmBySwFirm) {
         this.swFirmBySwFirm = swFirmBySwFirm;
+    }
+
+    @Basic
+    @Column(name = "remark", nullable = true, length = 255)
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }
