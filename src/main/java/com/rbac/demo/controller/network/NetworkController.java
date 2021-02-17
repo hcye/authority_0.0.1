@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Controller
@@ -44,6 +45,10 @@ public class NetworkController {
         List<SwFirm> firmList=jpaSwFirm.findAll();
         model.addAttribute("firms",firmList);
         return "network/oid/oid_add";
+    }
+    @GetMapping("/firm/add")
+    public String firm_add(){
+        return "network/firm/firm_add";
     }
 
     @GetMapping("/sw/edit")
@@ -81,16 +86,44 @@ public class NetworkController {
         model.addAttribute("oid",swOidTemp);
         return "network/oid/oid_edit";
     }
+    @GetMapping("/firm/edit")
+    public String firm_edit(int id, Model model){
+
+        SwFirm swFirm=jpaSwFirm.findById(id).get();
+        model.addAttribute("firm",swFirm);
+        return "network/firm/firm_edit";
+    }
 
     @GetMapping("/sw/del")
-    public String del(int id){
-        jpaSwSwitch.deleteById(id);
+    public String del(int id,Model model){
+        try {
+            jpaSwSwitch.deleteById(id);
+        }catch (Exception e){
+            model.addAttribute("err",e);
+            return "/network/error";
+        }
         return "redirect:/asm/network";
+    }
+    @GetMapping("/firm/del")
+    public String firm_del(int id,Model model){
+        try {
+            jpaSwFirm.deleteById(id);
+        }catch (Exception e){
+            model.addAttribute("err",e);
+            return "/network/error";
+        }
+        return "redirect:/network/firm_mgmt";
     }
 
     @GetMapping("/oid/del")
-    public String oid_del(int id){
-        jpaSwOidTemp.deleteById(id);
+    public String oid_del(int id,Model model){
+        try{
+            jpaSwOidTemp.deleteById(id);
+        }catch (Exception e){
+            model.addAttribute("err",e);
+            return "/network/error";
+        }
+
         return "redirect:/network/oid_mgmt";
     }
 
@@ -103,5 +136,10 @@ public class NetworkController {
         firms.add(0,swFirm);
         model.addAttribute("firms",firms);
         return "network/oid/oid_temp";
+    }
+    @RequiresPermissions("asm:firm:view")
+    @GetMapping("/network/firm_mgmt")
+    public String firm(){
+        return "network/firm/firm";
     }
 }

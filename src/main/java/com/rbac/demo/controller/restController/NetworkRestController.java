@@ -75,6 +75,22 @@ public class NetworkRestController {
         map.put("SUCCESS","添加成功");
         return map;
     }
+
+    @PostMapping("/firm/add_commit")
+    public Map<String,String> firm_add(String name,String remark){
+        Map<String,String> map=new HashMap<>();
+        if(jpaSwFirm.findSwFirmByFname(name)!=null){
+            map.put("ERROR","添加失败，同名品牌已存在！");
+            return map;
+        }
+        SwFirm swFirm=new SwFirm();
+        swFirm.setFname(name);
+        swFirm.setRemark(remark);
+        jpaSwFirm.save(swFirm);
+        map.put("SUCCESS","添加成功");
+        return map;
+    }
+
     @PostMapping("/sw/edit_commit")
     public Map<String,String> sw_edit(int id,String block_up,String name,String level, String com, String ip, String firm, String remark, String location, String cascade){
         Map<String,String> map=new HashMap<>();
@@ -123,6 +139,24 @@ public class NetworkRestController {
         map.put("SUCCESS","编辑成功");
         return map;
     }
+
+    @PostMapping("/firm/edit_commit")
+    public Map<String,String> firm_edit(int id,String name,String remark){
+        Map<String,String> map=new HashMap<>();
+        SwFirm swFirm=jpaSwFirm.findById(id).get();
+        SwFirm firm=jpaSwFirm.findSwFirmByFname(name);
+        if(firm!=null&&firm.getId()!=id){
+            map.put("ERROR","修改失败，同名品牌已存在！");
+            return map;
+        }
+
+        swFirm.setRemark(remark);
+        swFirm.setFname(name);
+        jpaSwFirm.save(swFirm);
+        map.put("SUCCESS","编辑成功");
+        return map;
+    }
+
     @RequestMapping("/sw/getAll")
     public Map<String, List<Object>> getAll(String searchFlag,String name,String firm,String pre,String next,String pageIndex){
         Map<String,List<Object>> map=new HashMap<>();
@@ -249,6 +283,51 @@ public class NetworkRestController {
             swFirms.add(fname);
         }
         map.put("oids", Collections.singletonList(oidTemps));
+        map.put("firms", Collections.singletonList(swFirms));
+        return map;
+    }
+    @RequestMapping("/firm/getAll")
+    public Map<String, List<Object>> getAllFirm(String searchFlag,String name,String pre,String next,String pageIndex){
+        Map<String,List<Object>> map=new HashMap<>();
+
+        int pagenow=0;
+        int pageSize=10;
+        Page<SwFirm> swFirms = null;
+        //初始页
+        if(pageIndex.equals("")){
+            Pageable pageable=PageRequest.of(pagenow,pageSize);
+            swFirms =jpaSwFirm.findAll(pageable);
+        }else
+            //搜索
+            if(!searchFlag.equals("")){
+                name=ConvertStrForSearch.getFormatedString(name);
+                Pageable pageable=PageRequest.of(pagenow,pageSize);
+                swFirms=jpaSwFirm.findSwFirmsByFnameLike(name,pageable);
+            }else
+                //普通翻页
+                if(name.equals("")){
+                    Pageable pageable=PageRequest.of(Integer.parseInt(pageIndex)-1,pageSize);
+                    if(pre.equals("1")){
+                        pageable=pageable.previousOrFirst();
+                    }
+                    if (next.equals("1")){
+                        pageable=pageable.next();
+                    }
+                    swFirms=jpaSwFirm.findAll(pageable);
+
+                }else
+                    //带参数翻页
+                    if(!name.equals("")){
+                        name=ConvertStrForSearch.getFormatedString(name);
+                        Pageable pageable=PageRequest.of(Integer.parseInt(pageIndex)-1,pageSize);
+                        if(pre.equals("1")){
+                            pageable=pageable.previousOrFirst();
+                        }
+                        if (next.equals("1")){
+                            pageable=pageable.next();
+                        }
+                        swFirms=jpaSwFirm.findSwFirmsByFnameLike(name,pageable);
+                    }
         map.put("firms", Collections.singletonList(swFirms));
         return map;
     }

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑品牌</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+    <script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>-->
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <script type="text/javascript">
+        layui.use('form', function () {
+            var form = layui.form;
+        });
+        $(function (){
+            $("#cancel").click(function(){
+                document.location.href="/network/firm_mgmt";
+            });
+        })
+        $(function () {
+            $("#save").click(function () {
+                var name=$("#name").val();
+                if(name==""||name.trim()==""){
+                    layer.alert("品牌名称必填！");
+                    return;
+                }
+
+                $.post("/firm/edit_commit", {id:$("#id").val(),name:name, remark:$("#remark").val()},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+                        if(data["ERROR"]!=null){
+                            layer.alert(data["ERROR"]);
+                        }else {
+                            layer.confirm(data["SUCCESS"], {
+                                btn: ['确定'] //可以无限个按钮
+                            }, function(index, layero){
+                                //关闭弹出层
+                                document.location.href="/network/firm_mgmt";
+                            });
+                        }
+                        // document.location.href="/sw/sw";
+                    }, "json");
+            });
+        })
+
+    </script>
+</head>
+<body>
+<div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
+    <p>编辑品牌</p>
+</div>
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-form">
+            <input type="hidden" th:value="${firm.getId()}" id="id"/>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span style="color: red">*</span>品牌名:</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="name" th:value="${firm.getFname()}"/>
+                </div>
+            </div>
+
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注:</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="remark" th:value="${firm.getRemark()}"/>
+                </div>
+            </div>
+            <div class="layui-row">
+                <div class="layui-col-md-offset4">
+                    <button class="layui-btn" type="button" id="save">保存</button>
+                    <button class="layui-btn" type="button" id="cancel">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
