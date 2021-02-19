@@ -1,13 +1,11 @@
 package com.rbac.demo;
 
-import com.rbac.demo.entity.DevType;
-import com.rbac.demo.entity.Employee;
-import com.rbac.demo.entity.Role;
-import com.rbac.demo.entity.User2Role;
+import com.rbac.demo.entity.*;
 import com.rbac.demo.jpa.*;
 import com.rbac.demo.service.GetAllAduser;
 import com.rbac.demo.service.Sendmail;
 import com.rbac.demo.service.UpdateUserDB;
+import com.rbac.demo.service.network.SnmpCore;
 import com.rbac.demo.shiro.ShiroUtils;
 import org.apache.catalina.User;
 import org.apache.shiro.util.ByteSource;
@@ -47,10 +45,19 @@ public class Test1 {
     JpaOperatRecord jpaOperatRecord;
     @Autowired
     JpaUser2Role jpaUser2Role;
+    @Autowired
+    SnmpCore snmpCore;
+    @Autowired
+    JpaSwOidTemp jpaSwOidTemp;
 
     @Test
-    public void t()  {
-        GetAllAduser getAllAduser=new GetAllAduser();
-        getAllAduser.getUsers();
+    public void t() throws Exception {
+     SwOidTemp swOidTemp =jpaSwOidTemp.findSwOidTempByOidName("arp");
+ //    snmpCore.getIpMapInteger("192.168.101.100","yhc4133");
+//     String oid=".1.3.6.1.4.1.2011.5.25.123.1.17.1.11.0.[p2].1.32";
+  //   System.out.println(oid.substring(0,oid.indexOf("[p2]")));
+//    System.out.println(oid.substring(oid.indexOf("[p2]")+"[p2]".length()));
+       String ip= snmpCore.getIpByMAC("54:89:98:b8:5b:dd");
+       System.out.println(ip);
     }
 }

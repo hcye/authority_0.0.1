@@ -1,5 +1,11 @@
 package com.rbac.demo.service.network;
 
+import com.rbac.demo.entity.SwGateway;
+import com.rbac.demo.entity.SwOidTemp;
+import com.rbac.demo.entity.SwSwitch;
+import com.rbac.demo.jpa.JpaGateway;
+import com.rbac.demo.jpa.JpaSwOidTemp;
+import com.rbac.demo.jpa.JpaSwSwitch;
 import org.snmp4j.CommunityTarget;
 import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
@@ -8,16 +14,27 @@ import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.smi.*;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Description:获得本机的信息
  */
+@Component
 public class SnmpCore {
+    @Autowired
+    private JpaSwOidTemp jpaSwOidTemp;
+    @Autowired
+    private JpaSwSwitch jpaSwSwitch;
+    @Autowired
+    private JpaGateway jpaGateway;
     //指定开始和结束字符 截取字符串
     public String getSubString(String info, String subStringStart, String subStringEnd) {
         if (subStringStart.equals("")) {
@@ -46,13 +63,13 @@ public class SnmpCore {
     }
 
     //把16进制的mac地址转换成10进制的mac地址，并拼接成oid
-    public String binaryConvert(String source) {
-        String baseString = "1.3.6.1.2.1.17.4.3.1.2.";
+    public String binaryConvert(String mac,String oidBase) {
+//        String baseString = "1.3.6.1.2.1.17.4.3.1.2.";
         BigInteger bigInteger = null;
         String macAddr10 = "";
-        for (int i = 2; i <= source.length(); i = i + 3) {
+        for (int i = 2; i <= mac.length(); i = i + 3) {
             try {
-                bigInteger = new BigInteger(source.substring(i - 2, i), 16);
+                bigInteger = new BigInteger(mac.substring(i - 2, i), 16);
             } catch (NumberFormatException e) {
                 // TODO: handle exception
                 return "null";
@@ -67,128 +84,166 @@ public class SnmpCore {
             }
         }
 //		System.out.println(baseString+macAddr10);
-        return baseString + macAddr10;
+        return oidBase + macAddr10;
     }
-
-    public String getIpByMAC(String mac, String vlanid) {
-        Map<String, String> arpOidMap = new HashMap();
-        //把ip分成4个字符串方便调用
-        arpOidMap.put("2", "42");
-        arpOidMap.put("1", "43");
-        arpOidMap.put("3", "44");
-        arpOidMap.put("4", "45");
-        arpOidMap.put("5", "46");
-        arpOidMap.put("6", "47");
-        arpOidMap.put("7", "48");
-        arpOidMap.put("8", "49");
-        arpOidMap.put("10", "50");
-        arpOidMap.put("12", "52");
-        //华为交换机 arp的snmp信息 oid树的前部分
-        String ip;
-        String arpOidBase = ".1.3.6.1.4.1.2011.5.25.123.1.17.1.11.";
-        String oid;
-        String arpResult;
-        for (int i = 0; i < 254; i++) {
-            ip = "172.16." + vlanid + "." + i;
-            oid = arpOidBase + arpOidMap.get(vlanid) + "." + ip + ".1.32";
-            arpResult = this.getInfo("192.168.100.3", "yhc41335", oid, "", "");
-            if (arpResult == null) {
-                continue;
-            }
-            String[] results = arpResult.split("=");
-            if (results != null) {
-                if (results[1].trim().equals(mac)) {
-                    String[] r = results[0].split("\\.");
-                    String dstIP = r[15] + "." + r[16] + "." + r[17] + "." + r[18];
-                    return dstIP;
+/*
+* mac查ip采用遍历网段方式，效率低下，耗时长。mac地址格式是 aa:bb:cc:dd:11:22
+* */
+    public String getIpByMAC(String mac) {
+        List<SwGateway> gateways=jpaGateway.findAll();
+        for (SwGateway swGateway:gateways){
+            String gateway=swGateway.getGateway();
+            String[] str=gateway.split("/");
+            String gateway_ip=str[0];
+            String[] gateway_ips=gateway_ip.split("\\.");
+            String mask=str[1];
+            String gateway_ip_head=gateway_ips[0]+"."+gateway_ips[1]+"."+gateway_ips[2]+".";
+            int gateway_ip_tail=Integer.parseInt(gateway_ips[3]);
+            int ip_num= (int) Math.pow(2,32-Integer.parseInt(mask));
+            for (int i=gateway_ip_tail;i<gateway_ip_tail+ip_num-3;i++){
+                String ip=gateway_ip_head+i;
+                if (mac.equals(getMACByIP(ip))){
+                    return ip;
                 }
             }
         }
-        return null;
+        return "";
     }
 
     //通过ip查询主机mac地址
     public String getMACByIP(String ip) {
+        List<SwGateway> gateways=jpaGateway.findAll();
+        String[] ips=ip.split("\\.");
+        String ip_head=ips[0]+"."+ips[1]+"."+ips[2]+".";
+        String ip_tail=ips[3];
+        int int_ip_tail=Integer.parseInt(ip_tail);
+        for (SwGateway swGateway:gateways) {
+            String gateway = swGateway.getGateway();
+            if (gateway.contains(ip_head)) {
+                String[] strings = gateway.split("/");
+                String mask = strings[1];
+                String gateway_ip = strings[0];
+                String gateway_ip_tail = gateway_ip.split("\\.")[3];
+                int intm = Integer.parseInt(mask);
+                int res = (int)Math.pow(2, 32 - intm) - 3;
+                int max_num = Integer.parseInt(gateway_ip_tail) + res;
+                if (max_num > 255) {
+                    return null;
+                }
+                if (int_ip_tail >= Integer.parseInt(gateway_ip_tail) && int_ip_tail <= max_num) {
+                    //输入的ip在数据库的vlan范围内，可以执行查询
+                    SwSwitch swSwitch=jpaSwSwitch.findSwSwitchesByLevel("核心").get(0);
+                    String vlanRelateNum = swGateway.getOidRelateCode();
+                    SwOidTemp oidTemp = jpaSwOidTemp.findSwOidTempByOidNameAndAndSwFirmBySwFirm("arp",swSwitch.getSwFirmByFirm());
+                    String oid_tmp = oidTemp.getOidTemp();
+                    oid_tmp=oid_tmp.replaceAll("\\[p1\\]", vlanRelateNum);
+                    oid_tmp=oid_tmp.replaceAll("\\[p2\\]", ip);
+                    String arpRes=this.getInfo(swSwitch.getIpAddr(),swSwitch.getSnmpComm(),oid_tmp,"","");
+                    if(arpRes.equals("null")||arpRes.contains("noSuch")){
+                        return "";
+                    }
+//                    return arpRes.substring(arpRes.indexOf("=")+1);
+                    return arpRes.split(" = ")[1];
+                }
+            }
+        }
+         return "";
+    }
+/*
+    本函数针对华为交换机
+    p2是ip,p1是vlan数字,本函数计算p1	.1.3.6.1.4.1.2011.5.25.123.1.17.1.11.[p1].[p2].1.32
+    本函数耗时长，占用系统资源多
 
-        Map<String, String> arpOidMap = new HashMap();
-        //把ip分成4个字符串方便调用
-        String[] ipS = ip.split("\\.");
-        //
-        arpOidMap.put("2", "42");
-        arpOidMap.put("1", "43");
-        arpOidMap.put("3", "44");
-        arpOidMap.put("4", "45");
-        arpOidMap.put("5", "46");
-        arpOidMap.put("6", "47");
-        arpOidMap.put("7", "48");
-        arpOidMap.put("8", "49");
-        arpOidMap.put("10", "50");
-        arpOidMap.put("12", "52");
-        //华为交换机 arp的snmp信息 oid树的前部分
-        String arpOidBase = ".1.3.6.1.4.1.2011.5.25.123.1.17.1.11.";
-        String oid = arpOidBase + arpOidMap.get(ipS[2]) + "." + ip + ".1.32";
-        String arpResult = this.getInfo("192.168.101.100", "yhc41335", oid, "", "");
-        int macIndex = arpResult.indexOf("=");
-        //取得snmp查询结果并截取=号后的结果
-        arpResult = arpResult.substring(macIndex + 2);
-        return arpResult;
+ */
+    public String getIpMapInteger() throws Exception {
+        SwSwitch swSwitch=jpaSwSwitch.findSwSwitchesByLevel("核心").get(0);
+        String swip=swSwitch.getIpAddr();
+        String comm=swSwitch.getSnmpComm();
+        List<SwGateway> gateways=jpaGateway.findAll();
+        List<Integer> re=new ArrayList<>();
+        for (SwGateway swGateway:gateways){
+            boolean flag=false;
+            String[] strs=swGateway.getGateway().split("/");
+            String gateway_ip=strs[0];
+            String mask=strs[1];
+            int intm=Integer.parseInt(mask);
+            //只接受24到32位的掩码
+            if(intm<24||intm>=32){
+                throw new Exception("掩码不合法");
+            }
+            String ress[]=gateway_ip.split("\\.");
+            int ip_start=Integer.parseInt(ress[3]);
+            Double resd=Math.pow(2,32-intm)-3;
+            int ip_tail= (int) (ip_start+resd);
+            String ip_head=ress[0]+"."+ress[1]+"."+ress[2]+".";
+            for(int i=0;i<4000;i++){
+                //跳过已经扫描到的数字加快扫描速度
+                for (Integer k:re){
+                    if(k==i){
+                        continue;
+                    }
+                }
+                //扫描到关联字段后进入下一个vlan
+                if(flag==true){
+                    break;
+                }
+                SwOidTemp swOidTemp =jpaSwOidTemp.findSwOidTempByOidNameAndAndSwFirmBySwFirm("arp",swSwitch.getSwFirmByFirm());
+                //替换网关占位符
+                String oid_tmp=swOidTemp.getOidTemp();
+                oid_tmp=oid_tmp.replaceAll("\\[p1\\]",i+"");
+                String oid_head=oid_tmp.substring(0,oid_tmp.indexOf("[p2]"));
+                String oid_tail=oid_tmp.substring(oid_tmp.indexOf("[p2]")+"[p2]".length());
+                for (int j=ip_start;j<ip_tail;j++) {
+                    String ip=ip_head+j;
+                    String oid=oid_head+ip+oid_tail;
+                    String arpRes=this.getInfo(swip,comm,oid,"","");
+                    String[] res=arpRes.split("=");
+                    if(res[1].equals("null")||res[1].contains("noSuch")){
+                        continue;
+                    }else {
+                        System.out.println(arpRes);
+                        swGateway.setOidRelateCode(i+"");
+                        jpaGateway.save(swGateway);
+                        re.add(i);
+                        flag=true;
+                        break;
+                    }
+                }
+            }
+        }
+        return "";
     }
 
     //通过mac地址查询 主机所在接口
-    public String[] searchPort(String src) {
+    public String[] searchPort(String mac,String arpOidBase) {
         String[] results = new String[2];
         String result = null;
         String subStr = null;
-        if (src.equals("null")) {
+        if (mac.equals("null")) {
             return null;
         }
 
-        String oid = this.binaryConvert(src);
+        String oid = this.binaryConvert(mac,arpOidBase);
         //	System.out.println(oid);
         if (oid.equals("null")) {
             return null;
         }
-        String[] allSwitchIP = {"192.168.100.121", "192.168.100.122",
-                "192.168.100.123", "192.168.100.124", "192.168.100.125",
-                "192.168.100.126", "192.168.100.127", "192.168.100.128",
-                "192.168.100.129", "192.168.100.130", "192.168.100.131",
-                "192.168.100.132", "192.168.100.133", "192.168.100.134",
-                "192.168.100.135", "192.168.100.136", "192.168.100.137", "192.168.100.138", "192.168.100.139", "192.168.100.140"};
-        for (int i = 0; i < allSwitchIP.length; i++) {
-            result = this.getInfo(allSwitchIP[i], "yhc41335", oid, "", "");
-            if (allSwitchIP[i] != "192.168.100.132" && allSwitchIP[i] != "192.168.100.133" &&
-                    allSwitchIP[i] != "192.168.100.134" && allSwitchIP[i] != "192.168.100.135"
-                    && allSwitchIP[i] != "192.168.100.136") {
-                if (result != "null" && result.length() < 52) {
-                    subStr = this.getSubStr2(result);
-                    if (result.length() < 51) {
-                        if (!subStr.equals("52")) {
-                            results[0] = subStr;
-                            results[1] = allSwitchIP[i];
-                            return results;
-                        }
-                    }
-                }
-            } else {
-                if (result != "null" && result.length() < 52) {
-                    subStr = this.getSubStr2(result);
-                    if (result.length() < 51) {
-                        if (!subStr.equals("48")) {
-                            results[0] = subStr;
-                            results[1] = allSwitchIP[i];
-                            return results;
-                        }
-                    }
-                }
-            }
+/*        String level="接入";
+        List<SwSwitch> swSwitches=jpaSwSwitch.findSwSwitchesByLevel(level);*/
+        List<SwSwitch> swSwitches = jpaSwSwitch.findAll();
+        for (int i = 0; i < swSwitches.size(); i++) {
+            SwSwitch cusw=swSwitches.get(i);
+            result = this.getInfo(cusw.getIpAddr(),cusw.getSnmpComm(), oid, "", "");
+            System.out.println(oid);
         }
         return null;
     }
 
     //获得主机vlan号
     public String getVlanID(String targetIP) {
-        String result = this.getInfo(targetIP, "yhc41335", "1.3.6.1.2.1.1.5.0", "", "");
-        return result.substring(26);
+        String result = this.getInfo(targetIP, "yhc4133", "1.3.6.1.2.1.1.5.0", "", "");
+//        return result.substring(26);
+        return result;
     }
 
     //oid查询函数

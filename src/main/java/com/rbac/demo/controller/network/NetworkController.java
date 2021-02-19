@@ -1,8 +1,10 @@
 package com.rbac.demo.controller.network;
 
 import com.rbac.demo.entity.SwFirm;
+import com.rbac.demo.entity.SwGateway;
 import com.rbac.demo.entity.SwOidTemp;
 import com.rbac.demo.entity.SwSwitch;
+import com.rbac.demo.jpa.JpaGateway;
 import com.rbac.demo.jpa.JpaSwFirm;
 import com.rbac.demo.jpa.JpaSwOidTemp;
 import com.rbac.demo.jpa.JpaSwSwitch;
@@ -23,6 +25,8 @@ public class NetworkController {
     private JpaSwFirm jpaSwFirm;
     @Autowired
     private JpaSwOidTemp jpaSwOidTemp;
+    @Autowired
+    private JpaGateway jpaGateway;
     @RequiresPermissions("asm:network:view")
     @GetMapping("/asm/network")
     public String sw(Model model){
@@ -51,6 +55,10 @@ public class NetworkController {
         return "network/firm/firm_add";
     }
 
+    @GetMapping("/gateway/add")
+    public String gateway_add(){
+        return "network/gateway/gateway_add";
+    }
     @GetMapping("/sw/edit")
     public String edit(int id, Model model){
 
@@ -94,6 +102,14 @@ public class NetworkController {
         return "network/firm/firm_edit";
     }
 
+    @GetMapping("/gateway/edit")
+    public String gateway_edit(int id, Model model){
+
+        SwGateway swGateway=jpaGateway.findById(id).get();
+        model.addAttribute("gateway",swGateway);
+        return "network/gateway/gateway_edit";
+    }
+
     @GetMapping("/sw/del")
     public String del(int id,Model model){
         try {
@@ -113,6 +129,17 @@ public class NetworkController {
             return "/network/error";
         }
         return "redirect:/network/firm_mgmt";
+    }
+
+    @GetMapping("/gateway/del")
+    public String gateway_del(int id,Model model){
+        try {
+            jpaGateway.deleteById(id);
+        }catch (Exception e){
+            model.addAttribute("err",e);
+            return "/network/error";
+        }
+        return "redirect:/network/gateway_mgmt";
     }
 
     @GetMapping("/oid/del")
@@ -141,5 +168,11 @@ public class NetworkController {
     @GetMapping("/network/firm_mgmt")
     public String firm(){
         return "network/firm/firm";
+    }
+
+    @RequiresPermissions("asm:gateway:view")
+    @GetMapping("/network/gateway_mgmt")
+    public String gateway(){
+        return "network/gateway/gateway";
     }
 }

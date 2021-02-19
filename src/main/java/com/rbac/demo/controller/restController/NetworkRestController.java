@@ -1,8 +1,10 @@
 package com.rbac.demo.controller.restController;
 
 import com.rbac.demo.entity.SwFirm;
+import com.rbac.demo.entity.SwGateway;
 import com.rbac.demo.entity.SwOidTemp;
 import com.rbac.demo.entity.SwSwitch;
+import com.rbac.demo.jpa.JpaGateway;
 import com.rbac.demo.jpa.JpaSwFirm;
 import com.rbac.demo.jpa.JpaSwOidTemp;
 import com.rbac.demo.jpa.JpaSwSwitch;
@@ -25,6 +27,8 @@ public class NetworkRestController {
     private JpaSwSwitch jpaSwSwitch;
     @Autowired
     private JpaSwOidTemp jpaSwOidTemp;
+    @Autowired
+    private JpaGateway jpaGateway;
     @PostMapping("/sw/add_commit")
     public Map<String,String> sw_add(String block_up,String name,String level, String com, String ip, String firm, String remark, String location, String cascade){
         Map<String,String> map=new HashMap<>();
@@ -91,6 +95,26 @@ public class NetworkRestController {
         return map;
     }
 
+    @PostMapping("/gateway/add_commit")
+    public Map<String,String> gateway_add(String vlanid,String gateway,String remark){
+        Map<String,String> map=new HashMap<>();
+        if(jpaGateway.findSwGatewayByVlanid(vlanid)!=null){
+            map.put("ERROR","添加失败，vlan号重复！");
+            return map;
+        }
+        if(jpaGateway.findSwGatewayByGateway(gateway)!=null){
+            map.put("ERROR","添加失败，网关重复！");
+            return map;
+        }
+        SwGateway swGateway=new SwGateway();
+        swGateway.setGateway(gateway);
+        swGateway.setVlanid(vlanid);
+        swGateway.setRemark(remark);
+        jpaGateway.save(swGateway);
+        map.put("SUCCESS","添加成功");
+        return map;
+    }
+
     @PostMapping("/sw/edit_commit")
     public Map<String,String> sw_edit(int id,String block_up,String name,String level, String com, String ip, String firm, String remark, String location, String cascade){
         Map<String,String> map=new HashMap<>();
@@ -153,6 +177,32 @@ public class NetworkRestController {
         swFirm.setRemark(remark);
         swFirm.setFname(name);
         jpaSwFirm.save(swFirm);
+        map.put("SUCCESS","编辑成功");
+        return map;
+    }
+
+    @PostMapping("/gateway/edit_commit")
+    public Map<String,String> gateway_edit(int id,String gateway,String vlanid,String remark){
+        Map<String,String> map=new HashMap<>();
+        SwGateway swGateway=jpaGateway.findById(id).get();
+        SwGateway gateway1=jpaGateway.findSwGatewayByVlanid(vlanid);
+
+        if(gateway1!=null&&gateway1.getId()!=id){
+            map.put("ERROR","修改失败，同名vlan已存在！");
+            return map;
+        }
+
+        gateway1=jpaGateway.findSwGatewayByGateway(gateway);
+
+        if(gateway1!=null&&gateway1.getId()!=id){
+            map.put("ERROR","修改失败，相同网关已存在！");
+            return map;
+        }
+
+        swGateway.setRemark(remark);
+        swGateway.setVlanid(vlanid);
+        swGateway.setGateway(gateway);
+        jpaGateway.save(swGateway);
         map.put("SUCCESS","编辑成功");
         return map;
     }
@@ -329,6 +379,52 @@ public class NetworkRestController {
                         swFirms=jpaSwFirm.findSwFirmsByFnameLike(name,pageable);
                     }
         map.put("firms", Collections.singletonList(swFirms));
+        return map;
+    }
+
+    @RequestMapping("/gateway/getAll")
+    public Map<String, List<Object>> getAllVlans(String searchFlag,String vlanid,String pre,String next,String pageIndex){
+        Map<String,List<Object>> map=new HashMap<>();
+
+        int pagenow=0;
+        int pageSize=10;
+        Page<SwGateway> swGateways = null;
+        //初始页
+        if(pageIndex.equals("")){
+            Pageable pageable=PageRequest.of(pagenow,pageSize);
+            swGateways =jpaGateway.findAll(pageable);
+        }else
+            //搜索
+            if(!searchFlag.equals("")){
+                vlanid=ConvertStrForSearch.getFormatedString(vlanid);
+                Pageable pageable=PageRequest.of(pagenow,pageSize);
+                swGateways=jpaGateway.findSwGatewaysByVlanidLike(vlanid,pageable);
+            }else
+                //普通翻页
+                if(vlanid.equals("")){
+                    Pageable pageable=PageRequest.of(Integer.parseInt(pageIndex)-1,pageSize);
+                    if(pre.equals("1")){
+                        pageable=pageable.previousOrFirst();
+                    }
+                    if (next.equals("1")){
+                        pageable=pageable.next();
+                    }
+                    swGateways=jpaGateway.findAll(pageable);
+
+                }else
+                    //带参数翻页
+                    if(!vlanid.equals("")){
+                        vlanid=ConvertStrForSearch.getFormatedString(vlanid);
+                        Pageable pageable=PageRequest.of(Integer.parseInt(pageIndex)-1,pageSize);
+                        if(pre.equals("1")){
+                            pageable=pageable.previousOrFirst();
+                        }
+                        if (next.equals("1")){
+                            pageable=pageable.next();
+                        }
+                        swGateways=jpaGateway.findSwGatewaysByVlanidLike(vlanid,pageable);
+                    }
+        map.put("vlans", Collections.singletonList(swGateways));
         return map;
     }
 }

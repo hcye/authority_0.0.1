@@ -1,5 +1,6 @@
 package com.rbac.demo.jpa;
 
+import com.rbac.demo.entity.SwFirm;
 import com.rbac.demo.entity.SwOidTemp;
 import com.rbac.demo.entity.SwSwitch;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface JpaSwOidTemp extends JpaRepository<SwOidTemp,Integer> {
     SwOidTemp findSwOidTempByOidName(String name);
+    SwOidTemp findSwOidTempByOidNameAndAndSwFirmBySwFirm(String oidname, SwFirm swFirm);
     SwOidTemp findSwOidTempByOidTemp(String tmp);
     Page<SwOidTemp> findSwOidTempsByOidNameLike(String name, Pageable pageable);
     //  @Query("select ast from Assert ast where ast.aname=:astName and ast.workless='0' and ast.assetTypeByAssertType=:astType ")
