@@ -64,7 +64,6 @@ public class SnmpCore {
 
     //把16进制的mac地址转换成10进制的mac地址，并拼接成oid
     public String binaryConvert(String mac,String oidBase) {
-//        String baseString = "1.3.6.1.2.1.17.4.3.1.2.";
         BigInteger bigInteger = null;
         String macAddr10 = "";
         for (int i = 2; i <= mac.length(); i = i + 3) {
@@ -110,7 +109,7 @@ public class SnmpCore {
         return "";
     }
 
-    //通过ip查询主机mac地址
+    //通过ip查询主机mac地址,效率高
     public String getMACByIP(String ip) {
         List<SwGateway> gateways=jpaGateway.findAll();
         String[] ips=ip.split("\\.");
@@ -152,7 +151,7 @@ public class SnmpCore {
 /*
     本函数针对华为交换机
     p2是ip,p1是vlan数字,本函数计算p1	.1.3.6.1.4.1.2011.5.25.123.1.17.1.11.[p1].[p2].1.32
-    本函数耗时长，占用系统资源多
+    函数耗时长，占用系统资源多
 
  */
     public String getIpMapInteger() throws Exception {
@@ -197,7 +196,13 @@ public class SnmpCore {
                     String ip=ip_head+j;
                     String oid=oid_head+ip+oid_tail;
                     String arpRes=this.getInfo(swip,comm,oid,"","");
+                    if(arpRes==null){
+                        continue;
+                    }
                     String[] res=arpRes.split("=");
+                    if(res.length<2){
+                        continue;
+                    }
                     if(res[1].equals("null")||res[1].contains("noSuch")){
                         continue;
                     }else {
@@ -211,32 +216,49 @@ public class SnmpCore {
                 }
             }
         }
+        System.out.println("work done！");
         return "";
     }
 
-    //通过mac地址查询 主机所在接口
-    public String[] searchPort(String mac,String arpOidBase) {
-        String[] results = new String[2];
-        String result = null;
-        String subStr = null;
-        if (mac.equals("null")) {
-            return null;
-        }
-
-        String oid = this.binaryConvert(mac,arpOidBase);
+    //通过mac地址查询 主机所在接口  返回 ip,port 字符串
+    public String searchPort(String mac) {
+        String result;
         //	System.out.println(oid);
-        if (oid.equals("null")) {
-            return null;
-        }
-/*        String level="接入";
-        List<SwSwitch> swSwitches=jpaSwSwitch.findSwSwitchesByLevel(level);*/
-        List<SwSwitch> swSwitches = jpaSwSwitch.findAll();
+        String level="接入";
+        List<SwSwitch> swSwitches=jpaSwSwitch.findSwSwitchesByLevel(level);
         for (int i = 0; i < swSwitches.size(); i++) {
             SwSwitch cusw=swSwitches.get(i);
+            SwOidTemp oidTemp=jpaSwOidTemp.findSwOidTempByOidNameAndAndSwFirmBySwFirm("mac",cusw.getSwFirmByFirm());
+            String oid_head=oidTemp.getOidTemp().replaceAll("\\[p1\\]","");
+            String oid = this.binaryConvert(mac,oid_head);
             result = this.getInfo(cusw.getIpAddr(),cusw.getSnmpComm(), oid, "", "");
-            System.out.println(oid);
+            if(result==null||result.equals("null")){
+                continue;
+            }
+            if(!result.contains("noSuch")){
+                String cascadePort=cusw.getCascadePort();
+                String[] ports;
+                String port=result.split(" = ")[1] ;
+                //剔除级联口扫描到的数据
+                if(cascadePort.contains(",")){
+                     ports=cascadePort.split(",");
+                     for (String p:ports){
+                      if(p.equals(port)){
+                          continue;
+                      }
+                     }
+                }else {
+                    if(port.equals(cascadePort)){
+                        continue;
+                    }
+                }
+                //获得结果
+                return cusw.getIpAddr()+","+port;
+            }else {
+                continue;
+            }
         }
-        return null;
+        return "";
     }
 
     //获得主机vlan号
@@ -273,6 +295,9 @@ public class SnmpCore {
             request.add(new VariableBinding(new OID(OID)));
             request.setType(PDU.GET);
             ResponseEvent responseEvent = protocol.send(request, myTarget);
+            if(responseEvent==null){
+                return null;
+            }
             PDU response = responseEvent.getResponse();
             if (response != null) {
                 VariableBinding vb1 = response.get(0);

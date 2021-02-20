@@ -8,6 +8,7 @@ import com.rbac.demo.jpa.JpaGateway;
 import com.rbac.demo.jpa.JpaSwFirm;
 import com.rbac.demo.jpa.JpaSwOidTemp;
 import com.rbac.demo.jpa.JpaSwSwitch;
+import com.rbac.demo.service.network.SnmpCore;
 import com.rbac.demo.tool.ConvertStrForSearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,6 +30,8 @@ public class NetworkRestController {
     private JpaSwOidTemp jpaSwOidTemp;
     @Autowired
     private JpaGateway jpaGateway;
+    @Autowired
+    private SnmpCore snmpCore;
     @PostMapping("/sw/add_commit")
     public Map<String,String> sw_add(String block_up,String name,String level, String com, String ip, String firm, String remark, String location, String cascade){
         Map<String,String> map=new HashMap<>();
@@ -38,6 +41,10 @@ public class NetworkRestController {
         }
         if(jpaSwSwitch.findSwSwitchByLabel(name)!=null){
             map.put("ERROR","添加失败，同名交换机已存在！");
+            return map;
+        }
+        if(jpaSwSwitch.findSwSwitchesByLevel("核心")!=null&&level.equals("核心")){
+            map.put("ERROR","添加失败，核心交换机已存在！");
             return map;
         }
         SwSwitch swSwitch=new SwSwitch();
@@ -425,6 +432,52 @@ public class NetworkRestController {
                         swGateways=jpaGateway.findSwGatewaysByVlanidLike(vlanid,pageable);
                     }
         map.put("vlans", Collections.singletonList(swGateways));
+        return map;
+    }
+
+
+    @PostMapping("/network/port_query")
+    public Map<String,String> port_query(String ipOrMac,String flag){
+        Map<String,String> map=new HashMap<>();
+        if(flag.equals("ip")){
+            String mac=snmpCore.getMACByIP(ipOrMac);
+            if(mac==null||mac.equals("")){
+                map.put("error","查询无结果");
+                return map;
+            }else {
+                String res=snmpCore.searchPort(mac);
+                if(res==null||res.equals("")){
+                    map.put("error","查询无结果");
+                }else {
+                    map.put("res",res);
+                }
+
+            }
+            return map;
+        }else {
+            String res=snmpCore.searchPort(ipOrMac);
+
+            if(res==null||res.equals("")){
+                map.put("error","查询无结果");
+            }else {
+                map.put("res",res);
+                return map;
+            }
+
+        }
+        map.put("error","查询无结果");
+        return map;
+    }
+
+    @PostMapping("/network/mac_query")
+    public Map<String,String> mac_query(String ipOrMac){
+        Map<String,String> map=new HashMap<>();
+        String res=snmpCore.getMACByIP(ipOrMac);
+        if(res==null||res.equals("")){
+            map.put("error","查询无结果");
+        }else {
+            map.put("res",res);
+        }
         return map;
     }
 }

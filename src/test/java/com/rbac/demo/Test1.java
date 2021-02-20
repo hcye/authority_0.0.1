@@ -57,7 +57,7 @@ public class Test1 {
 //     String oid=".1.3.6.1.4.1.2011.5.25.123.1.17.1.11.0.[p2].1.32";
   //   System.out.println(oid.substring(0,oid.indexOf("[p2]")));
 //    System.out.println(oid.substring(oid.indexOf("[p2]")+"[p2]".length()));
-       String ip= snmpCore.getIpByMAC("54:89:98:b8:5b:dd");
-       System.out.println(ip);
+        String a=snmpCore.searchPort("50:7b:9d:61:ed:7f");
+        System.out.println(a);
     }
 }

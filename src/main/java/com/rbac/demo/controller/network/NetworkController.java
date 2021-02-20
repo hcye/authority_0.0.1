@@ -175,4 +175,10 @@ public class NetworkController {
     public String gateway(){
         return "network/gateway/gateway";
     }
+
+    @RequiresPermissions("asm:net_query:view")
+    @GetMapping("/network/info_query")
+    public String query(){
+        return "network/query/query";
+    }
 }

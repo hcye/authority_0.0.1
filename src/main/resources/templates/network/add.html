@@ -38,7 +38,7 @@
                     return;
                 }
                 var reg = /^((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}$/g;
-                var reg1 = /^([1-5]?[0-9]?)(,[1-5]?[0-9]?)*/;
+                var reg1 = /^([1-5]?[0-9]?)((,[1-5])?[0-9]?)*/;
                 var arr1=reg1.exec(cascade);
                 var arr = reg.test(ip);
                 if(!arr){
@@ -92,7 +92,7 @@
             <div class="layui-form-item">
                 <label class="layui-form-label"><span style="color: red">*</span>管理地址:</label>
                 <div class="layui-input-block">
-                    <input class="layui-input" id="ip"/>
+                    <input class="layui-input" id="ip" placeholder="格式：192.168.1.1"/>
                 </div>
             </div>
             <div class="layui-form-item">
@@ -112,7 +112,7 @@
             <div class="layui-form-item">
                 <label class="layui-form-label">级联口:</label>
                 <div class="layui-input-block">
-                    <input class="layui-input" id="cascade" placeholder="端口逗号分割，逗号必须是英文模式，格式：xx,xx"/>
+                    <input class="layui-input" id="cascade" placeholder="端口逗号分割，逗号英文模式，格式：xx,xx"/>
                 </div>
             </div>
             <div class="layui-form-item">
