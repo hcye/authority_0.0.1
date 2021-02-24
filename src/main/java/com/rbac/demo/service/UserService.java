@@ -84,7 +84,13 @@ public class UserService {
         if(turnFlag.equals("")&&keyWord.equals("")&&refreshFlag.equals("")&&depid.equals("")){
             pageable=PageRequest.of(0,pageSize);
             List<SysGroup> groups=jpaGroup.findAllExcludDeleted();
-            SysGroup group = groups.get(2);
+            SysGroup group;
+            if(groups.size()<=1){
+                group=groups.get(0);
+            }else {
+                group=groups.get(2);
+            }
+
             employees=jpaEmployee.findEmployeesBySysGroupByGroupId(group,pageable);
             return employees;
         }

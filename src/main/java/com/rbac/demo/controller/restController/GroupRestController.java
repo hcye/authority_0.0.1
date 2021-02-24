@@ -51,7 +51,13 @@ public class GroupRestController {
         map.put("gname",group.getGname());
         map.put("createTime",new Date(group.getCreatTime().getTime()).toString());
         map.put("avalible",group.getAvalible()+"");
-        map.put("parent",group.getSysGroupByParentId().getGname());
+        String name;
+        if(group.getSysGroupByParentId()==null){
+            name="";
+        }else {
+            name=group.getSysGroupByParentId().getGname();
+        }
+        map.put("parent",name);
         map.put("leader",group.getLeader());
         map.put("count",count+"");
         return map;

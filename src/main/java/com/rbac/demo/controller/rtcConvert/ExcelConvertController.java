@@ -38,6 +38,7 @@ public class ExcelConvertController {
 
     @PostMapping("/rtc/input")
     public Map<String,String> rtc(HttpServletRequest request) throws UnsupportedEncodingException {
+
         Map<String, String> json = new HashMap<>();
         request.setCharacterEncoding("UTF-8");
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
@@ -118,7 +119,6 @@ public class ExcelConvertController {
         contentWriteFont.setBold(false);
         contentWriteFont.setFontName("等线");
         contentWriteCellStyle.setWriteFont(contentWriteFont);
-        // 这个策略是 头是头的样式 内容是内容的样式 其他的策略可以自己实现
         HorizontalCellStyleStrategy horizontalCellStyleStrategy =
                 new HorizontalCellStyleStrategy(headWriteCellStyle, contentWriteCellStyle);
         EasyExcel.write(response.getOutputStream(), RtcBugDownloadModel.class).
@@ -137,7 +137,7 @@ public class ExcelConvertController {
             rtcBugDownloadModel.setBugDefectType(rb.getBugDefectType());
             rtcBugDownloadModel.setBugDesc(rb.getBugDesc());
             rtcBugDownloadModel.setBugDiscoveryPhase(rb.getBugDiscoveryPhase());
-            rtcBugDownloadModel.setBugFlag(rb.getBugFlag());
+            rtcBugDownloadModel.setBugFlag(rb.getRtcId());//rtc id
             rtcBugDownloadModel.setBugFrequence(rb.getBugFrequence());
             rtcBugDownloadModel.setBugModule(rb.getBugModule());
             rtcBugDownloadModel.setBugOwner(rb.getBugOwner());
@@ -150,7 +150,6 @@ public class ExcelConvertController {
             rtcBugDownloadModel.setBugRelative(rb.getBugRelative());
             models.add(rtcBugDownloadModel);
         }
-        jpaRtcBug.deleteAll();
         //清空数据库
         return models;
     }

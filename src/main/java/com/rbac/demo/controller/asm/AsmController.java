@@ -74,7 +74,12 @@ public class AsmController {
 
 
         List<AssetType> assetTypes=asmService.getPermitAsmAssetTypes();
-        String firstType=assetTypes.get(0).getTypeName();
+        String firstType;
+        if(assetTypes.size()==0){
+            firstType="";
+        }else {
+            firstType=assetTypes.get(0).getTypeName();
+        }
         List<String> names=jpaDevType.findDevTypesNameByAssertType(firstType);
         if(names.size()!=0){
 

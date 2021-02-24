@@ -154,7 +154,7 @@ public class SnmpCore {
     函数耗时长，占用系统资源多
 
  */
-    public String getIpMapInteger() throws Exception {
+    public void getIpMapInteger() throws Exception {
         SwSwitch swSwitch=jpaSwSwitch.findSwSwitchesByLevel("核心").get(0);
         String swip=swSwitch.getIpAddr();
         String comm=swSwitch.getSnmpComm();
@@ -170,10 +170,24 @@ public class SnmpCore {
             if(intm<24||intm>=32){
                 throw new Exception("掩码不合法");
             }
+
+            int intmask = Integer.parseInt(mask);
+            int subnet_width= (int) Math.pow(2,32-intmask);
+            int subnet_num=256/subnet_width;
+            List<int[]> subnets=new ArrayList<>();
+            for (int i=0;i<subnet_num;i++){
+                int[] b={i*subnet_width,(i+1)*subnet_width-1};
+                subnets.add(b);
+            }
             String ress[]=gateway_ip.split("\\.");
             int ip_start=Integer.parseInt(ress[3]);
-            Double resd=Math.pow(2,32-intm)-3;
-            int ip_tail= (int) (ip_start+resd);
+            int ip_tail=0;
+            for (int[] a:subnets){
+                if(ip_start>=a[0]&&ip_start<a[1]){
+                    ip_tail=a[1];
+                    ip_start=a[0];
+                }
+            }
             String ip_head=ress[0]+"."+ress[1]+"."+ress[2]+".";
             for(int i=0;i<4000;i++){
                 //跳过已经扫描到的数字加快扫描速度
@@ -216,8 +230,7 @@ public class SnmpCore {
                 }
             }
         }
-        System.out.println("work done！");
-        return "";
+
     }
 
     //通过mac地址查询 主机所在接口  返回 ip,port 字符串

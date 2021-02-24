@@ -21,6 +21,7 @@ import javax.naming.NamingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootTest
@@ -57,7 +58,45 @@ public class Test1 {
 //     String oid=".1.3.6.1.4.1.2011.5.25.123.1.17.1.11.0.[p2].1.32";
   //   System.out.println(oid.substring(0,oid.indexOf("[p2]")));
 //    System.out.println(oid.substring(oid.indexOf("[p2]")+"[p2]".length()));
-        String a=snmpCore.searchPort("50:7b:9d:61:ed:7f");
-        System.out.println(a);
+    /*    String a=snmpCore.searchPort("50:7b:9d:61:ed:7f");
+        System.out.println(a);*/
+        List<String> gateways=new ArrayList<>();
+        gateways.add("192.168.10.254/24");
+        gateways.add("192.168.20.254/24");
+        gateways.add("192.168.30.254/24");
+        gateways.add("192.168.30.254/25");
+        gateways.add("192.168.30.254/26");
+        gateways.add("192.168.30.1/27");
+        for (String swGateway:gateways){
+            boolean flag=false;
+            String[] strs=swGateway.split("/");
+            String gateway_ip=strs[0];
+            String mask=strs[1];
+            int intm=Integer.parseInt(mask);
+            //只接受24到32位的掩码
+            if(intm<24||intm>=32){
+                throw new Exception("掩码不合法");
+            }
+
+            int intmask = Integer.parseInt(mask);
+            int subnet_width= (int) Math.pow(2,32-intmask);
+            int subnet_num=256/subnet_width;
+            List<int[]> subnets=new ArrayList<>();
+            for (int i=0;i<subnet_num;i++){
+                int[] b={i*subnet_width,(i+1)*subnet_width-1};
+                subnets.add(b);
+            }
+            String ress[]=gateway_ip.split("\\.");
+            int ip_start=Integer.parseInt(ress[3]);
+            int ip_tail=0;
+            for (int[] a:subnets){
+                if(ip_start>=a[0]&&ip_start<a[1]){
+                    ip_tail=a[1];
+                    ip_start=a[0];
+                    System.out.println(ip_start+"--"+ip_tail);
+                }
+            }
+
+
     }
-}
+}}

@@ -37,28 +37,32 @@ public class NetworkController {
         model.addAttribute("firms",firms);
         return "network/switch";
     }
+    @RequiresPermissions("network:sw:add")
     @GetMapping("/sw/add")
     public String add(Model model){
         List<SwFirm> firmList=jpaSwFirm.findAll();
         model.addAttribute("firms",firmList);
         return "network/add";
     }
-
+    @RequiresPermissions("network:oid:add")
     @GetMapping("/oid/add")
     public String oid_add(Model model){
         List<SwFirm> firmList=jpaSwFirm.findAll();
         model.addAttribute("firms",firmList);
         return "network/oid/oid_add";
     }
+    @RequiresPermissions("network:firm:add")
     @GetMapping("/firm/add")
     public String firm_add(){
         return "network/firm/firm_add";
     }
 
+    @RequiresPermissions("network:vlan:add")
     @GetMapping("/gateway/add")
     public String gateway_add(){
         return "network/gateway/gateway_add";
     }
+    @RequiresPermissions("network:sw:edit")
     @GetMapping("/sw/edit")
     public String edit(int id, Model model){
 
@@ -76,7 +80,7 @@ public class NetworkController {
        model.addAttribute("sw",swSwitch);
        return "network/edit";
     }
-
+    @RequiresPermissions("network:oid:edit")
     @GetMapping("/oid/edit")
     public String oid_edit(int id, Model model){
 
@@ -94,6 +98,7 @@ public class NetworkController {
         model.addAttribute("oid",swOidTemp);
         return "network/oid/oid_edit";
     }
+    @RequiresPermissions("network:firm:edit")
     @GetMapping("/firm/edit")
     public String firm_edit(int id, Model model){
 
@@ -101,7 +106,7 @@ public class NetworkController {
         model.addAttribute("firm",swFirm);
         return "network/firm/firm_edit";
     }
-
+    @RequiresPermissions("network:vlan:edit")
     @GetMapping("/gateway/edit")
     public String gateway_edit(int id, Model model){
 
@@ -109,7 +114,7 @@ public class NetworkController {
         model.addAttribute("gateway",swGateway);
         return "network/gateway/gateway_edit";
     }
-
+    @RequiresPermissions("network:sw:delete")
     @GetMapping("/sw/del")
     public String del(int id,Model model){
         try {
@@ -120,6 +125,7 @@ public class NetworkController {
         }
         return "redirect:/asm/network";
     }
+    @RequiresPermissions("network:firm:delete")
     @GetMapping("/firm/del")
     public String firm_del(int id,Model model){
         try {
@@ -130,7 +136,7 @@ public class NetworkController {
         }
         return "redirect:/network/firm_mgmt";
     }
-
+    @RequiresPermissions("network:vlan:delete")
     @GetMapping("/gateway/del")
     public String gateway_del(int id,Model model){
         try {
@@ -141,7 +147,7 @@ public class NetworkController {
         }
         return "redirect:/network/gateway_mgmt";
     }
-
+    @RequiresPermissions("network:oid:delete")
     @GetMapping("/oid/del")
     public String oid_del(int id,Model model){
         try{
@@ -154,7 +160,7 @@ public class NetworkController {
         return "redirect:/network/oid_mgmt";
     }
 
-    @RequiresPermissions("asm:oid:view")
+    @RequiresPermissions("network:oid:view")
     @GetMapping("/network/oid_mgmt")
     public String oid(Model model){
         List<SwFirm> firms=jpaSwFirm.findAll();
@@ -164,21 +170,27 @@ public class NetworkController {
         model.addAttribute("firms",firms);
         return "network/oid/oid_temp";
     }
-    @RequiresPermissions("asm:firm:view")
+    @RequiresPermissions("network:firm:view")
     @GetMapping("/network/firm_mgmt")
     public String firm(){
         return "network/firm/firm";
     }
 
-    @RequiresPermissions("asm:gateway:view")
+    @RequiresPermissions("network:gateway:view")
     @GetMapping("/network/gateway_mgmt")
     public String gateway(){
         return "network/gateway/gateway";
     }
 
-    @RequiresPermissions("asm:net_query:view")
+    @RequiresPermissions("network:net_query:view")
     @GetMapping("/network/info_query")
     public String query(){
         return "network/query/query";
+    }
+
+    @RequiresPermissions("network:network:doc")
+    @GetMapping("/asm/network/doc")
+    public String network_doc(){
+        return "network/basicDoc";
     }
 }

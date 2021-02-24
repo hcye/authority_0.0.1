@@ -26,6 +26,7 @@ public class RtcBug {
     private String bugDiscoveryPhase;
     private String bugCate;
     private String bugType;
+    private String rtcId;
 
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
@@ -258,5 +259,15 @@ public class RtcBug {
     @Override
     public int hashCode() {
         return Objects.hash(id, bugFlag, bugSrc, bugModule, bugSeriousness, bugPriority, bugFrequence, bugRelative, bugSummary, bugDesc, bugStatus, bugCreater, bugOwner, bugVersion, bugClassfy1, bugClassfy2, bugDefectType, bugDiscoveryPhase, bugCate, bugType);
+    }
+
+    @Basic
+    @Column(name = "rtc_id", nullable = true, length = 255)
+    public String getRtcId() {
+        return rtcId;
+    }
+
+    public void setRtcId(String rtcId) {
+        this.rtcId = rtcId;
     }
 }
