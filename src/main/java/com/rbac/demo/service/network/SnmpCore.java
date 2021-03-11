@@ -38,7 +38,6 @@ public class SnmpCore {
     //指定开始和结束字符 截取字符串
     public String getSubString(String info, String subStringStart, String subStringEnd) {
         if (subStringStart.equals("")) {
-            //System.out.println("------0x-----"+info);
             return info;
         }
         StringBuffer sb = new StringBuffer();
@@ -82,7 +81,6 @@ public class SnmpCore {
                 }
             }
         }
-//		System.out.println(baseString+macAddr10);
         return oidBase + macAddr10;
     }
 /*
@@ -114,39 +112,47 @@ public class SnmpCore {
         List<SwGateway> gateways=jpaGateway.findAll();
         String[] ips=ip.split("\\.");
         String ip_head=ips[0]+"."+ips[1]+"."+ips[2]+".";
-        String ip_tail=ips[3];
-        int int_ip_tail=Integer.parseInt(ip_tail);
+        String ip_tail1=ips[3];
+        int int_ip_tail=Integer.parseInt(ip_tail1);
+        SwGateway targetGateway=null;
         for (SwGateway swGateway:gateways) {
             String gateway = swGateway.getGateway();
             if (gateway.contains(ip_head)) {
                 String[] strings = gateway.split("/");
                 String mask = strings[1];
-                String gateway_ip = strings[0];
-                String gateway_ip_tail = gateway_ip.split("\\.")[3];
-                int intm = Integer.parseInt(mask);
-                int res = (int)Math.pow(2, 32 - intm) - 3;
-                int max_num = Integer.parseInt(gateway_ip_tail) + res;
-                if (max_num > 255) {
-                    return null;
+                int gateway_tail = Integer.parseInt(strings[0].split("\\.")[3]);
+                int intmask = Integer.parseInt(mask);
+                int subnet_width = (int) Math.pow(2, 32 - intmask);
+                int subnet_num = 256 / subnet_width;
+                List<int[]> subnets = new ArrayList<>();
+                for (int i = 0; i < subnet_num; i++) {
+                    int[] b = {i * subnet_width, (i + 1) * subnet_width - 1};
+                    subnets.add(b);
                 }
-                if (int_ip_tail >= Integer.parseInt(gateway_ip_tail) && int_ip_tail <= max_num) {
-                    //输入的ip在数据库的vlan范围内，可以执行查询
-                    SwSwitch swSwitch=jpaSwSwitch.findSwSwitchesByLevel("核心").get(0);
-                    String vlanRelateNum = swGateway.getOidRelateCode();
-                    SwOidTemp oidTemp = jpaSwOidTemp.findSwOidTempByOidNameAndAndSwFirmBySwFirm("arp",swSwitch.getSwFirmByFirm());
-                    String oid_tmp = oidTemp.getOidTemp();
-                    oid_tmp=oid_tmp.replaceAll("\\[p1\\]", vlanRelateNum);
-                    oid_tmp=oid_tmp.replaceAll("\\[p2\\]", ip);
-                    String arpRes=this.getInfo(swSwitch.getIpAddr(),swSwitch.getSnmpComm(),oid_tmp,"","");
-                    if(arpRes.equals("null")||arpRes.contains("noSuch")){
-                        return "";
+                for (int[] a : subnets) {
+                    if (gateway_tail >= a[0] && gateway_tail < a[1] && int_ip_tail >= a[0] && int_ip_tail <= a[1]) {
+                        targetGateway = swGateway;
+                        break;
                     }
-//                    return arpRes.substring(arpRes.indexOf("=")+1);
-                    return arpRes.split(" = ")[1];
                 }
             }
         }
-         return "";
+                //输入的ip在数据库的vlan范围内，可以执行查询
+                if(targetGateway==null){
+                    return "";
+                }
+                SwSwitch swSwitch=jpaSwSwitch.findSwSwitchesByLevel("核心").get(0);
+                String vlanRelateNum = targetGateway.getOidRelateCode();
+                SwOidTemp oidTemp = jpaSwOidTemp.findSwOidTempByOidNameAndAndSwFirmBySwFirm("arp",swSwitch.getSwFirmByFirm());
+                String oid_tmp = oidTemp.getOidTemp();
+                oid_tmp=oid_tmp.replaceAll("\\[p1\\]", vlanRelateNum);
+                oid_tmp=oid_tmp.replaceAll("\\[p2\\]", ip);
+                String arpRes=this.getInfo(swSwitch.getIpAddr(),swSwitch.getSnmpComm(),oid_tmp,"","");
+                if(arpRes.equals("null")||arpRes.contains("noSuch")){
+                        return "";
+                }
+//              return arpRes.substring(arpRes.indexOf("=")+1);
+                return arpRes.split(" = ")[1];
     }
 /*
     本函数针对华为交换机
@@ -161,6 +167,11 @@ public class SnmpCore {
         List<SwGateway> gateways=jpaGateway.findAll();
         List<Integer> re=new ArrayList<>();
         for (SwGateway swGateway:gateways){
+            String code=swGateway.getOidRelateCode();
+            if(code!=null&&!code.equals("")){
+                continue;
+            }
+
             boolean flag=false;
             String[] strs=swGateway.getGateway().split("/");
             String gateway_ip=strs[0];
@@ -186,6 +197,7 @@ public class SnmpCore {
                 if(ip_start>=a[0]&&ip_start<a[1]){
                     ip_tail=a[1];
                     ip_start=a[0];
+                    break;
                 }
             }
             String ip_head=ress[0]+"."+ress[1]+"."+ress[2]+".";
@@ -220,7 +232,6 @@ public class SnmpCore {
                     if(res[1].equals("null")||res[1].contains("noSuch")){
                         continue;
                     }else {
-                        System.out.println(arpRes);
                         swGateway.setOidRelateCode(i+"");
                         jpaGateway.save(swGateway);
                         re.add(i);
@@ -236,7 +247,6 @@ public class SnmpCore {
     //通过mac地址查询 主机所在接口  返回 ip,port 字符串
     public String searchPort(String mac) {
         String result;
-        //	System.out.println(oid);
         String level="接入";
         List<SwSwitch> swSwitches=jpaSwSwitch.findSwSwitchesByLevel(level);
         for (int i = 0; i < swSwitches.size(); i++) {

@@ -13,8 +13,7 @@ class SaticScheduleTask {
     private SnmpCore snmpCore;
 
     //3.添加定时任务
-    @Scheduled(cron = "* 0 11 * * ?")
-    //或直接指定时间间隔，例如：5秒
+    @Scheduled(cron = "* 15 12 * * ?")
     //@Scheduled(fixedRate=5000)
     private void configureTasks() throws Exception {
         snmpCore.getIpMapInteger();

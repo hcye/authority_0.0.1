@@ -43,7 +43,7 @@ public class NetworkRestController {
             map.put("ERROR","添加失败，同名交换机已存在！");
             return map;
         }
-        if(jpaSwSwitch.findSwSwitchesByLevel("核心")!=null&&level.equals("核心")){
+        if(jpaSwSwitch.findSwSwitchesByLevel("核心").size()>0&&level.equals("核心")){
             map.put("ERROR","添加失败，核心交换机已存在！");
             return map;
         }
@@ -192,6 +192,7 @@ public class NetworkRestController {
     public Map<String,String> gateway_edit(int id,String gateway,String vlanid,String remark){
         Map<String,String> map=new HashMap<>();
         SwGateway swGateway=jpaGateway.findById(id).get();
+
         SwGateway gateway1=jpaGateway.findSwGatewayByVlanid(vlanid);
 
         if(gateway1!=null&&gateway1.getId()!=id){
@@ -205,7 +206,11 @@ public class NetworkRestController {
             map.put("ERROR","修改失败，相同网关已存在！");
             return map;
         }
-
+        //如果网段改变了置vlan关联号为空
+        String old_gateway=swGateway.getGateway();
+        if(!old_gateway.equals(gateway)){
+            swGateway.setOidRelateCode(null);
+        }
         swGateway.setRemark(remark);
         swGateway.setVlanid(vlanid);
         swGateway.setGateway(gateway);
@@ -441,11 +446,13 @@ public class NetworkRestController {
         Map<String,String> map=new HashMap<>();
         if(flag.equals("ip")){
             String mac=snmpCore.getMACByIP(ipOrMac);
+            System.out.println(mac + "---");
             if(mac==null||mac.equals("")){
                 map.put("error","查询无结果");
                 return map;
             }else {
                 String res=snmpCore.searchPort(mac);
+
                 if(res==null||res.equals("")){
                     map.put("error","查询无结果");
                 }else {

@@ -7,6 +7,7 @@ import com.rbac.demo.jpa.JpaEmployee;
 import com.rbac.demo.jpa.JpaRole;
 import com.rbac.demo.jpa.JpaSwSwitch;
 import com.rbac.demo.service.RoleService;
+import com.rbac.demo.service.network.SnmpCore;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,10 +28,11 @@ public class JpaTests {
     JpaRole jpaRole;
     @Autowired
     JpaSwSwitch jpaSwSwitch;
+    @Autowired
+    SnmpCore snmpCore;
     @Test
     public void t1(){
-        Pageable pageable= PageRequest.of(1,10);
-        Page<SwSwitch> page=jpaSwSwitch.findSwSwitchesByLabelLikeAndsAndfirm("%%","华为",pageable);
-        System.out.println(page.toList().size());
+     String res=snmpCore.getMACByIP("192.168.10.10");
+     System.out.println(res);
     }
 }
