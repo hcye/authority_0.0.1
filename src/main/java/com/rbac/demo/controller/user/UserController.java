@@ -183,7 +183,7 @@ public class UserController {
         }
         model.addAttribute("sexs",sexs);
         model.addAttribute("user",employee);
-        return "user/personal_center";
+        return "redirect:/common/basicDoc";
     }
 
     @GetMapping("/user/select_tx")

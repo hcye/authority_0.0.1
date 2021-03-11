@@ -43,7 +43,10 @@ public class AsmController {
         List<AssetType> assetTypes=asmService.getPermitAsmAssetTypes();
         String loginUser= (String) SecurityUtils.getSubject().getPrincipal();  //操作者用户名
         Pageable pageable=PageRequest.of(0,pageSize);   //初始化第一页
-        List<String> assertNames=jpaAssert.getDistinctAssertNames(assetTypes.get(0));
+        List<String> assertNames=null;
+        if(assetTypes.size()>0){
+           assertNames=jpaAssert.getDistinctAssertNames(assetTypes.get(0));
+        }
         if(assertNames==null){
             assertNames=new ArrayList<>();
         }
