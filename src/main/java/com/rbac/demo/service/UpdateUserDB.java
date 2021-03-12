@@ -141,11 +141,11 @@ public class UpdateUserDB {
                 }
             }
             try {
-                if (flag1 == 1) {
+               /* if (flag1 == 1) {
                     Employee employees = jpaEmployee.findEmployeeByLoginName(allUser.get(i).getLoginName());
                     employees.setOnjob("0");
                     jpaEmployee.saveAndFlush(employees);
-                }
+                }*/
             }catch (Exception e){
                 throw new RuntimeException("系统中发现登录名重复的用户："+allUser.get(i).getLoginName()+",删除后重新刷新！");
             }

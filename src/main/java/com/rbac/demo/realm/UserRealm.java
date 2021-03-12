@@ -62,11 +62,14 @@ public class UserRealm extends AuthorizingRealm {
                 throw new UnknownAccountException();
             }
         }
-
+        if (employee==null){
+            throw new UnknownAccountException();
+        }
         //这里要实现密码验证需要重写credentialsMater,然后在realmconfig内getDefaultSecurityManager方法上 userRealm参数上设置这个匹配器
         //        userRealm.setCredentialsMatcher(myCredentialsMatcher());
         //        defaultSecurityManager.setRealm(userRealm);
         return new SimpleAuthenticationInfo(     //
+
                 employee.getLoginName(),  //用户名principle
                 ShiroUtils.encryption(String.valueOf(token.getPassword()), ByteSource.Util.bytes(employee.getPingyin()).toHex()),    //密码password.加密后的密码
                 ByteSource.Util.bytes(employee.getPingyin()),

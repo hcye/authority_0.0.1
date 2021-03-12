@@ -2,6 +2,7 @@ package com.rbac.demo.controller.restController;
 
 import com.rbac.demo.entity.*;
 import com.rbac.demo.jpa.*;
+import com.rbac.demo.service.Chinese2Eng;
 import com.rbac.demo.service.UpdateUserDB;
 import com.rbac.demo.service.UserService;
 import com.rbac.demo.shiro.ShiroUtils;
@@ -23,7 +24,8 @@ import java.util.*;
 
 @RestController
 public class EmployeeRestController {
-
+    @Autowired
+    private JpaOperatRecord jpaOperatRecord;
     @Autowired
     private JpaRole jpaRole;
     @Autowired
@@ -114,11 +116,91 @@ public class EmployeeRestController {
         map.put("ok","ok");
         return map;
     }
+    @PostMapping("/user/doAdd")
+//    id:$("#id").val(),email:$("#email").val(),sex:$("#sex").val(),status:$("#status"),group:$("#group"),pwd:$("#pwd"),roles:$("#roles").val()
+    public Map<String,String> addUser(String name,String lname,String email,String sex,String status,String group,String pwd,String roles){
+        Map<String,String> map=new HashMap<>();
+        Employee employeec=jpaEmployee.findEmployeeByLoginName(lname);
 
+        if(employeec!=null&&employeec.getId()!=0){
+            map.put("error","登录名重复");
+            return map;
+        }
+        SysGroup sysGroup =jpaGroup.findSysGroupByGname(group);
+        String[] rolesList=roles.split(",");
+
+        Employee employee=new Employee();
+        if(status.equals("启用")){
+            employee.setStatus((byte) 0);
+        }else {
+            employee.setStatus((byte) 1);
+        }
+        String py=Chinese2Eng.convertHanzi2Pinyin(name,true);
+        employee.setOnjob("0");
+        employee.setPingyin(py);
+        employee.setEdepart(group);
+        employee.setLoginName(lname);
+        employee.setEname(name);
+        employee.setEmail(email);
+        employee.setSex(sex);
+        employee.setSysGroupByGroupId(sysGroup);
+        if(!pwd.equals("")){
+            pwd= ShiroUtils.encryption(pwd, ByteSource.Util.bytes(employee.getPingyin()).toHex());
+            employee.setPwd(pwd);
+        }
+
+        /**
+         * 新增权限
+         * */
+        for(String str:rolesList){
+            if(str.equals("")){
+                continue;
+            }
+            Role role=jpaRole.findById(Integer.parseInt(str)).get();
+            User2Role user2Role=new User2Role();
+            user2Role.setRoleByRoleId(role);
+            user2Role.setEmployeeByUserId(employee);
+            jpaUser2Role.save(user2Role);
+        }
+        jpaEmployee.save(employee);
+        map.put("ok","ok");
+        return map;
+    }
     @PostMapping("/user/getPage")
     public Page<Employee> turn(String depId, String pageInput, String turnFlag, String keyWord, String refreshFlag) throws NamingException {
         Page<Employee> page= service.getPage( depId, pageInput, turnFlag,keyWord,refreshFlag);
         return page;
+    }
+
+    @PostMapping("/user/validForDel")
+    public Map<String,String> valid(int id) {
+        Map<String,String> map=new HashMap<>();
+        Employee employee=jpaEmployee.findEmployeeById(id);
+        if (employee.getAssertsById().size()>0){
+            map.put("error","用户保有资产，请归还后再试");
+        }else {
+            List<User2Role> user2Roles=jpaUser2Role.findUser2RolesByEmployeeByUserId(employee);
+            for (User2Role user2Role:user2Roles){
+                jpaUser2Role.delete(user2Role);
+            }
+            List<OperatRecord> operatRecords=jpaOperatRecord.findOperatRecordsByEmployeeByAssertEmp(employee);
+            for (OperatRecord record:operatRecords){
+                jpaOperatRecord.delete(record);
+            }
+            List<OperatRecord> operatRecordss=jpaOperatRecord.findOperatRecordsByEmployeeByDealer(employee);
+            for (OperatRecord record:operatRecordss){
+                jpaOperatRecord.delete(record);
+            }
+            employee.setExchangeResiver(null);
+            employee.setExchangeSender(null);
+            employee.setOperatRecordsById(null);
+            employee.setOperatRecordsById_0(null);
+            employee.setSysGroupByGroupId(null);
+
+            jpaEmployee.delete(employee);
+            map.put("ok","删除成功");
+        }
+        return map;
     }
 
     @PostMapping("/user/checkAdinfo")

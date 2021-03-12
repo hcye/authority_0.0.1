@@ -80,6 +80,26 @@ public class UserController {
         model.addAttribute("rolesBind",rolesUserHas);
         return "user/edit";
     }
+    @GetMapping("/user/add")
+    public String turnToAddPage(Model model){
+        List<Role> rolesUserHas= jpaRole.findAllRole();
+        List<String> groupsName=jpaGroup.getDistinctGourpName();
+        List<Role> roles=jpaRole.findAllRole();
+        //普通用户不能成为超级管理员
+        roles.remove(jpaRole.findById(1).get());
+        List<String> status=new ArrayList<>();
+        List<String> sex=new ArrayList<>();
+            sex.add("男");
+            sex.add("女");
+        status.add("启用");
+        status.add("禁用");
+        Collections.reverse(groupsName);
+        model.addAttribute("status",status);
+        model.addAttribute("group",groupsName);
+        model.addAttribute("roles",roles);
+        model.addAttribute("rolesBind",rolesUserHas);
+        return "user/add";
+    }
     //进入登录页面
     @GetMapping("/")
     public String login(){

@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.*;
@@ -519,16 +520,13 @@ public class AsmRestController {
         return map;
     }
 
-    @PostMapping("/asm/queryListPage")
-    public Map<String,List<Object>> queryListPage(String type,String isDam,String search,String pre,String next,int pageIndex,String jumpFlag){
+    @RequestMapping("/asm/queryListPage")
+    public Map<String,List<Object>> queryListPage(String type,String isDam,String search,String pre,String next,int pageIndex,String jumpFlag) throws UnsupportedEncodingException {
         /**
          *
          * 确定是否是翻页
          *
          * */
-
-
-
         Map<String,List<Object>> map=new HashMap<>();
         List<Employee> bros=new ArrayList<>();
         List<Page<Assert>> pages=new ArrayList<>();
@@ -771,7 +769,6 @@ public class AsmRestController {
             inputStream.close();
         } catch (Exception e) {
             json.put("error", e.toString());
-            System.out.println(e.toString());
             return json;
         } finally {
             if (reader != null) {

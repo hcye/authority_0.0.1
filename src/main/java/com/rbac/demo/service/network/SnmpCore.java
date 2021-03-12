@@ -161,7 +161,11 @@ public class SnmpCore {
 
  */
     public void getIpMapInteger() throws Exception {
-        SwSwitch swSwitch=jpaSwSwitch.findSwSwitchesByLevel("核心").get(0);
+        List<SwSwitch> swSwitches=jpaSwSwitch.findSwSwitchesByLevel("核心");
+        if(swSwitches.size()==0){
+            return;
+        }
+        SwSwitch swSwitch=swSwitches.get(0);
         String swip=swSwitch.getIpAddr();
         String comm=swSwitch.getSnmpComm();
         List<SwGateway> gateways=jpaGateway.findAll();

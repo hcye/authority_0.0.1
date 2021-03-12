@@ -101,9 +101,14 @@
                 $.post("/user/getPage", {depId: id, pageInput: pageNum, turnFlag: turn,keyWord:keyWord,refreshFlag:refreshFlag},    //把name数据提交到ajaxRes action内，
                     function (data) {
                         var editflag =  [[${@permission.getPermi('asm:user:edit')}]];
+                        var deleteflag =  [[${@permission.getPermi('asm:user:del')}]];
                         var isDisabled="";
+                        var isDelDisabled="";
                         if(editflag=="layui-btn-disabled"){
                             isDisabled="disabled='true'";
+                        }
+                        if(deleteflag=="layui-btn-disabled"){
+                            isDelDisabled="disabled='true'";
                         }
                         tbody.find("tr").remove();
                         employees = data.content;
@@ -117,9 +122,11 @@
                                 status = "账号正常";
                             }
                             tbody.append("<tr "+trCss+" ><td>" + employees[key].ename + "<input  value="+employees[key].id+"  type='hidden'/></td><td>"+employees[key].loginName+ "</td><td>"+employees[key].email+ "</td><td>" + employees[key].sex + "</td>" +
-                                "<td>" + status + "</td><td style='align-content: center'><button class='layui-btn "+editflag+"'  "+isDisabled+"  name='edit'  >编辑</button></td></tr>");
+                                "<td>" + status + "</td><td style='align-content: center'><button class='layui-btn layui-btn-xs "+editflag+"'  "+isDisabled+"  name='edit'  >编辑</button>" +
+                                "<button class='layui-btn layui-btn-xs "+deleteflag+"'  "+isDelDisabled+"  name='del'  >删除</button></td></tr>");
                         }
                         editUser();
+                        delUser()
                         //此处重置页码值,和总页码值
                         $("#pageInput").val(data.number+1);
                         $("#PageCount").html('共 '+data.totalPages+' 页');
@@ -128,10 +135,36 @@
             };
 
             function editUser(){
-                $("#userTable").find("button").click(function () {
+                $("#userTable").find("button[name='edit']").click(function () {
                     window.location.href="/user/edit?id="+$(this).parent().parent().find("input")[0].value;
                 });
             }
+
+
+             function delUser(){
+                 $("#userTable").find("button[name='del']").click(function () {
+                     console.log("----");
+                     var id=$(this).parent().parent().find("input")[0].value;
+                     var btn = $(this);
+                     layer.confirm('删除用户！', {
+                         btn: ['确定', '取消'] //可以无限个按钮
+                     }, function (index, layero) {
+                         $.post("/user/validForDel", {id: id},    //把name数据提交到ajaxRes action内，
+                             function (data) {
+                                 if (data["error"] != null) {
+                                     layer.alert(data["error"]);
+                                 } else if (data["ok"] != null) {
+                                     queryDepUser($("#selectedDepId").val(),$("#pageInput").val(),"",$("#searchInput").val(),"");
+                                     layer.close(index);
+                                 }
+                             }, "json");
+                     }, function (index) {
+                         //关闭弹出层
+                         layer.close(index);
+                     });
+
+                 })
+             }
 
             //翻页
             $(function () {
@@ -151,6 +184,10 @@
                 $("#searchUser").click(function () {
                      queryDepUser('','','',$("#searchInput").val(),'');
 
+                });
+                //新增
+                $("#addUser").click(function () {
+                    window.location.href="/user/add";
                 });
                 //刷新用户列表
                 $("#refresh").click(function () {
@@ -177,6 +214,7 @@
                 </div>
                 <div class="layui-btn-group ">
                    <button class="layui-btn" id="searchUser"><i class="layui-icon">&#xe615;</i> 查找用户</button>
+                    <button class="layui-btn" shiro:hasPermission="asm:user:add" id="addUser"><i class="layui-icon">&#xe654;</i> 新增用户</button>
                     <button class="layui-btn" shiro:hasPermission="asm:user:refresh" id="refresh"><i class="layui-icon">&#xe669;</i>刷新用户列表</button>
                 </div>
             </div>

@@ -124,7 +124,7 @@ public class AsmService {
 
         List<Assert> list=jpaAssert.findAssertsByAnameAndAssetType(dev_name,devType.getAssetTypeByAssertTypeId());
         String template=devType.getAssetNumTemplate();
-        if(template.equals("")){
+        if(template==null||template.equals("")){
             return "";
         }
         String maxNum="";

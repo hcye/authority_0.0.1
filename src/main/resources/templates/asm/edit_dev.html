@@ -41,7 +41,9 @@
                         return;
                     }else {
                         document.location.href="/asm/save_dev/?id="+$("#id").val()+"&types=" +
-                            ""+$("#types").val()+"&model="+$("#model").val()+"&price="+$("#price").val()+"&remarks="+$("#remarks").val()+"&sn="+$("#sn_num").val()+"&num="+$("#num").val();
+                            ""+$("#types").val()+"&model="+$("#model").val()+"&price="+$("#price").val()+"&remarks="+$("#remarks").val()+
+                            "&sn="+$("#sn_num").val()+"&num="+$("#num").val()+"&list_type="+$("#list_type").val()
+                            +"&list_isDam="+$("#list_isDam").val()+"&cuindex="+$("#cuindex").val();
                     }
                 }, "json");
 
@@ -62,6 +64,9 @@
     <p>编辑资产</p>
 </div>
 <input type="hidden" id="id" th:value="${dev.getId()}" />
+<input type="hidden" id="list_type" th:value="${type}" />
+<input type="hidden" id="list_isDam" th:value="${isDam}" />
+<input type="hidden" id="cuindex" th:value="${cuindex}" />
     <div class="layui-container">
         <div class="layui-form">
             <fieldset class="layui-elem-field">

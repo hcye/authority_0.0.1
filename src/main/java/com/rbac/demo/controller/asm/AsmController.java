@@ -13,6 +13,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -104,12 +107,36 @@ public class AsmController {
 
     @RequiresPermissions("asm:list:view")
     @GetMapping("/asm/list")
-    public String listPage(Model model){
+    public String listPage(Model model,String type,String isDam,String cuindex) throws UnsupportedEncodingException {
         List<AssetType> types= jpaAssetType.findAssertType();
+        List<String> dam=new ArrayList<>();
+        dam.add("完好");
+        dam.add("损坏");
+        if(type!=null&&isDam!=null){
+
+           type=URLDecoder.decode(type,"UTF-8");
+           isDam=URLDecoder.decode(isDam,"UTF-8");
+           AssetType type1=jpaAssetType.findAssetTypeByName(type);
+           for (AssetType assetType:types){
+               if(assetType.getTypeName().equals(type)){
+                   types.remove(assetType);
+                   break;
+               }
+           }
+           types.add(0,type1);
+           for (String s:dam){
+               if(s.equals(isDam)){
+                   dam.remove(s);
+                   break;
+               }
+           }
+           dam.add(0,isDam);
+        }
         model.addAttribute("types",types);
+        model.addAttribute("dam",dam);
+        model.addAttribute("cuindex",cuindex);
         return "asm/list";
     }
-
     @RequiresPermissions("asm:type:view")
     @GetMapping("/asm/type")
     public String typePage(){
@@ -234,7 +261,7 @@ public class AsmController {
 
     @RequiresPermissions("asm:edit:btn")
     @GetMapping("/asm/edit_dev")
-    public String editDev(int id,Model model){
+    public String editDev(int id,String type,String isDam,String cuindex,Model model){
         Assert anAssert= jpaAssert.findById(id).get();
 
 
@@ -242,7 +269,10 @@ public class AsmController {
         DevType devType=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(name,anAssert.getAssetTypeByAssertType());
         String temp=devType.getAssetNumTemplate();
         model.addAttribute("dev",anAssert);
+        model.addAttribute("type",type);
+        model.addAttribute("isDam",isDam);
         model.addAttribute("temp",temp);
+        model.addAttribute("cuindex",cuindex);
         return "asm/edit_dev";
     }
     @RequiresPermissions("asm:exchange:view")
@@ -268,7 +298,7 @@ public class AsmController {
 
     @RequiresPermissions("asm:edit:btn")
     @GetMapping("/asm/save_dev")
-    public String saveDev(int id,String types,String model,String price,String remarks,String sn,String num){
+    public String saveDev(int id,String types,String model,String price,String remarks,String sn,String num,String list_type,String list_isDam,String cuindex) throws UnsupportedEncodingException {
         Assert anAssert=jpaAssert.findById(id).get();
         anAssert.setAssetTypeByAssertType(jpaAssetType.findAssetTypeByName(types));
         anAssert.setModel(model);
@@ -278,7 +308,10 @@ public class AsmController {
         anAssert.setAssestnum(num);
         jpaAssert.save(anAssert);
         asmRecordService.write(AsmAction.dev_edit,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert,"");
-        return "redirect:/asm/list";
+        String type=URLEncoder.encode(list_type,"UTF-8");
+        String isDam=URLEncoder.encode(list_isDam,"UTF-8");
+        return "redirect:/asm/list?type="+type+"&isDam="+isDam+"&cuindex="+cuindex;
+//        String type,String isDam,String search,String pre,String next,int pageIndex,String jumpFlag
     }
 
 

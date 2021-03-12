@@ -1,6 +1,7 @@
 package com.rbac.demo.jpa;
 
 import com.rbac.demo.entity.Assert;
+import com.rbac.demo.entity.Employee;
 import com.rbac.demo.entity.OperatRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +19,8 @@ public interface JpaOperatRecord extends JpaRepository<OperatRecord,Integer> {
 
     Page<OperatRecord> findOperatRecordsByActionTimeBetween(Date date1,Date date2,Pageable pageable);
 
-
+    List<OperatRecord> findOperatRecordsByEmployeeByAssertEmp(Employee e);
+    List<OperatRecord> findOperatRecordsByEmployeeByDealer(Employee e);
     List<OperatRecord> findOperatRecordsByAssertByAssertAsset(Assert asset);
 
 }

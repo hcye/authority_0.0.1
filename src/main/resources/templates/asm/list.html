@@ -77,7 +77,9 @@
 
                 // 添加编辑按钮点击事件
                 $("#tb").find("button[name='edit']").click(function () {
-                    document.location.href = "/asm/edit_dev?id=" + $(this).parent().parent().find("input")[0].value;
+                    document.location.href = "/asm/edit_dev?id=" + $(this).parent().parent().find("input")[0].value+"&type="+$("#dev_type").val()+
+                        "&isDam=" + $("#is_damage").val()+"&cuindex=" + $("#pageInput").val();
+
                     //获得操作角色id
                 });
                 //添加报损按钮点击事件
@@ -175,7 +177,7 @@
     $(function () {
         $(document).ready(function () {
             // type,search,pre,next,pageIndex,jumpFlag,isDam
-            queryPage($("#dev_type").val(), "", "", "", "1", "", "完好");
+            queryPage($("#dev_type").val(), "", "", "", $("#pageInput").val(), "jump", $("#is_damage").val());
         });
 
 //导出表格
@@ -228,8 +230,7 @@
                     <label class="layui-form-label">是否损坏</label>
                     <div class="layui-input-inline">
                         <select class="layui-form-select" id="is_damage">
-                            <option>完好</option>
-                            <option>损坏</option>
+                            <option  th:each="isdam : ${dam}"  th:text="${isdam}"></option>
                         </select>
                     </div>
                 </div>
@@ -273,7 +274,7 @@
                 <button class="layui-btn" id="pre" style="float: right">-</button>
             </div>
             <div class="layui-col-md2 layui-input-inline">
-                <input type="text" class="layui-input" id="pageInput" />
+                <input type="text" class="layui-input" id="pageInput" th:value="${cuindex==null?1:cuindex}" />
             </div>
             <div class="layui-col-md1">
                 <button class="layui-btn" id="next">+</button>
