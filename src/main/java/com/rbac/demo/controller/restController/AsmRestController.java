@@ -230,9 +230,11 @@ public class AsmRestController {
             login_name=login_name+res[res.length-1];
             returner=jpaEmployee.findEmployeeByLoginName(login_name);
         }
-
-        List<Assert> asserts= (List<Assert>) returner.getAssertsById();
         List<Assert> assertsHasPermit=new ArrayList<>();
+        if(returner==null){
+            return map;
+        }
+        List<Assert> asserts= (List<Assert>) returner.getAssertsById();
         for(int i=0;i<asserts.size();i++){
             for (int j=0;j<assetTypes.size();j++){
                 if(asserts.get(i).getAssetTypeByAssertType().equals(assetTypes.get(j))){
