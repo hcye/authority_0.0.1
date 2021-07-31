@@ -74,6 +74,12 @@ public class AsmController {
     public String rtcPage(){
         return "rtc/file_convert";
     }
+
+    @GetMapping("/stateCode/count")
+    public String stateCode(){
+        return "codeCount/statecode";
+    }
+
     @RequiresPermissions("asm:inp:view")
     @GetMapping("/asm/inp")
     public String inpPage(Model model){
