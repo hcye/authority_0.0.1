@@ -1,5 +1,7 @@
 package com.rbac.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.sql.Date;
 
@@ -10,8 +12,7 @@ public class StateCode {
     private String repoName;
     private String repoUrl;
     private Date addTime;
-    private String repoType;
-
+    private StateCodeProj stateCodeProjByProjId;
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
@@ -76,14 +77,14 @@ public class StateCode {
         result = 31 * result + (addTime != null ? addTime.hashCode() : 0);
         return result;
     }
-
-    @Basic
-    @Column(name = "repo_type", nullable = true, length = 255)
-    public String getRepoType() {
-        return repoType;
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "proj_id", referencedColumnName = "id")
+    public StateCodeProj getStateCodeProjByProjId() {
+        return stateCodeProjByProjId;
     }
 
-    public void setRepoType(String repoType) {
-        this.repoType = repoType;
+    public void setStateCodeProjByProjId(StateCodeProj stateCodeProjByProjId) {
+        this.stateCodeProjByProjId = stateCodeProjByProjId;
     }
 }
