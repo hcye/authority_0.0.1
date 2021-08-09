@@ -74,6 +74,9 @@ public class AsmController {
     public String rtcPage(){
         return "rtc/file_convert";
     }
+
+
+
     @RequiresPermissions("asm:inp:view")
     @GetMapping("/asm/inp")
     public String inpPage(Model model){

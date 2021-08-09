@@ -105,6 +105,17 @@
             <version>2.2.6</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.tmatesoft.svnkit</groupId>
+            <artifactId>svnkit</artifactId>
+            <version>1.10.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>5.12.0.202106070339-r</version>
+        </dependency>
 
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -123,6 +134,12 @@
             <groupId>org.snmp4j</groupId>
             <artifactId>snmp4j</artifactId>
             <version>3.4.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.ethz.ganymed</groupId>
+            <artifactId>ganymed-ssh2</artifactId>
+            <version>262</version>
         </dependency>
 
     </dependencies>

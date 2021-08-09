@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>代码统计</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+    <script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>-->
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <script type="text/javascript">
+        layui.use('form', function(){
+            var form = layui.form;
+            //监听提交
+            //checkbox 点击事件
+            form.on("select(r_proj_type)", function(data){
+                $.post("/stateCode/getProjs", {projType:data.value},    //把name数据提交到ajaxRes action内，
+                    function(types) {
+                        $("#r_proj_name").find("option").remove();
+                        var types=types["types"];
+                        if(types!=null){
+                            for(var key in types){
+                                $("#r_proj_name").append("<option>"+types[key]+"</option>");
+                            }
+                        }
+                        form.render('select');//修改select后需要重新渲染
+                    }, "json");
+
+            });
+            layui.use('laydate', function(){
+                var laydate = layui.laydate;
+
+                //执行一个laydate实例
+                laydate.render({
+                    elem: '#time_range'
+                    ,type: 'date'
+                    ,range: true //或 range: '~' 来自定义分割字符
+                    ,max: 0 //7天后
+                });
+            });
+
+            form.on("select(rr_proj_type)", function(data){
+                $.post("/stateCode/getProjs", {projType:data.value},    //把name数据提交到ajaxRes action内，
+                    function(types) {
+                        $("#rr_proj_name").find("option").remove();
+                        var types=types["types"];
+                        if(types!=null){
+                            for(var key in types){
+                                $("#rr_proj_name").append("<option>"+types[key]+"</option>");
+                            }
+                        }
+                        form.render('select');//修改select后需要重新渲染
+                    }, "json");
+
+            });
+            form.on("select(r_proj_name)", function(data){
+                $.post("/stateCode/getRepos", {projType:$("#r_proj_type").val(),projName:$("#r_proj_name").val()},    //把name数据提交到ajaxRes action内，
+                    function(datas) {
+                        $("#r_repo_name").find("option").remove();
+                        var names=datas["names"];
+                        if(names!=null){
+                            for(var key in names){
+                                $("#r_repo_name").append("<option>"+names[key]+"</option>");
+                            }
+                        }
+                        form.render('select');//修改select后需要重新渲染
+                    }, "json");
+
+            });
+        });
+        //增加git仓库
+        $(function () {
+            $("#add_git").click(function () {
+                $.post("/stateCode/add_repo", {name:$("#git_repo_name").val(),repo_url:$("#git_repo_locate").val(),repo_type:"git",projName: $("#git_proj_name").val()},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+                        if (data["error"] != null) {
+                            layer.alert(data["error"]);
+                        }else {
+                            layer.alert(data["success"]);
+                        }
+                    }, "json");
+            })
+
+            $("#add_svn").click(function () {
+                $.post("/stateCode/add_repo", {name:$("#svn_repo_name").val(),repo_url:$("#svn_repo_locate").val(),repo_type:"svn",projName: $("#svn_proj_name").val()},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+                        if (data["error"] != null) {
+                            layer.alert(data["error"]);
+                        }else {
+                            layer.alert(data["success"]);
+                        }
+                    }, "json");
+            })
+
+            $("#add_proj").click(function () {
+                $.post("/stateCode/add_proj", {type:$("#proj_type").val(),name:$("#proj_name").val()},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+                        if (data["error"] != null) {
+                            layer.alert(data["error"]);
+                        }else {
+                            layer.alert(data["success"]);
+                            window.location.reload();
+                        }
+                    }, "json");
+            })
+
+            $("#remove_repo").click(function () {
+                $.post("/stateCode/del_repo", {type:$("#r_proj_type").val(),name:$("#r_proj_name").val(),repoName:$("#r_repo_name").val()},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+                        if (data["error"] != null) {
+                            layer.alert(data["error"]);
+                        }else {
+                            layer.alert(data["success"]);
+                            window.location.reload();
+                        }
+                    }, "json");
+            })
+
+            $("#remove_proj").click(function () {
+                $.post("/stateCode/del_proj", {type:$("#rr_proj_type").val(),name:$("#rr_proj_name").val()},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+                        if (data["error"] != null) {
+                            layer.alert(data["error"]);
+                        }else {
+                            layer.alert(data["success"]);
+                            window.location.reload();
+                        }
+                    }, "json");
+            })
+
+            $("#to_excel").click(function () {
+                $.post("/stateCode/to_excel", {path:$("#repo_path").val(),timeRange:$("#time_range").val()},    //把name数据提交到ajaxRes action内，
+                    function (data) {
+                        if (data["error"] != null) {
+                            layer.alert(data["error"]);
+                        }else {
+                            layer.alert(data["success"]);
+                            window.location.reload();
+                        }
+                    }, "json");
+            })
+
+
+
+        })
+
+
+
+    </script>
+</head>
+
+<body>
+<div class="layui-container" style="width: 95%">
+    <h1 class="site-h3" style="margin-top: 5%">代码统计</h1>
+    <hr>
+    <div class="layui-form">
+        <blockquote class="layui-elem-quote">新增项目</blockquote>
+
+        <fieldset class="layui-elem-field layui-field-title">
+            <div class="layui-field-box">
+                <div class="layui-form-item" >
+                    <div class="layui-inline" style="width: 100%;">
+                        <label class="layui-form-label">项目类型</label>
+                        <div class="layui-input-inline">
+                            <select class="layui-form-select" id="proj_type">
+                                <option>  git   </option>
+                                <option>  svn   </option>
+                            </select>
+                        </div>
+                        <label class="layui-form-label">项目名</label>
+                        <div class="layui-input-inline" >
+                            <input class="layui-input"  id="proj_name"/>
+                        </div>
+                        <div class="layui-inline">
+                            <button class="layui-btn " id="add_proj"> ＋添加</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <blockquote class="layui-elem-quote">添加仓库</blockquote>
+
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>git 仓库</legend>
+            <div class="layui-field-box">
+                <div class="layui-form-item" >
+                    <div class="layui-inline" style="width: 100%;">
+                        <label class="layui-form-label">项目名</label>
+                        <div class="layui-input-inline">
+                            <select class="layui-form-select" id="git_proj_name">
+                                <option  th:each="git_proj : ${git_projs}"  th:text="${git_proj}"></option>
+                            </select>
+                        </div>
+                        <label class="layui-form-label">仓库名</label>
+                        <div class="layui-input-inline" >
+                            <input class="layui-input"  id="git_repo_name"/>
+                        </div>
+                        <label class="layui-form-label">仓库地址</label>
+                        <div class="layui-input-inline" style="width: 35%">
+                            <input class="layui-input"  id="git_repo_locate"/>
+                        </div>
+                        <div class="layui-inline">
+                            <button class="layui-btn " id="add_git"> ＋添加</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="layui-elem-field layui-field-title">
+        <legend>svn 仓库</legend>
+        <div class="layui-field-box">
+            <div class="layui-form-item">
+                <div class="layui-inline" style="width: 100%">
+                    <label class="layui-form-label">项目名</label>
+                    <div class="layui-input-inline">
+                        <select class="layui-form-select" id="svn_proj_name">
+                            <option  th:each="svn_proj : ${svn_projs}"  th:text="${svn_proj}"></option>
+                        </select>
+                    </div>
+                    <label class="layui-form-label">仓库名</label>
+                    <div class="layui-input-inline">
+                        <input  class="layui-input" id="svn_repo_name"/>
+                    </div>
+                    <label class="layui-form-label">仓库地址</label>
+                    <div class="layui-input-inline" style="width: 35%">
+                        <input class="layui-input"  id="svn_repo_locate"/>
+                    </div>
+                    <div class="layui-inline">
+                        <button class="layui-btn " id="add_svn"> ＋添加</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </fieldset>
+        <blockquote class="layui-elem-quote">移除</blockquote>
+
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>移除仓库</legend>
+            <div class="layui-field-box">
+                <div class="layui-form-item">
+                    <div class="layui-inline" style="width: 100%">
+                        <label class="layui-form-label">项目类型</label>
+                        <div class="layui-input-inline">
+                            <select class="layui-form-select" id="r_proj_type" lay-filter="r_proj_type">
+                                <option>  git   </option>
+                                <option>  svn   </option>
+                            </select>
+                        </div>
+                        <label class="layui-form-label">项目名</label>
+                        <div class="layui-input-inline">
+                            <select class="layui-form-select" id="r_proj_name" lay-filter="r_proj_name">
+
+                            </select>
+                        </div>
+                        <label class="layui-form-label">仓库名</label>
+                        <div class="layui-input-inline">
+                            <select class="layui-form-select" id="r_repo_name">
+
+                            </select>
+                        </div>
+                        <div class="layui-inline">
+                            <button class="layui-btn " id="remove_repo"> ✘删除</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>移除项目</legend>
+            <div class="layui-field-box">
+                <div class="layui-form-item">
+                    <div class="layui-inline" style="width: 100%">
+                        <label class="layui-form-label">项目类型</label>
+                        <div class="layui-input-inline">
+                            <select class="layui-form-select" id="rr_proj_type" lay-filter="rr_proj_type">
+                                <option>  git   </option>
+                                <option>  svn   </option>
+                            </select>
+                        </div>
+                        <label class="layui-form-label">项目名</label>
+                        <div class="layui-input-inline">
+                            <select class="layui-form-select" id="rr_proj_name">
+
+                            </select>
+                        </div>
+                        <div class="layui-inline">
+                            <button class="layui-btn " id="remove_proj"> ✘删除</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <blockquote class="layui-elem-quote">代码统计</blockquote>
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>svn 仓库</legend>
+            <div class="layui-field-box">
+                <div class="layui-form-item">
+                    <div class="layui-inline" style="width: 100%">
+                        <div class="layui-input-inline">
+                            <button class="layui-btn " id="view_repos"> <i class="layui-icon">&#xe63c;</i> <a target="_blank" href="http://192.168.100.82:8099/source/">浏览仓库</a> </button>
+                        </div>
+                        <label class="layui-form-label">时间范围:</label>
+                        <div class="layui-input-inline">
+                            <input id="time_range" class="layui-input" />
+                        </div>
+                        <label class="layui-form-label">仓库路径</label>
+                        <div class="layui-input-inline" style="width: 45%">
+                            <input class="layui-input"  placeholder="例：http://192.168.100.82:8099/source/svn/project/middleware/sdp7_hmi_build/workspace/" id="repo_path"/>
+                        </div>
+                        <div class="layui-inline">
+                            <button class="layui-btn " id="to_excel">生成报表</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+</body>
+</html>
