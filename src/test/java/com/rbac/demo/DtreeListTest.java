@@ -18,6 +18,6 @@ public class DtreeListTest {
     public void test(){
       //  RepoUrlCheck.authSvn("svn://172.32.0.215/myp1ro","yehangcheng","yehangcheng");
         // RepoUrlCheck.authGit("http://yehangcheng@gerrit2.hsaecd.com:80/a/hsae/ioc/nxp/s32k","","");
-        ExecShell.execCommand("netstat");
+        //ExecShell.execCommand("netstat");
     }
 }

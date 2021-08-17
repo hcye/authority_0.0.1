@@ -5,7 +5,9 @@ import com.rbac.demo.entity.StateCodeProj;
 import com.rbac.demo.jpa.JpaProjStatCode;
 import com.rbac.demo.jpa.JpaStateCode;
 import com.rbac.demo.tool.ExecShell;
+import com.sun.tools.classfile.ConstantPool;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,22 +24,25 @@ public class StateCodeRestController {
     @Autowired
     private JpaProjStatCode jpaProjStatCode;
     @PostMapping("/stateCode/add_repo")
-    public Map<String, String> add_repo(String name,String repo_url,String repo_type,String projName) {
+    public Map<String, String> add_repo(String name,String repo_url,String repo_type,String projName,String branch) {
         Map<String, String> map = new HashMap<>();
+//        {name:$("#svn_repo_name").val(),repo_url:$("#svn_repo_locate").val(),repo_type:"svn",projName: $("#svn_proj_name").val()},
         if( name.trim().equals("") || repo_type.trim().equals("") || repo_url.trim().equals("") || projName.trim().equals("")){
             map.put("error","关键字不能为空！");
             return map;
         }
+        name=name.trim();
+        repo_url=repo_url.trim();
+        repo_type=repo_type.trim();
+        projName=projName.trim();
+        if(branch!=null){
+            branch=branch.trim();
+        }
         StateCodeProj codeProj =jpaProjStatCode.findByProjNameAndAndProjType(projName,repo_type);
-
         List<StateCode> stateCodes = jpaStateCode.findAll();
         for (StateCode stateCode:stateCodes){
             if(name.equals(stateCode.getRepoName())){
                 map.put("error","仓库名重复");
-                return map;
-            }
-            if(repo_url.equals(stateCode.getRepoUrl())){
-                map.put("error","仓库地址已存在");
                 return map;
             }
         }
@@ -48,17 +53,34 @@ public class StateCodeRestController {
         stateCode.setRepoName(name);
         stateCode.setRepoUrl(repo_url);
         stateCode.setStateCodeProjByProjId(codeProj);
-        jpaStateCode.save(stateCode);
         /*
-        *
-        * 同步利用ansible 同步数据
-        * 在项目目录下创建 创建仓库目录
-        * 进入仓库目录 pull 代码
-        * ExecShell.execCommand("pull code");
-        *
-        * */
+         * 关键字
+         * name 仓库文件夹名
+         * repo_url 仓库地址
+         * codeProj 获得前缀目录
+         * 同步利用ansible 同步数据
+         * 在项目目录下创建 创建仓库目录
+         * 进入仓库目录 pull 代码
+         * ExecShell.execCommand("pull code");
+         *
+         * */
+        if(branch==null){
+            branch="";
+        }
+        String cmd="python3 /opt/bin/task.py makeRepo "+repo_url+" "+repo_type+" "+projName+" "+name+" "+"branch:"+branch;
+        System.out.println(cmd);
+        String res=ExecShell.execCommand(cmd);
+        System.out.println(res);
+        if(res.contains("error:clone")){
+            map.put("error","新增失败");
+            return map;
+        }else {
+            jpaStateCode.save(stateCode);
+        }
 
-        map.put("success","新增成功，请给我们一定时间同步数据");
+
+
+        map.put("success","新增成功");
         return map;
 
     }
@@ -89,7 +111,9 @@ public class StateCodeRestController {
             map.put("error","项目名不为空！");
             return map;
         }
-        StateCodeProj codeProj=jpaProjStatCode.findByProjNameAndAndProjType(name.trim(),type.trim());
+        name=name.trim();
+        type=type.trim();
+        StateCodeProj codeProj=jpaProjStatCode.findByProjNameAndAndProjType(name,type);
         if(codeProj!=null){
             map.put("error","项目名重复！");
             return map;
@@ -97,89 +121,127 @@ public class StateCodeRestController {
         codeProj=new StateCodeProj();
         codeProj.setProjName(name);
         codeProj.setProjType(type);
-        jpaProjStatCode.save(codeProj);
-        map.put("success","新增项目成功");
+        String cmd="python3 /opt/bin/task.py makeProject "+type+" "+name;
+        String res=ExecShell.execCommand(cmd);
+        System.out.println(res);
+        System.out.println(cmd);
+        if(res.contains("error")){
+            map.put("error",res);
+        }else {
+            jpaProjStatCode.save(codeProj);
+            map.put("success","新增项目成功");
+        }
+
 
         /*
-        *
-        *
+        * 添加项目
+        * ExecShell.execCommand("pull code");
         *
         *
         * */
+
         return map;
     }
 
     @PostMapping("/stateCode/del_repo")
     public Map<String, String> delRepo(String name,String type,String repoName) {
         Map<String,String> map=new HashMap<>();
+        if(name.equals("") || repoName.equals("")){
+            map.put("error","关键字不为空！");
+            return map;
+        }
+        name=name.trim();
+        repoName=repoName.trim();
         try{
             StateCode stateCode=jpaStateCode.getRepoByTypeAndProjAndRepoName(type,name,repoName);
+            String res=ExecShell.execCommand("python3 /opt/bin/task.py rmRepo "+type+" "+name+" "+repoName);
+            System.out.println(res);
+            if(res.contains("error")){
+                map.put("error",res);
+            }else {
+                jpaStateCode.delete(stateCode);
+                map.put("success","删除成功");
+            }
             /**
              *
              *      ExecShell.execCommand("rm -rf 进入对应项目目录执行删除动作");
              *
              * */
-            jpaStateCode.delete(stateCode);
-            map.put("success","删除成功");}
+            }
         catch (Exception e) {
             map.put("error","遇到错误:"+e);
         }
-
-
-        /*
-         *
-         *    ExecShell.execCommand("mkdir 创建项目目录");
-         *
-         *
-         * */
         return map;
     }
 
     @PostMapping("/stateCode/del_proj")
     public Map<String, String> delProj(String name,String type) {
+
         Map<String,String> map=new HashMap<>();
+        if(name.equals("")){
+            map.put("error","关键字不为空！");
+            return map;
+        }
+        name=name.trim();
         try{
             StateCodeProj codeProj=jpaProjStatCode.findByProjNameAndAndProjType(name,type);
             List<StateCode> stateCodes= (List<StateCode>) codeProj.getStateCodesById();
             if(stateCodes.size()!=0){
                 map.put("error","删除失败，项目非空，请清除仓库后再执行删除！");
             }else {
-                /**
-                 *
-                 *      ExecShell.execCommand("rm -rf 进入对应项目目录执行删除动作");
-                 *
-                 * */
-                jpaProjStatCode.delete(codeProj);
-                map.put("success","删除成功");
+                String res=ExecShell.execCommand("python3 /opt/bin/task.py rmProject "+type+" "+name);
+                System.out.println(res);
+                if(res.contains("error")){
+                    map.put("error",res);
+                }else {
+                    jpaProjStatCode.delete(codeProj);
+                    map.put("success","删除成功");
+                }
+
             }
           }
         catch (Exception e) {
             map.put("error","遇到错误:"+e);
         }
 
-
-        /*
-         *
-         *    ExecShell.execCommand("mkdir 创建项目目录");
-         *
-         *
-         * */
         return map;
     }
 
     @PostMapping("/stateCode/to_excel")
     public Map<String, String> toExcel(String path,String timeRange) {
         Map<String,String> map=new HashMap<>();
-        if(path.trim().equals("")){
-            map.put("error","路径不能为空！");
+        if(path.equals("") || timeRange.equals("")){
+            map.put("error","关键字不为空！");
+            return map;
         }
+        path=path.trim();
+        timeRange=timeRange.trim();
+        String start_time=timeRange.split(" - ")[0];
+        String end_time=timeRange.split(" - ")[1];
+        String[] paths=path.split("/");
+        String type="";
+        for(String p:paths){
+            if(p.equals("git")){
+                type="git";
+                break;
+            }
+            if(p.equals("svn")){
+                type="svn";
+                break;
+            }
+        }
+
+
         try{
-                /**
-                 *
-                 *      ExecShell.execCommand("执行生成excel动作");
-                 *
-                 * */
+            String res=ExecShell.execCommand("python3 /opt/bin/task.py makeExcel_"+type+" "+path+" "+start_time+" "+end_time);
+            System.out.println(res);
+            if(res.contains("error")){
+                map.put("error",res);
+
+            }else {
                 map.put("success","输出成功");
+            }
+
 
         }
         catch (Exception e) {

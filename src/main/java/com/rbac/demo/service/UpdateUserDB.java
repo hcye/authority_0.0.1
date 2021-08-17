@@ -29,6 +29,7 @@ public class UpdateUserDB {
     public static void updateUserTable(JpaEmployee jpaEmployee, JpaGroup jpaGroup, String adip, String adname, String username, String userpwd) throws NamingException {
         NamingEnumeration<SearchResult> answer=getNamingEnumeration( adip,  adname,  username,  userpwd);
         List<String> allLADPUserList = new ArrayList<String>();
+
         List<Employee> allUser = jpaEmployee.findAll();
 
         int flag = 0;
@@ -41,6 +42,7 @@ public class UpdateUserDB {
             String loginName = "";
             String mail = "";
             SearchResult sr = answer.next();
+
             if(sr.getAttributes().get("mail")!=null){
                 mail=sr.getAttributes().get("mail").toString().split(": ")[1];
             }

@@ -32,7 +32,10 @@ public class JpaTests {
     SnmpCore snmpCore;
     @Test
     public void t1(){
-     String res=snmpCore.getMACByIP("192.168.10.10");
-     System.out.println(res);
+        String path="http://192.168.100.82:8099/source/svn/project/middleware/";
+        String[] paths=path.split("source");
+        for(String p:paths){
+            System.out.println(p);
+        }
     }
 }

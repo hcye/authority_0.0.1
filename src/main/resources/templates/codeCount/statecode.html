@@ -76,7 +76,10 @@
         //增加git仓库
         $(function () {
             $("#add_git").click(function () {
-                $.post("/stateCode/add_repo", {name:$("#git_repo_name").val(),repo_url:$("#git_repo_locate").val(),repo_type:"git",projName: $("#git_proj_name").val()},    //把name数据提交到ajaxRes action内，
+                layer.alert("已提交，拉代码可能会花费一定时间！稍等");
+                $.post("/stateCode/add_repo", {name:$("#git_repo_name").val(),repo_url:$("#git_repo_locate").val(),repo_type:"git",
+                        projName: $("#git_proj_name").val(),branch:$("#git_branch").val()},    //把name数据提交到ajaxRes action内，
+
                     function (data) {
                         if (data["error"] != null) {
                             layer.alert(data["error"]);
@@ -87,6 +90,7 @@
             })
 
             $("#add_svn").click(function () {
+                layer.alert("已提交，拉代码可能会花费一定时间！稍等");
                 $.post("/stateCode/add_repo", {name:$("#svn_repo_name").val(),repo_url:$("#svn_repo_locate").val(),repo_type:"svn",projName: $("#svn_proj_name").val()},    //把name数据提交到ajaxRes action内，
                     function (data) {
                         if (data["error"] != null) {
@@ -104,7 +108,7 @@
                             layer.alert(data["error"]);
                         }else {
                             layer.alert(data["success"]);
-                            window.location.reload();
+                            window.location.reload()
                         }
                     }, "json");
             })
@@ -116,7 +120,7 @@
                             layer.alert(data["error"]);
                         }else {
                             layer.alert(data["success"]);
-                            window.location.reload();
+                            window.location.reload()
                         }
                     }, "json");
             })
@@ -125,10 +129,11 @@
                 $.post("/stateCode/del_proj", {type:$("#rr_proj_type").val(),name:$("#rr_proj_name").val()},    //把name数据提交到ajaxRes action内，
                     function (data) {
                         if (data["error"] != null) {
+
                             layer.alert(data["error"]);
                         }else {
                             layer.alert(data["success"]);
-                            window.location.reload();
+                            window.location.reload()
                         }
                     }, "json");
             })
@@ -140,7 +145,6 @@
                             layer.alert(data["error"]);
                         }else {
                             layer.alert(data["success"]);
-                            window.location.reload();
                         }
                     }, "json");
             })
@@ -200,9 +204,16 @@
                         <div class="layui-input-inline" >
                             <input class="layui-input"  id="git_repo_name"/>
                         </div>
+
+                    </div>
+                    <div class="layui-inline" style="width: 100%;">
                         <label class="layui-form-label">仓库地址</label>
                         <div class="layui-input-inline" style="width: 35%">
                             <input class="layui-input"  id="git_repo_locate"/>
+                        </div>
+                        <label class="layui-form-label">分支</label>
+                        <div class="layui-input-inline" >
+                            <input class="layui-input"  id="git_branch"/>
                         </div>
                         <div class="layui-inline">
                             <button class="layui-btn " id="add_git"> ＋添加</button>
@@ -230,6 +241,7 @@
                     <div class="layui-input-inline" style="width: 35%">
                         <input class="layui-input"  id="svn_repo_locate"/>
                     </div>
+
                     <div class="layui-inline">
                         <button class="layui-btn " id="add_svn"> ＋添加</button>
                     </div>
