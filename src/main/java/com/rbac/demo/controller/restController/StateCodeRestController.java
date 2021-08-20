@@ -279,6 +279,12 @@ public class StateCodeRestController {
             map.put("error","关键字不为空！");
             return map;
         }
+
+        if(!url.contains("http://")){
+            map.put("error","url格式不符合规则！");
+            return map;
+        }
+
         StateUrlSet urlSet =jpaStateCodeSet.findStateUrlSetBySetName(name);
         if(urlSet!=null){
             map.put("error","集合名重复！");
@@ -296,9 +302,93 @@ public class StateCodeRestController {
         stateUrl.setStateUrl(url);
         stateUrl.setStateUrlSetBySetFk(set);
         stateUrl.setUrlName(name);
+        stateUrl.setRemark(remark);
         jpaStateUrl.save(stateUrl);
         map.put("success","新增成功！");
         return map;
     }
 
+    @PostMapping("/stateCode/getSetRows")
+    public Map<String, List<StateUrl>> getSetRows(String setName) {
+        Map<String, List<StateUrl>> map=new HashMap<>();
+        StateUrlSet set=null;
+        if(setName.equals("")){
+            List<StateUrlSet> urlSets=jpaStateCodeSet.findAll();
+            set=urlSets.get(0);
+        }else {
+            set=jpaStateCodeSet.findStateUrlSetBySetName(setName);
+        }
+        List<StateUrl> stateUrls=jpaStateUrl.findStateUrlsByStateUrlSetBySetFk(set);
+
+
+        map.put("urls",stateUrls);
+        return map;
+    }
+
+
+    @PostMapping("/stateCode/delSetUrl")
+    public Map<String, String> delSetRows(int id) {
+        Map<String, String> map=new HashMap<>();
+        try{
+            jpaStateUrl.deleteById(id);
+            map.put("success","删除成功");
+        }catch (Exception e){
+            System.out.println(e);
+            map.put("error","删除失败");
+        }
+        return map;
+    }
+
+
+    @PostMapping("/stateCode/output")
+    public Map<String, String> output(String name,String timeRange) {
+        Map<String, String> map=new HashMap<>();
+        StateUrlSet urlSet=jpaStateCodeSet.findStateUrlSetBySetName(name);
+        List<StateUrl> stateUrls= (List<StateUrl>) urlSet.getStateUrlsById();
+        if(timeRange.equals("")){
+            map.put("error","关键字不为空！");
+            return map;
+        }
+
+        timeRange=timeRange.trim();
+        String start_time=timeRange.split(" - ")[0];
+        String end_time=timeRange.split(" - ")[1];
+
+
+        for(StateUrl stateUrl:stateUrls){
+            String path=stateUrl.getStateUrl();
+            String[] paths=path.split("/");
+            String type="";
+            for(String p:paths){
+                if(p.equals("git")){
+                    type="git";
+                    break;
+                }
+                if(p.equals("svn")){
+                    type="svn";
+                    break;
+                }
+            }
+
+
+            try{
+                String res=ExecShell.execCommand("python3 /opt/bin/task.py makeExcel_"+type+" "+path+" "+start_time+" "+end_time+" "+name);
+                System.out.println(res);
+                if(res.contains("error")){
+                    map.put("error",res);
+
+                }else {
+                    map.put("success","输出成功");
+                }
+
+
+            }
+            catch (Exception e) {
+                map.put("error","遇到错误:"+e);
+            }
+        }
+
+
+        return map;
+    }
 }

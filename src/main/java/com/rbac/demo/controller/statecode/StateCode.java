@@ -53,7 +53,7 @@ public class StateCode {
     @GetMapping("/stateCode/addView")
     public String addView(){
 
-        return "/codeCount/add";
+        return "codeCount/add";
     }
 
 }

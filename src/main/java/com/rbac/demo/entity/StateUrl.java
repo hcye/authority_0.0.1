@@ -11,7 +11,7 @@ public class StateUrl {
     private String stateUrl;
     private StateUrlSet stateUrlSetBySetFk;
     private String urlName;
-
+    private String remark;
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
@@ -31,6 +31,17 @@ public class StateUrl {
 
     public void setStateUrl(String stateUrl) {
         this.stateUrl = stateUrl;
+    }
+
+
+    @Basic
+    @Column(name = "remark", nullable = true, length = 255)
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 
     @Override

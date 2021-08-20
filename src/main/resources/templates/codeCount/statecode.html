@@ -3,7 +3,7 @@
       xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <meta charset="UTF-8">
-    <title>代码统计</title>
+    <title>仓库管理</title>
     <link rel="stylesheet" href="/layui/css/layui.css">
     <script type="text/javascript" src="/layui/layui.js"></script>
     <link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
@@ -160,7 +160,7 @@
 
 <body>
 <div class="layui-container" style="width: 95%">
-    <h1 class="site-h3" style="margin-top: 5%">代码统计</h1>
+    <h1 class="site-h3" style="margin-top: 5%">仓库管理</h1>
     <hr>
     <div class="layui-form">
         <blockquote class="layui-elem-quote">新增项目</blockquote>
@@ -303,31 +303,6 @@
                         </div>
                         <div class="layui-inline">
                             <button class="layui-btn " id="remove_proj"> ✘删除</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </fieldset>
-
-        <blockquote class="layui-elem-quote">代码统计</blockquote>
-        <fieldset class="layui-elem-field layui-field-title">
-            <legend>svn 仓库</legend>
-            <div class="layui-field-box">
-                <div class="layui-form-item">
-                    <div class="layui-inline" style="width: 100%">
-                        <div class="layui-input-inline">
-                            <button class="layui-btn " id="view_repos"> <i class="layui-icon">&#xe63c;</i> <a target="_blank" href="http://192.168.100.82:8099/source/">浏览仓库</a> </button>
-                        </div>
-                        <label class="layui-form-label">时间范围:</label>
-                        <div class="layui-input-inline">
-                            <input id="time_range" class="layui-input" />
-                        </div>
-                        <label class="layui-form-label">仓库路径</label>
-                        <div class="layui-input-inline" style="width: 45%">
-                            <input class="layui-input"  placeholder="例：http://192.168.100.82:8099/source/svn/project/middleware/sdp7_hmi_build/workspace/" id="repo_path"/>
-                        </div>
-                        <div class="layui-inline">
-                            <button class="layui-btn " id="to_excel">生成报表</button>
                         </div>
                     </div>
                 </div>

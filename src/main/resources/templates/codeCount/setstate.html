@@ -17,9 +17,39 @@
         // //在前端利用thymeleaf 直接调用spring bean对象方法。
         //
         // //渲染form组件，如果不执行这个函数，form组件中的select radio 等不会被渲染出来
-         layui.use('form', function(){
+         layui.use('form', function() {
              var form = layui.form;
-         });
+
+             layui.use('laydate', function(){
+                 var laydate = layui.laydate;
+
+                 //执行一个laydate实例
+                 laydate.render({
+                     elem: '#time_range'
+                     ,type: 'date'
+                     ,range: true //或 range: '~' 来自定义分割字符
+                     ,max: 0 //7天后
+                 });
+             });
+
+             form.on("select(set_name)", function (data) {
+                 queryRow(data.value)
+                 //     $.post("/stateCode/getProjs", {projType:data.value},    //把name数据提交到ajaxRes action内，
+                 //         function(types) {
+                 //             $("#r_proj_name").find("option").remove();
+                 //             var types=types["types"];
+                 //             if(types!=null){
+                 //                 for(var key in types){
+                 //                     $("#r_proj_name").append("<option>"+types[key]+"</option>");
+                 //                 }
+                 //             }
+                 //             form.render('select');//修改select后需要重新渲染
+                 //         }, "json");
+                 //
+                 // });
+
+             });
+         })
         // //渲染dataPicker
         // //格式化事件字符串
         // function timeStamp2String(time){
@@ -36,14 +66,30 @@
         // }
         //
         //
+
         //
         $(function () {
 
+            $(document).ready(function () {
+                queryRow("");
+            });
 
             //跳转到添加类型页面
             $("#add").click(function () {
                 document.location.href="/stateCode/addView"
             });
+
+            $("#putout").click(function () {
+                $.post("/stateCode/output", {name:$("#set_name").val(),timeRange:$("#time_range").val()},    //把name数据提交到ajaxRes action内，
+                    function(data) {
+                        if (data["error"] != null) {
+                            layer.alert(data["error"]);
+                        }else {
+                            layer.alert(data["success"]);
+                        }
+                    }, "json");
+            });
+
             //增加行
             $("#add_row").click(function () {
                 $("#set_table").append("<tr><td><input class='layui-input' /></td><td><input class='layui-input' /></td>" +
@@ -74,62 +120,59 @@
 
 
         })
-        function queryDevTypes(name, pre, next, pageNow, type) {
+        function queryRow(name) {
 
             $.post("/stateCode/getSetRows", {setName: name},    //把name数据提交到ajaxRes action内，
                 function (data) {
 
+                    $("#set_table").find("tr").remove();
+                    urls = data["urls"];
 
-                    $("#devType_table").find("tr").remove();
-                    types = data.content;
+                    for (var key in urls) {
 
-                    for (var key in types) {
-                        var readonlyFlag="readonly='readonly'"
-                        if(transformNullStr(types[key].assetNumTemplate)!=''){
-                            readonlyFlag="";
-                        }
-                        var checked="";
-                        if(types[key].exchangeable=="1"){
-                            checked="checked='true'"
-                        }
+                        $("#set_table").append("<tr><td><input type='hidden' value='"+urls[key].id+"'   /><input class='layui-input' value='"+urls[key].urlName+"' /></td>" +
+                            "<td><input class='layui-input' value="+urls[key].stateUrl+" /></td><td><input class='layui-input' value='"+urls[key].remark+"' /></td>"+
+                            "<td><button class='layui-btn layui-btn-xs'  name='save'>保存</button><button class='layui-btn layui-btn-xs' name='delete'>删除</button>" +
+                            "<button class='layui-btn layui-btn-xs' name='update'>更新</button></td></tr>");
 
-                        $("#devType_table").append("<tr><td><input type='hidden' value=" + types[key].id + " />" + types[key].devName + "</td><td><input class='layui-input' "+readonlyFlag+"  value='"+transformNullStr(types[key].assetNumTemplate)+"'  /></td>" +
-                            "<td>" + timeStamp2String(types[key].createTime) + "</td><td>  <input type='checkbox'  name='switch' "+checked+" lay-skin='switch'></td><td>" + transformNullStr(types[key].remarks) + "</td><td>" +
-                            "<button class='layui-btn layui-btn-xs " + editflag + "' " + editDisable + "  name='edit'>保存</button><button class='layui-btn layui-btn-xs " + deleteflag + "' " + deleteDisable + "  name='delete'>删除</button></td></tr>");
                     }
+                    // 编辑事件
+                    $("#set_table").find("button[name='save']").click(function () {
+                        //       document.location.href = "/asm/edit_type?id=" + $(this).parent().parent().find("input")[0].value;
+                        var repoName=$(this).parent().parent().find("input")[0].value;
+                        var repoUrl=$(this).parent().parent().find("input")[1].value;
+                        var repoRemark=$(this).parent().parent().find("input")[2].value;
+                        var setName=$("#set_name").val();
+                        $.post("/stateCode/addSetUrl", {name:repoName,url:repoUrl,remark:repoRemark,setName:setName},    //把name数据提交到ajaxRes action内，
+                            function(data) {
+                                if (data["error"] != null) {
+                                    layer.alert(data["error"]);
+                                }else {
+                                    layer.alert(data["success"]);
+                                }
+                            }, "json");
+
+                        console.log(repoName,repoUrl,repoRemark)
+
+                    });
+
                     var form = layui.form;
                     form.render();//重新渲染
 
 
-                    // 添加编辑按钮点击事件
-                    $("#devType_table").find("button[name='edit']").click(function () {
-                        var id=$(this).parent().parent().find("input")[0].value;
-                        var input=$(this).parent().parent().find("input")[1].value;
-                        var exc=$(this).parent().parent().find("input")[2].checked;
 
-                        $.post("/asm/editDevType", {id:id,input:input,exc:exc},    //把name数据提交到ajaxRes action内，
-                            function (data) {
-                                if (data["error"] != null) {
-                                    layer.alert(data["error"]);
-                                } else if (data["ok"] != null) {
-                                    layer.alert(data["ok"]);
-                                }
-                            }, "json");
-                        //获得操作角色id
-                    });
                     //添加删除按钮点击事件
-                    $("#devType_table").find("button[name='delete']").click(function () {
+                    $("#set_table").find("button[name='delete']").click(function () {
                         var btn = $(this);
                         layer.confirm('确定删除！', {
                             btn: ['确定', '取消'] //可以无限个按钮
                         }, function (index, layero) {
-                            $.post("/asm/deleteDevType", {id: btn.parent().parent().find("input")[0].value},    //把name数据提交到ajaxRes action内，
+                            $.post("/stateCode/delSetUrl", {id: btn.parent().parent().find("input")[0].value},    //把name数据提交到ajaxRes action内，
                                 function (data) {
                                     if (data["error"] != null) {
-                                        layer.alert("该类型有关联资产，删除失败");
-                                    } else if (data["ok"] != null) {
-                                        queryDevTypes($("#rname").val(), "", "", $("#pageInput").val(), $("#type").val());
-                                        layer.close(index);
+                                        layer.alert("删除失败");
+                                    } else if (data["success"] != null) {
+                                        document.location.reload();
                                     }
 
                                 }, "json");
@@ -139,9 +182,6 @@
                         });
 
                     })
-
-                    $("#pageInput").val(data.number + 1);
-                    $("#PageCount").html('共 ' + data.totalPages + ' 页');
 
                 }, "json");
         }
@@ -162,7 +202,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label">集合名称:</label>
                 <div class="layui-input-inline">
-                    <select class="layui-form-select" id="set_name">
+                    <select class="layui-form-select" id="set_name" lay-filter="set_name">
                         <option th:each="name : ${names}" th:text="${name.getSetName()}"></option>
                     </select>
                 </div>
@@ -171,7 +211,16 @@
             <div class="layui-btn-group">
                 <button class="layui-btn" id="add"><i class="layui-icon">&#xe654;</i>新增集合</button>
                 <button class="layui-btn" id="add_row"><i class="layui-icon">&#xe654;</i>新增item</button>
-                <button class="layui-btn " id="putout" ><i class="layui-icon">&#xe601;</i>生成报表集合</button>
+
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">时间范围:</label>
+                <div class="layui-input-inline">
+                    <input id="time_range" class="layui-input" />
+                </div>
+                <div class="layui-btn-group">
+                    <button class="layui-btn " id="putout" ><i class="layui-icon">&#xe601;</i>生成报表集合</button>
+                </div>
             </div>
         </div>
 
