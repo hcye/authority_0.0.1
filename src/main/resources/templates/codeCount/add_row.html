@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>增加</title>
+</head>
+<link rel="stylesheet" href="/layui/css/layui.css">
+<link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+<link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+<script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+<script type="text/javascript" src="/layui/layui.js"></script>
+<!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+<!--[if lt IE 9]>-->
+<script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+<script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+<script type="text/javascript">
+    layui.use('form', function(){
+        var form = layui.form;
+        form.render();
+    });
+
+    $(function () {
+        $("#encode_template").blur(function () {
+            var patt=new RegExp("([x0]{1,4})((-[x0]{0,4})*)");
+            var val=$(this).val();
+            var res=patt.exec(val);
+            var len=res.length;
+            var i=0;
+            var flag=false;
+            while (i<len){
+                if(res[i]==val){
+                    flag=true;
+                    break;
+                }
+                i++;
+            }
+            if(!flag){
+                $(this).val("");
+                layer.alert("输入不匹配指定格式！");
+            }
+
+        });
+
+
+        $("#conform").click(function () {
+            // String devType,String template,String desc
+            var name=$("#type_name").val();
+            var temp=$("#encode_template").val().trim();
+            $.post("/asm/addAssetType", {devType:name,template:temp,desc:$("#desc").val(),authority:$("#authority").val()},    //把name数据提交到ajaxRes action内，
+                function(data) {
+                    if(data["error"]!=null){
+                        layer.alert(data["error"]);
+                    }else {
+                        layer.confirm(data["ok"], {
+                            btn: ['确定'] //可以无限个按钮
+                        }, function(index, layero){
+                            //关闭弹出层
+                            document.location.href="/asm/type";
+                        });
+                    }
+                }, "json");
+        });
+        $("#cancel").click(function () {
+            //关闭弹出层
+            document.location.href="/asm/type";
+        })
+    });
+
+
+</script>
+<body>
+<div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
+    <p>新增资产类型</p>
+</div>
+<div class="layui-container" style="margin-top: 5%">
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span style="color: red">*</span>类型名称:</label>
+            <div class="layui-input-block">
+                <input class="layui-input" id="type_name" />
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <p style="margin-left: 12%">&nbsp;&nbsp;资产编码按照企业资产编码规范编写。x代表英文字符，0代表数字；例如某设备类型编码是 HS-BG-99999,则资产类型编码模板是xx-xx-00000</p>
+            <p style="margin-left: 12%">资产类型编码约束设备类型编码,不填写编码模板则默认为资产类型是耗材，未来不检查资产编码，资产不能添加到耗材内<span style="color: firebrick">英文和数字必须用‘-’隔开。</span></p>
+            <br/>
+            <label class="layui-form-label"><span style="color: red"></span>编码模板:</label>
+            <div class="layui-input-block">
+                <input class="layui-input" id="encode_template" placeholder="类似x-x-0,不填写则认为是耗材" />
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <p style="margin-left: 12%">在新建类型前必须新建类型权限,在此处引用该标识用于授权!</p>
+            <br/>
+            <label class="layui-form-label">权限标识:</label>
+            <div class="layui-input-block">
+                <select id="authority" >
+                    <option th:each="res : ${list}" th:text="${res.getPermission()}"></option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">描述:</label>
+            <div class="layui-input-block">
+                <input class="layui-input" id="desc" />
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-row">
+                <div class="layui-col-md-offset5">
+                    <button class="layui-btn" id="conform">确定</button>
+                    <button class="layui-btn" id="cancel">取消</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>

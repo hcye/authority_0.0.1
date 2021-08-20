@@ -10,6 +10,8 @@ public class StateUrl {
     private int id;
     private String stateUrl;
     private StateUrlSet stateUrlSetBySetFk;
+    private String urlName;
+
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
@@ -50,6 +52,7 @@ public class StateUrl {
         result = 31 * result + (stateUrl != null ? stateUrl.hashCode() : 0);
         return result;
     }
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "set_fk", referencedColumnName = "id")
@@ -59,5 +62,15 @@ public class StateUrl {
 
     public void setStateUrlSetBySetFk(StateUrlSet stateUrlSetBySetFk) {
         this.stateUrlSetBySetFk = stateUrlSetBySetFk;
+    }
+
+    @Basic
+    @Column(name = "url_name", nullable = true, length = 255)
+    public String getUrlName() {
+        return urlName;
+    }
+
+    public void setUrlName(String urlName) {
+        this.urlName = urlName;
     }
 }

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<link rel="stylesheet" href="/layui/css/layui.css">
+<script type="text/javascript" src="/layui/layui.js"></script>
+<link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+<link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+<script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+<!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+<!--[if lt IE 9]>-->
+<script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+<script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+<script type="text/javascript">
+    layui.use('form', function(){
+        var form = layui.form;
+        //监听提交
+    });
+    $(function () {
+
+        $("#setName").blur(function () {
+            $.post("/stateCode/validSetName", {name:$("#setName").val()},    //把name数据提交到ajaxRes action内，
+                function(data) {
+                    if (data["error"] != null) {
+                        layer.alert(data["error"]);
+                        $("#setName").val("");
+                    }
+                }, "json");
+        })
+
+        $("#reset").click(function () {
+            window.location.href="/stateCode/count";
+        })
+    })
+
+</script>
+<head>
+    <meta charset="UTF-8">
+    <title>增加集合</title>
+</head>
+<body>
+<div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
+    <p>增加集合</p>
+</div>
+    <div class="layui-container">
+        <form class="layui-form" action="/stateCode/setAdd">
+            <div class="layui-form-item">
+                <label class="layui-form-label">集合名称</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="setName"  name="setName" />
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">集合备注</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" id="setRemark"  name="setRemark" />
+                </div>
+            </div>
+
+            <div class="layui-row">
+                <div class="layui-col-md-offset5 layui-col-md3">
+                    <button class="layui-btn" type="submit">确定</button><button  class="layui-btn" type="reset" id="reset">取消</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

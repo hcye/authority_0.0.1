@@ -2,12 +2,14 @@ package com.rbac.demo.controller.restController;
 
 import com.rbac.demo.entity.StateCode;
 import com.rbac.demo.entity.StateCodeProj;
+import com.rbac.demo.entity.StateUrl;
+import com.rbac.demo.entity.StateUrlSet;
 import com.rbac.demo.jpa.JpaProjStatCode;
 import com.rbac.demo.jpa.JpaStateCode;
+import com.rbac.demo.jpa.JpaStateCodeSet;
+import com.rbac.demo.jpa.JpaStateUrl;
 import com.rbac.demo.tool.ExecShell;
-import com.sun.tools.classfile.ConstantPool;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,6 +25,10 @@ public class StateCodeRestController {
     private JpaStateCode jpaStateCode;
     @Autowired
     private JpaProjStatCode jpaProjStatCode;
+    @Autowired
+    private JpaStateCodeSet jpaStateCodeSet;
+    @Autowired
+    private JpaStateUrl jpaStateUrl;
     @PostMapping("/stateCode/add_repo")
     public Map<String, String> add_repo(String name,String repo_url,String repo_type,String projName,String branch) {
         Map<String, String> map = new HashMap<>();
@@ -247,6 +253,51 @@ public class StateCodeRestController {
         catch (Exception e) {
             map.put("error","遇到错误:"+e);
         }
+        return map;
+    }
+
+    @PostMapping("/stateCode/validSetName")
+    public Map<String, String> addSet(String name) {
+        Map<String,String> map=new HashMap<>();
+        if(name==null || name.trim().equals("")){
+            map.put("error","关键字不为空！");
+            return map;
+        }
+        StateUrlSet urlSet =jpaStateCodeSet.findStateUrlSetBySetName(name);
+        if(urlSet!=null){
+            map.put("error","集合名重复！");
+        }
+        return map;
+    }
+    @PostMapping("/stateCode/addSetUrl")
+    public Map<String, String> addRow(String name,String url,String remark,String setName) {
+        Map<String,String> map=new HashMap<>();
+        StateUrlSet set=jpaStateCodeSet.findStateUrlSetBySetName(setName);
+        List<StateUrl> stateUrls=jpaStateUrl.findStateUrlsByStateUrlSetBySetFk(set);
+
+        if(name==null || name.trim().equals("")){
+            map.put("error","关键字不为空！");
+            return map;
+        }
+        StateUrlSet urlSet =jpaStateCodeSet.findStateUrlSetBySetName(name);
+        if(urlSet!=null){
+            map.put("error","集合名重复！");
+            return map;
+        }
+
+        for(StateUrl stateUrl:stateUrls){
+            if(stateUrl.getUrlName().equals(name)){
+                map.put("error","同一个集合下url名不能相同！");
+                return map;
+            }
+        }
+
+        StateUrl stateUrl=new StateUrl();
+        stateUrl.setStateUrl(url);
+        stateUrl.setStateUrlSetBySetFk(set);
+        stateUrl.setUrlName(name);
+        jpaStateUrl.save(stateUrl);
+        map.put("success","新增成功！");
         return map;
     }
 
