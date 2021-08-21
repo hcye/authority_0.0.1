@@ -80,6 +80,7 @@
             });
 
             $("#putout").click(function () {
+                alert("输出需要耗费一定时间！请稍等");
                 $.post("/stateCode/output", {name:$("#set_name").val(),timeRange:$("#time_range").val()},    //把name数据提交到ajaxRes action内，
                     function(data) {
                         if (data["error"] != null) {
@@ -156,10 +157,23 @@
 
                     });
 
-                    var form = layui.form;
-                    form.render();//重新渲染
+                    // var form = layui.form;
+                    // form.render();//重新渲染
 
+                    // update仓库事件
+                    $("#set_table").find("button[name='update']").click(function () {
+                        alert("同步仓库需要一定时间！请等待");
+                        var btn = $(this);
+                        $.post("/stateCode/update", {url: btn.parent().parent().find("input")[2].value},    //把name数据提交到ajaxRes action内，
 
+                            function (data) {
+                                if (data["error"] != null) {
+                                    layer.alert(data["error"]);
+                                } else if (data["success"] != null) {
+                                    layer.alert("更新成功！");
+                                }
+                            }, "json");
+                    });
 
                     //添加删除按钮点击事件
                     $("#set_table").find("button[name='delete']").click(function () {

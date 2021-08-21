@@ -391,4 +391,34 @@ public class StateCodeRestController {
 
         return map;
     }
+    @PostMapping("/stateCode/update")
+    public Map<String, String> update(String url) {
+        Map<String, String> map=new HashMap<>();
+        String[] paths=url.split("/");
+        String type="";
+        for(String p:paths){
+            if(p.equals("git")){
+                type="git";
+                break;
+            }
+            if(p.equals("svn")){
+                type="svn";
+                break;
+            }
+        }
+
+        try{
+            String res=ExecShell.execCommand("python3 /opt/bin/task.py update_"+type+" "+url);
+            System.out.println(res);
+            if(res.contains("error")){
+                map.put("error",res);
+            }else {
+                map.put("success","更新成功!");
+            }
+        }catch (Exception e){
+            System.out.println(e);
+            map.put("error","遇到错误"+e);
+        }
+        return map;
+    }
 }
