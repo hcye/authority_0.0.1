@@ -10,10 +10,14 @@ import com.rbac.demo.jpa.JpaStateCodeSet;
 import com.rbac.demo.jpa.JpaStateUrl;
 import com.rbac.demo.tool.ExecShell;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ClassUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -341,7 +345,7 @@ public class StateCodeRestController {
 
 
     @PostMapping("/stateCode/output")
-    public Map<String, String> output(String name,String timeRange) {
+    public Map<String, String> output(String name,String timeRange)  {
         Map<String, String> map=new HashMap<>();
         StateUrlSet urlSet=jpaStateCodeSet.findStateUrlSetBySetName(name);
         List<StateUrl> stateUrls= (List<StateUrl>) urlSet.getStateUrlsById();
@@ -357,6 +361,7 @@ public class StateCodeRestController {
 
         for(StateUrl stateUrl:stateUrls){
             String path=stateUrl.getStateUrl();
+            System.out.println(path);
             String[] paths=path.split("/");
             String type="";
             for(String p:paths){
@@ -375,7 +380,9 @@ public class StateCodeRestController {
                 String res=ExecShell.execCommand("python3 /opt/bin/task.py makeExcel_"+type+" "+path+" "+start_time+" "+end_time+" "+name);
                 System.out.println(res);
                 if(res.contains("error")){
+
                     map.put("error",res);
+                    break;
 
                 }else {
                     map.put("success","输出成功");
@@ -385,10 +392,25 @@ public class StateCodeRestController {
             }
             catch (Exception e) {
                 map.put("error","遇到错误:"+e);
+                break;
             }
         }
 
+        if(map.containsKey("success")){
+            String res=ExecShell.execCommand("python3 /opt/bin/task.py package");
+            if(res.contains("path:")){
+                String target_file=res.split("path:")[1];
+                System.out.println(target_file);
+                map.put("success",target_file);
+            }else {
+                ExecShell.execCommand("python3 /opt/bin/task.py clean");
 
+            }
+        }else {
+            String res1=ExecShell.execCommand("python3 /opt/bin/task.py clean");
+            System.out.println(res1);
+
+        }
         return map;
     }
     @PostMapping("/stateCode/update")
@@ -421,4 +443,92 @@ public class StateCodeRestController {
         }
         return map;
     }
+
+    @GetMapping("/stateCode/export_zip")
+    public void exportModel(HttpServletResponse response,String path) throws FileNotFoundException {
+        OutputStream stream = null;
+        try {
+            stream =new BufferedOutputStream(response.getOutputStream()) ;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        InputStream inputStream =new FileInputStream(file);
+        File file=new File(path);
+        InputStream inputStream = new FileInputStream(file);
+        response.setHeader("Content-disposition", "attachment; filename=" + "release.zip");
+        response.setContentType("application/octet-stream;charset=UTF-8");//设置类型
+        response.setHeader("Pragma", "No-cache");//设置头
+        response.setHeader("Cache-Control", "no-cache");//设置头
+        response.setDateHeader("Expires", 0);//设置日期头
+        byte[] bytes=new byte[1024];
+        try {
+
+            int i=0;
+            while(((i=inputStream.read(bytes))!=-1)){
+                stream.write(bytes,0,i);
+            }
+            inputStream.close();
+            stream.flush();
+            stream.close();
+            // 清理输出目录
+            String res=ExecShell.execCommand("python3 /opt/bin/task.py clean");
+            System.out.println(res);
+        } catch (FileNotFoundException e) {
+            return;
+        } catch (IOException e) {
+            return;
+        }
+    }
+   //$.post("/stateCode/getRepo_url", {repoName:$("#r_repo_name").val()},
+   @PostMapping("/stateCode/getRepo_url")
+   public Map<String, String> getRepo_url(String  repoName,String type,String proName) {
+       Map<String, String> map=new HashMap<>();
+       try{
+           StateCode stateCode=jpaStateCode.getRepoByTypeAndProjAndRepoName(type,proName,repoName);
+           String url=stateCode.getRepoUrl();
+           map.put("url",url);
+       }catch (Exception e){
+           System.out.println(e);
+           map.put("error","删除失败");
+       }
+       return map;
+   }
+
+    @PostMapping("/stateCode/delSet")
+    public Map<String, String> delSet(String  name) {
+        Map<String, String> map=new HashMap<>();
+        try{
+            StateUrlSet stateUrlSet=jpaStateCodeSet.findStateUrlSetBySetName(name);
+            jpaStateCodeSet.delete(stateUrlSet);
+
+
+        }catch (Exception e){
+            System.out.println(e);
+            map.put("error","删除失败,集合不为空！");
+        }
+        return map;
+    }
+
+    @PostMapping("/stateCode/setUrl_update")
+    public Map<String, String> urlUpdate(String  name,String setUrl,String remark,int id,String setName) {
+        Map<String, String> map=new HashMap<>();
+        StateUrlSet stateUrlSet=jpaStateCodeSet.findStateUrlSetBySetName(setName);
+        List<StateUrl> stateUrls= (List<StateUrl>) stateUrlSet.getStateUrlsById();
+        // 查看同一集合下不同对象是否重名！
+        for(StateUrl stateUrl:stateUrls){
+            if(stateUrl.getUrlName().equals(name)&&id!=stateUrl.getId()){
+                map.put("error","修改失败，重名");
+                return map;
+            }
+        }
+        StateUrl stateUrl=jpaStateUrl.findById(id).get();
+        stateUrl.setUrlName(name);
+        stateUrl.setStateUrl(setUrl);
+        stateUrl.setRemark(remark);
+        jpaStateUrl.save(stateUrl);
+        map.put("success","修改成功！");
+        return map;
+    }
+
 }

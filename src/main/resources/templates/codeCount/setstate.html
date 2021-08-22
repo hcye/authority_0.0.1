@@ -79,16 +79,29 @@
                 document.location.href="/stateCode/addView"
             });
 
+            $("#del").click(function () {
+                $.post("/stateCode/delSet", {name:$("#set_name").val()},    //把name数据提交到ajaxRes action内，
+                    function(data) {
+                        if (data["error"] != null) {
+                            layer.alert(data["error"]);
+                        }else {
+                            document.location.reload();
+                        }
+                    }, "json");
+            });
+
             $("#putout").click(function () {
                 var msg = layer.msg('输出需要耗费一定时间！请稍等...', {icon: 16,shade: [0.5, '#f5f5f5'],scrollbar: false,offset: '0px',time: 0});
                 $.post("/stateCode/output", {name:$("#set_name").val(),timeRange:$("#time_range").val()},    //把name数据提交到ajaxRes action内，
                     function(data) {
                         if (data["error"] != null) {
                             layer.close(msg);
+
                             layer.alert(data["error"]);
                         }else {
                             layer.close(msg);
-                            layer.alert(data["success"]);
+                            document.location.href="/stateCode/export_zip?path="+data["success"];
+                      //      layer.alert(data["success"]);
                         }
                     }, "json");
             });
@@ -103,7 +116,8 @@
                 $("#set_table").find("button[name='save']").click(function () {
                     //       document.location.href = "/asm/edit_type?id=" + $(this).parent().parent().find("input")[0].value;
                     var repoName=$(this).parent().parent().find("input")[0].value;
-                    var repoUrl=$(this).parent().parent().find("input")[1].value;
+                    var repoUrl=decodeURI($(this).parent().parent().find("input")[1].value);
+                        console.log(decodeURI(repoUrl));
                     var repoRemark=$(this).parent().parent().find("input")[2].value;
                     var setName=$("#set_name").val();
                     $.post("/stateCode/addSetUrl", {name:repoName,url:repoUrl,remark:repoRemark,setName:setName},    //把name数据提交到ajaxRes action内，
@@ -115,7 +129,6 @@
                             }
                         }, "json");
 
-                    console.log(repoName,repoUrl,repoRemark)
 
                 });
             });
@@ -136,17 +149,18 @@
                         $("#set_table").append("<tr><td><input type='hidden' value='"+urls[key].id+"'   /><input class='layui-input' value='"+urls[key].urlName+"' /></td>" +
                             "<td><input class='layui-input' value="+urls[key].stateUrl+" /></td><td><input class='layui-input' value='"+urls[key].remark+"' /></td>"+
                             "<td><button class='layui-btn layui-btn-xs'  name='save'>保存</button><button class='layui-btn layui-btn-xs' name='delete'>删除</button>" +
-                            "<button class='layui-btn layui-btn-xs' name='update'>更新</button></td></tr>");
+                            "<button class='layui-btn layui-btn-xs' name='update'>更新仓库</button></td></tr>");
 
                     }
                     // 编辑事件
                     $("#set_table").find("button[name='save']").click(function () {
                         //       document.location.href = "/asm/edit_type?id=" + $(this).parent().parent().find("input")[0].value;
-                        var repoName=$(this).parent().parent().find("input")[0].value;
-                        var repoUrl=$(this).parent().parent().find("input")[1].value;
-                        var repoRemark=$(this).parent().parent().find("input")[2].value;
+                        var id=$(this).parent().parent().find("input")[0].value;
+                        var urlName=$(this).parent().parent().find("input")[1].value;
+                        var url=decodeURI($(this).parent().parent().find("input")[2].value);
+                        var remark=$(this).parent().parent().find("input")[3].value;
                         var setName=$("#set_name").val();
-                        $.post("/stateCode/addSetUrl", {name:repoName,url:repoUrl,remark:repoRemark,setName:setName},    //把name数据提交到ajaxRes action内，
+                        $.post("/stateCode/setUrl_update", {id:id,setUrl:url,remark:remark,name:urlName,setName:setName},    //把name数据提交到ajaxRes action内，
                             function(data) {
                                 if (data["error"] != null) {
                                     layer.alert(data["error"]);
@@ -164,14 +178,16 @@
 
                     // update仓库事件
                     $("#set_table").find("button[name='update']").click(function () {
-                        alert("同步仓库需要一定时间！请等待");
+                        var msg = layer.msg('更新仓库需要一定时间！请稍等...', {icon: 16,shade: [0.5, '#f5f5f5'],scrollbar: false,offset: '0px',time: 0});
                         var btn = $(this);
                         $.post("/stateCode/update", {url: btn.parent().parent().find("input")[2].value},    //把name数据提交到ajaxRes action内，
 
                             function (data) {
                                 if (data["error"] != null) {
+                                    layer.close(msg);
                                     layer.alert(data["error"]);
                                 } else if (data["success"] != null) {
+                                    layer.close(msg);
                                     layer.alert("更新成功！");
                                 }
                             }, "json");
@@ -209,7 +225,7 @@
     <p>集合统计</p>
 </div>
 
-<div class="layui-container">
+<div class="layui-container" style="width: 85%">
     <input type="hidden" id="role_name" />
     <div class="layui-row layui-form">
         <!--layui-inline定义外层行内-->
@@ -226,6 +242,7 @@
 
             <div class="layui-btn-group">
                 <button class="layui-btn" id="add"><i class="layui-icon">&#xe654;</i>新增集合</button>
+                <button class="layui-btn" id="del">– 删除集合</button>
                 <button class="layui-btn" id="add_row"><i class="layui-icon">&#xe654;</i>新增item</button>
 
             </div>
@@ -236,6 +253,9 @@
                 </div>
                 <div class="layui-btn-group">
                     <button class="layui-btn " id="putout" ><i class="layui-icon">&#xe601;</i>生成报表集合</button>
+                </div>
+                <div class="layui-btn-group">
+                    <button class="layui-btn layui-bg-cyan" ><a href="http://192.168.100.82:8099/source/"  target="_blank" style="color: aliceblue">浏览仓库</a></button>
                 </div>
             </div>
         </div>
