@@ -117,7 +117,6 @@
                     //       document.location.href = "/asm/edit_type?id=" + $(this).parent().parent().find("input")[0].value;
                     var repoName=$(this).parent().parent().find("input")[0].value;
                     var repoUrl=decodeURI($(this).parent().parent().find("input")[1].value);
-                        console.log(decodeURI(repoUrl));
                     var repoRemark=$(this).parent().parent().find("input")[2].value;
                     var setName=$("#set_name").val();
                     $.post("/stateCode/addSetUrl", {name:repoName,url:repoUrl,remark:repoRemark,setName:setName},    //把name数据提交到ajaxRes action内，
