@@ -32,6 +32,11 @@ public class StateCode {
         model.addAttribute("svn_projs",svnProjs);
         return "codeCount/statecode";
     }
+
+    @GetMapping("/stateCode/doc")
+    public String doc(){
+        return "codeCount/basicDoc";
+    }
     @GetMapping("/stateCode/setCount")
     public String stateCodeSet(Model model){
 
