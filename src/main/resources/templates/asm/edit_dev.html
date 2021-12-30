@@ -33,8 +33,7 @@
                     return;
                 }
             }
-
-            $.post("/asm/validAssetNum", {num:$("#num").val(),id:$("#id").val()},    //把name数据提交到ajaxRes action内，
+            $.post("/asm/validAssetNum", {num:$("#num").val(),id:$("#id").val(),newBrow:$("#bor_emp").val()},    //把name数据提交到ajaxRes action内，
                 function(data) {
                     if(data["error"]!=null){
                         layer.alert(data["error"]);
@@ -51,7 +50,17 @@
         })
 
 
-
+        $("#bor_emp").click(function () {
+            console.log("click select browser")
+            layer.open({
+                type: 2,
+                title: "修改借用人",
+                area: ['1000px', '500px'],
+                content: ['/layer/layer_select_exchange_user.html', 'no'],
+                //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                //实现弹出层间不同frame的传值
+            });
+        })
 
 
         $("#cancel").click(function () {
@@ -91,7 +100,7 @@
                         <div class="layui-inline">
                             <label class="layui-form-label">借用人:</label>
                             <div class="layui-input-inline">
-                                <input class="layui-input" id="bor_emp"  th:value="${dev.getEmployeeByBorrower()==null?'':dev.getEmployeeByBorrower().getEname()}" disabled="disabled" />
+                                <input class="layui-input" id="bor_emp"  th:value="${dev.getEmployeeByBorrower()==null?'':dev.getEmployeeByBorrower().getEname()}"  />
                             </div>
                         </div>
                         <div class="layui-inline">

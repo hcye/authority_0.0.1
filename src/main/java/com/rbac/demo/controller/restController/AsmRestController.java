@@ -12,6 +12,8 @@ import com.rbac.demo.tool.ConvertStrForSearch;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.cache.ehcache.EhCacheManager;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.web.servlet.ShiroHttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -414,7 +416,7 @@ public class AsmRestController {
     }
 
     @PostMapping("/asm/validAssetNum")
-    public Map<String,String> valid(String num,int id){
+    public Map<String,String> valid(String num,int id,String newBrow){
         Map<String,String> map=new HashMap<>();
         Assert anAssert=jpaAssert.findById(id).get();
 
