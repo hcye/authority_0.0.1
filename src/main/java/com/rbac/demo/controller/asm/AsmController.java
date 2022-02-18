@@ -28,6 +28,8 @@ public class AsmController {
     @Autowired
     private JpaAssetType jpaAssetType;
     @Autowired
+    private JpaEmployee jpaEmployee;
+    @Autowired
     private JpaAssert jpaAssert;
     @Autowired
     private JpaResources jpaResources;
@@ -301,7 +303,7 @@ public class AsmController {
 
     @RequiresPermissions("asm:edit:btn")
     @GetMapping("/asm/save_dev")
-    public String saveDev(int id,String types,String model,String price,String remarks,String sn,String num,String list_type,String list_isDam,String cuindex) throws UnsupportedEncodingException {
+    public String saveDev(int id,String types,String model,String price,String remarks,String sn,String num,String list_type,String list_isDam,String cuindex,String new_bro) throws UnsupportedEncodingException {
         Assert anAssert=jpaAssert.findById(id).get();
         anAssert.setAssetTypeByAssertType(jpaAssetType.findAssetTypeByName(types));
         anAssert.setModel(model);
@@ -309,6 +311,14 @@ public class AsmController {
         anAssert.setRemarks(remarks);
         anAssert.setSnnum(sn);
         anAssert.setAssestnum(num);
+        if(new_bro==null || new_bro.equals("")) {
+            anAssert.setEmployeeByBorrower(null);
+        }else {
+           String py=new_bro.split("-")[1];
+           Employee employee=jpaEmployee.findEmployeeByLoginName(py);
+           anAssert.setEmployeeByBorrower(employee);
+        }
+        System.out.println(new_bro);
         jpaAssert.save(anAssert);
         asmRecordService.write(AsmAction.dev_edit,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert,"");
         String type=URLEncoder.encode(list_type,"UTF-8");

@@ -416,7 +416,7 @@ public class AsmRestController {
     }
 
     @PostMapping("/asm/validAssetNum")
-    public Map<String,String> valid(String num,int id,String newBrow){
+    public Map<String,String> valid(String num,int id){
         Map<String,String> map=new HashMap<>();
         Assert anAssert=jpaAssert.findById(id).get();
 
