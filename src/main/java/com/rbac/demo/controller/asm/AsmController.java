@@ -326,9 +326,4 @@ public class AsmController {
         return "redirect:/asm/list?type="+type+"&isDam="+isDam+"&cuindex="+cuindex;
 //        String type,String isDam,String search,String pre,String next,int pageIndex,String jumpFlag
     }
-
-
-
-
-
 }
