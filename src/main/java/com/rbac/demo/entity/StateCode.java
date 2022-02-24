@@ -6,14 +6,14 @@ import javax.persistence.*;
 import java.sql.Date;
 
 @Entity
-@Table(name = "state_code", schema = "mydb1", catalog = "")
+@Table(name = "state_code", schema = "mydb", catalog = "")
 public class StateCode {
     private int id;
     private String repoName;
     private String repoUrl;
     private Date addTime;
     private StateCodeProj stateCodeProjByProjId;
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public int getId() {

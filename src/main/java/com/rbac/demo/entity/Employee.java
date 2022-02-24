@@ -19,9 +19,6 @@ public class Employee {
 
     private Collection<EchangeDevs> exchangeSender;
     private Collection<EchangeDevs> exchangeResiver;
-
-
-
     private Collection<User2Role> user2RolesById;
     private String loginName;
     private SysGroup sysGroupByGroupId;
@@ -30,12 +27,14 @@ public class Employee {
     private String sex="男";
     private String txUri="tx_ms_04.gif";
     private Collection<Assert> assertsById;
+    //private Collection<EchangeDevs> echangeDevsById;
+    //private Collection<EchangeDevs> echangeDevsById_0;
 
     public Employee(){
 
     }
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public Integer getId() {
@@ -120,7 +119,6 @@ public class Employee {
         this.pwd = pwd;
     }
 
-
     @Basic
     @Column(name = "tx_uri", nullable = true, length = 64)
     public String getTxUri() {
@@ -178,6 +176,7 @@ public class Employee {
     public void setOperatRecordsById_0(Collection<OperatRecord> operatRecordsById_0) {
         this.operatRecordsById_0 = operatRecordsById_0;
     }
+
     @OneToMany(mappedBy = "senderFK")
     public Collection<EchangeDevs> getExchangeSender() {
         return exchangeSender;
@@ -186,6 +185,7 @@ public class Employee {
     public void setExchangeSender(Collection<EchangeDevs> exchangeSender) {
         this.exchangeSender = exchangeSender;
     }
+
     @OneToMany(mappedBy = "resiverFK")
     public Collection<EchangeDevs> getExchangeResiver() {
         return exchangeResiver;
@@ -195,8 +195,6 @@ public class Employee {
         this.exchangeResiver = exchangeResiver;
     }
 
-
-
     @OneToMany(mappedBy = "employeeByUserId")
     public Collection<User2Role> getUser2RolesById() {
         return user2RolesById;
@@ -205,7 +203,6 @@ public class Employee {
     public void setUser2RolesById(Collection<User2Role> user2RolesById) {
         this.user2RolesById = user2RolesById;
     }
-
 
     @JsonIgnore
     @ManyToOne
@@ -255,4 +252,22 @@ public class Employee {
     public void setAssertsById(Collection<Assert> assertsById) {
         this.assertsById = assertsById;
     }
+
+/*    @OneToMany(mappedBy = "employeeBySenderEmp")
+    public Collection<EchangeDevs> getEchangeDevsById() {
+        return echangeDevsById;
+    }
+
+    public void setEchangeDevsById(Collection<EchangeDevs> echangeDevsById) {
+        this.echangeDevsById = echangeDevsById;
+    }*/
+
+/*    @OneToMany(mappedBy = "employeeByReciveEmp")
+    public Collection<EchangeDevs> getEchangeDevsById_0() {
+        return echangeDevsById_0;
+    }
+
+    public void setEchangeDevsById_0(Collection<EchangeDevs> echangeDevsById_0) {
+        this.echangeDevsById_0 = echangeDevsById_0;
+    }*/
 }

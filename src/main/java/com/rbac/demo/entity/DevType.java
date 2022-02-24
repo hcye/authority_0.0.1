@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-@Table(name = "dev_type", schema = "mydb1", catalog = "")
+@Table(name = "dev_type", schema = "mydb", catalog = "")
 public class DevType {
     private int id;
     private String devName;
@@ -21,7 +21,7 @@ public class DevType {
 
 
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public int getId() {

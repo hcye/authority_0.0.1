@@ -4,15 +4,16 @@ import javax.persistence.*;
 import java.util.Collection;
 
 @Entity
-@Table(name = "state_url_set", schema = "mydb", catalog = "")
-public class StateUrlSet {
+@Table(name = "asset_action", schema = "mydb", catalog = "")
+public class AssetAction {
     private int id;
-    private String setName;
+    private String assetAction;
     private String remark;
-    private Collection<StateUrl> stateUrlsById;
+    private Collection<AssetRecord> assetRecordsById;
+
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     public int getId() {
         return id;
     }
@@ -22,17 +23,17 @@ public class StateUrlSet {
     }
 
     @Basic
-    @Column(name = "set_name", nullable = true, length = 255)
-    public String getSetName() {
-        return setName;
+    @Column(name = "asset_action")
+    public String getAssetAction() {
+        return assetAction;
     }
 
-    public void setSetName(String setName) {
-        this.setName = setName;
+    public void setAssetAction(String assetAction) {
+        this.assetAction = assetAction;
     }
 
     @Basic
-    @Column(name = "remark", nullable = true, length = 255)
+    @Column(name = "remark")
     public String getRemark() {
         return remark;
     }
@@ -46,10 +47,10 @@ public class StateUrlSet {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        StateUrlSet that = (StateUrlSet) o;
+        AssetAction that = (AssetAction) o;
 
         if (id != that.id) return false;
-        if (setName != null ? !setName.equals(that.setName) : that.setName != null) return false;
+        if (assetAction != null ? !assetAction.equals(that.assetAction) : that.assetAction != null) return false;
         if (remark != null ? !remark.equals(that.remark) : that.remark != null) return false;
 
         return true;
@@ -58,17 +59,17 @@ public class StateUrlSet {
     @Override
     public int hashCode() {
         int result = id;
-        result = 31 * result + (setName != null ? setName.hashCode() : 0);
+        result = 31 * result + (assetAction != null ? assetAction.hashCode() : 0);
         result = 31 * result + (remark != null ? remark.hashCode() : 0);
         return result;
     }
 
-    @OneToMany(mappedBy = "stateUrlSetBySetFk")
-    public Collection<StateUrl> getStateUrlsById() {
-        return stateUrlsById;
+    @OneToMany(mappedBy = "assetActionByAssetAction")
+    public Collection<AssetRecord> getAssetRecordsById() {
+        return assetRecordsById;
     }
 
-    public void setStateUrlsById(Collection<StateUrl> stateUrlsById) {
-        this.stateUrlsById = stateUrlsById;
+    public void setAssetRecordsById(Collection<AssetRecord> assetRecordsById) {
+        this.assetRecordsById = assetRecordsById;
     }
 }

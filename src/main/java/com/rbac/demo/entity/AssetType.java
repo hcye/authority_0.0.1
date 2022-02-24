@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 import java.util.Collection;
 
 @Entity
-@Table(name = "asset_type", schema = "mydb1", catalog = "")
+@Table(name = "asset_type", schema = "mydb", catalog = "")
 public class AssetType {
     private Integer id;
     private String typeName;
@@ -19,7 +19,7 @@ public class AssetType {
     private Collection<DevType> devTypesById;
     private String permiCode;
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public Integer getId() {

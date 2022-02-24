@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "rtc_bug", schema = "mydb1", catalog = "")
+@Table(name = "rtc_bug", schema = "mydb", catalog = "")
 public class RtcBug {
     private int id;
     private String bugFlag;
@@ -28,7 +28,7 @@ public class RtcBug {
     private String bugType;
     private String rtcId;
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public int getId() {

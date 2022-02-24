@@ -37,15 +37,45 @@ public class GroupRestController {
         return groupDtreeList.getDtree();
     }
     @PostMapping("/queryDepInfo")
-    public Map<String,String> getInfo(String did){
+    public Map<String,String> getInfo(String did,String parentId){
+/*        parentId 是本部门id
+        did 是选择的上级部门id*/
         Map<String,String> map=new HashMap<>();
         int id=0;
+        int pid=0;
         try {
             id=Integer.parseInt(did);
+            pid=Integer.parseInt(parentId);
         }catch (Exception e){
             System.out.println(e+"后台传回部门id格式异常");
         }
         SysGroup group=jpaGroup.findById(id).get();
+        if(pid!=0){
+            SysGroup cuGroup=jpaGroup.findById(pid).get();
+            if(id==pid){
+                map.put("error","上级部门不能是自己！");
+                return(map);
+            }
+            List<SysGroup> sysGroups= (List<SysGroup>) cuGroup.getSysGroupsById();
+            for(SysGroup sysGroup:sysGroups){
+                System.out.println(sysGroup.getGname());
+            }
+            if(!sysGroups.isEmpty()){
+                boolean flag=false;
+                for(SysGroup sysGroup:sysGroups){
+                    //      System.out.println(pid+"-"+sysGroup.getId());
+                    if(id==sysGroup.getId()){
+                        flag=true;
+                        break;
+                    }
+                }
+                if(flag==true){
+                    map.put("error","上级部门不能设置为子部门！");
+                    return(map);
+                }
+            }
+
+        }
         int count=jpaGroup.getEmpCountOfGroup(group);
         map.put("id",group.getId()+"");
         map.put("gname",group.getGname());

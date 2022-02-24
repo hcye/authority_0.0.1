@@ -7,7 +7,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "sw_switch", schema = "mydb1", catalog = "")
+@Table(name = "sw_switch", schema = "mydb", catalog = "")
 public class SwSwitch {
     private int id;
     private String level;
@@ -20,7 +20,7 @@ public class SwSwitch {
     private String blockUp;
     private String cascadePort;
     private SwFirm swFirmByFirm;
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public int getId() {

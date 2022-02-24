@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.Date;
 
 @Entity
-@Table(name = "sys_group", schema = "mydb1", catalog = "")
+@Table(name = "sys_group", schema = "mydb", catalog = "")
 public class SysGroup {
     private Integer id;
     private String gname;
@@ -22,8 +22,9 @@ public class SysGroup {
     private Employee employeeByCreatorId;
     private Byte deleteFlag=0;
     private String leader="";
+    private Collection<Assert> assertsById;
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public Integer getId() {
@@ -160,5 +161,14 @@ public class SysGroup {
 
     public void setLeader(String leader) {
         this.leader = leader;
+    }
+
+    @OneToMany(mappedBy = "sysGroupBySysGroup")
+    public Collection<Assert> getAssertsById() {
+        return assertsById;
+    }
+
+    public void setAssertsById(Collection<Assert> assertsById) {
+        this.assertsById = assertsById;
     }
 }

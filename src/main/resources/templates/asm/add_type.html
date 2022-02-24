@@ -84,15 +84,16 @@
 
             <div class="layui-form-item">
                 <p style="margin-left: 12%">&nbsp;&nbsp;资产编码按照企业资产编码规范编写。x代表英文字符，0代表数字；例如某设备类型编码是 HS-BG-99999,则资产类型编码模板是xx-xx-00000</p>
-                <p style="margin-left: 12%">资产类型编码约束设备类型编码,不填写编码模板则默认为资产类型是耗材，未来不检查资产编码，资产不能添加到耗材内<span style="color: firebrick">英文和数字必须用‘-’隔开。</span></p>
+                <p style="margin-left: 12%">资产类型编码约束设备类型编码,不填写编码模板则设备没有资产编码<span style="color: firebrick">英文和数字必须用‘-’隔开。</span></p>
                 <br/>
                 <label class="layui-form-label"><span style="color: red"></span>编码模板:</label>
                 <div class="layui-input-block">
-                    <input class="layui-input" id="encode_template" placeholder="类似x-x-0,不填写则认为是耗材" />
+                    <input class="layui-input" id="encode_template" placeholder="类似x-x-0,可不填" />
                 </div>
             </div>
             <div class="layui-form-item">
-                <p style="margin-left: 12%">在新建类型前必须新建类型权限,在此处引用该标识用于授权!</p>
+                <p style="margin-left: 12%"><span style="color: firebrick">在新建类型前必须新建类型权限</span>,在此处引用该标识用于授权!</p>
+                <p style="margin-left: 12%">系统管理->菜单管理->操作权限->新增</p>
                 <br/>
                 <label class="layui-form-label">权限标识:</label>
                 <div class="layui-input-block">

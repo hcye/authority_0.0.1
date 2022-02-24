@@ -3,7 +3,7 @@ package com.rbac.demo.entity;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "sys_mail", schema = "mydb1", catalog = "")
+@Table(name = "sys_mail", schema = "mydb", catalog = "")
 public class SysMail {
     private int id;
     private String host;
@@ -13,7 +13,7 @@ public class SysMail {
     private String remark;
     private String forwhat;
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id")
     public int getId() {
@@ -45,7 +45,7 @@ public class SysMail {
     }
 
     @Basic
-    @Column(name = "senderAddr")
+    @Column(name = "sender_addr")
     public String getSenderAddr() {
         return senderAddr;
     }
@@ -55,7 +55,7 @@ public class SysMail {
     }
 
     @Basic
-    @Column(name = "senderAccont")
+    @Column(name = "sender_accont")
     public String getSenderAccont() {
         return senderAccont;
     }
@@ -65,7 +65,7 @@ public class SysMail {
     }
 
     @Basic
-    @Column(name = "senderPwd")
+    @Column(name = "sender_pwd")
     public String getSenderPwd() {
         return senderPwd;
     }

@@ -1,5 +1,13 @@
 package com.rbac.demo.controller.restController;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelReader;
+import com.alibaba.excel.read.metadata.ReadSheet;
+import com.alibaba.excel.support.ExcelTypeEnum;
+import com.rbac.demo.easyExcel.AssetDownloadModel;
+import com.rbac.demo.easyExcel.ReadAssetEventListener;
+import com.rbac.demo.easyExcel.ReadUserEventListener;
+import com.rbac.demo.easyExcel.UserModel;
 import com.rbac.demo.entity.*;
 import com.rbac.demo.jpa.*;
 import com.rbac.demo.service.Chinese2Eng;
@@ -16,10 +24,15 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.SearchResult;
+import javax.servlet.http.HttpServletRequest;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 @RestController
@@ -242,7 +255,69 @@ public class EmployeeRestController {
         return map;
     }
 
+    /**
+     *
+     * upload user excel
+     *
+     * */
 
+    @PostMapping("user/input")
+    public Map<String,String> upload(HttpServletRequest request) throws UnsupportedEncodingException {
+        Map<String, String> json = new HashMap<>();
+        request.setCharacterEncoding("UTF-8");
+        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+        /** 页面控件的文件流* */
+        MultipartFile multipartFile = null;
+        Map map = multipartRequest.getFileMap();
+        Set set = map.keySet();
+        Iterator<String> iterator = set.iterator();
+        while (iterator.hasNext()) {
+            multipartFile = (MultipartFile) map.get(iterator.next());
+        }
+        String filename = multipartFile.getOriginalFilename();
+        if (!filename.contains("xlsx")) {
+            json.put("error", "文件类型错误");
+            return json;
+        }
+        InputStream inputStream;
+        ExcelReader reader = null;
+        try {
+
+            inputStream = multipartFile.getInputStream();
+            /**
+             *
+             * 使用easyExcel读上传的表格
+             *
+             * */
+
+
+            try {
+                reader = EasyExcel.read(inputStream, UserModel.class, new ReadUserEventListener( jpaGroup,  jpaEmployee, jpaOperatRecord)).excelType(ExcelTypeEnum.XLSX).build();
+                ReadSheet readSheet = EasyExcel.readSheet(0).build();
+                reader.read(readSheet);
+            } catch (Exception e) {
+                json.put("error", e.toString());
+                return json;
+            }
+
+            /**
+             *
+             * */
+
+            inputStream.close();
+        } catch (Exception e) {
+            json.put("error", e.toString());
+            return json;
+        } finally {
+            if (reader != null) {
+                // 这里千万别忘记关闭，读的时候会创建临时文件，到时磁盘会崩的
+                reader.finish();
+            }
+
+        }
+        json.put("ok", "上传成功");
+        return json;
+    }
 
 
     @PostMapping("/user/reset_password")

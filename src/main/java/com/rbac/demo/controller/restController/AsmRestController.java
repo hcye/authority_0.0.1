@@ -46,6 +46,8 @@ public class AsmRestController {
     @Autowired
     private JpaAssetType jpaAssetType;
     @Autowired
+    private JpaGroup jpaGroup;
+    @Autowired
     private WriteLog writeLog;
     @Autowired
     private JpaDevType jpaDevType;
@@ -497,7 +499,7 @@ public class AsmRestController {
     }
 
     @PostMapping("/asm/validInputAssetNum")
-    public Map<String,String> valid(String inputCode,String tep,String num,String model,String price){
+    public Map<String,String> valid(String inputCode,String tep,String num,String model,String price,String sysGroup){
         Map<String,String> map=new HashMap<>();
         String numRegex="[0-9]+";
         String priceRegex="[0-9]+[\\.]?[0-9]*";
@@ -510,6 +512,17 @@ public class AsmRestController {
             return map;
         }
         if(!price.equals("")){
+            if(!Pattern.matches(priceRegex, price)){
+                map.put("error","价格只接受数字！");
+                return map;
+            }
+        }
+        if(!sysGroup.equals("")){
+            String groupId=sysGroup.split("-")[0];
+            if(jpaGroup.findById(Integer.parseInt(groupId))==null){
+                map.put("error","从属主体不存在！");
+                return map;
+            }
             if(!Pattern.matches(priceRegex, price)){
                 map.put("error","价格只接受数字！");
                 return map;
@@ -644,8 +657,14 @@ public class AsmRestController {
     @Transactional
     @RequiresPermissions("asm:inp:view")
     @PostMapping("/asm/putin")
-    public Map<String,String> putin(String type, String model, String price, String name, String encode, String num){
+    public Map<String,String> putin(String type, String model, String price, String name, String encode,
+                                    String num,String sysGroup,String supplier){
         int nu=Integer.parseInt(num);
+        SysGroup group=null;
+        if(!sysGroup.equals("")){
+            String groupId=sysGroup.split("-")[0];
+            group=jpaGroup.findById(Integer.parseInt(groupId)).get();
+        }
         Map<String,String> map=new HashMap<>();
         List<Assert> list=new ArrayList<>();
         AssetType assetType=jpaAssetType.findAssetTypeByName(type);
@@ -657,6 +676,11 @@ public class AsmRestController {
                 ast.setPrice(price);
                 ast.setModel(model);
                 ast.setAssetTypeByAssertType(assetType);
+                if(group!=null){
+                    ast.setSysGroupBySysGroup(group);
+                    ast.setSysGroupName(group.getGname());
+                }
+                ast.setSupplire(supplier);
                 list.add(ast);
                 asmRecordService.write(AsmAction.dev_in,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null,"");
             }
@@ -758,7 +782,7 @@ public class AsmRestController {
 
 
             try {
-                reader = EasyExcel.read(inputStream, AssetDownloadModel.class, new ReadAssetEventListener(jpaAssert, jpaEmployee, jpaAssetType, asmService, jpaOperatRecord,jpaDevType)).excelType(ExcelTypeEnum.XLSX).build();
+                reader = EasyExcel.read(inputStream, AssetDownloadModel.class, new ReadAssetEventListener(jpaAssert, jpaEmployee, jpaAssetType, asmService, jpaOperatRecord,jpaDevType,jpaGroup)).excelType(ExcelTypeEnum.XLSX).build();
                 ReadSheet readSheet = EasyExcel.readSheet(0).build();
                 reader.read(readSheet);
             } catch (Exception e) {
@@ -784,49 +808,7 @@ public class AsmRestController {
         json.put("ok", "上传成功");
         return json;
     }
-    /**
-     *
-     * 下载模板
-     *
-     * */
-    @GetMapping("asm/outputTemplate")
-    public void exportModel(HttpServletResponse response) throws FileNotFoundException {
-        OutputStream stream = null;
-        try {
-            stream =new BufferedOutputStream(response.getOutputStream()) ;
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String path= ClassUtils.getDefaultClassLoader().getResource("static/excel").getPath();   //上传资源到项目路径的路径获得
-
-        File file=new File(path+"/"+"moban1.xlsx");
-//        InputStream inputStream =new FileInputStream(file);
-        InputStream inputStream =this.getClass().getClassLoader().getResourceAsStream("static/excel/moban1.xlsx");
-        response.setHeader("Content-disposition", "attachment; filename=" + "template.xlsx");
-        response.setContentType("application/octet-stream;charset=UTF-8");//设置类型
-        response.setHeader("Pragma", "No-cache");//设置头
-        response.setHeader("Cache-Control", "no-cache");//设置头
-        response.setDateHeader("Expires", 0);//设置日期头
-        byte[] bytes=new byte[1024];
-        try {
-            //除放在static下和templates下的资源
-            //idea必须使用项目路径，即以src开头的路径
-
-            //jspringboot文件下载，的输入流只能按以上方式获得
-            int i=0;
-            while(((i=inputStream.read(bytes))!=-1)){
-                stream.write(bytes,0,i);
-            }
-            inputStream.close();
-            stream.flush();
-            stream.close();
-        } catch (FileNotFoundException e) {
-            return;
-        } catch (IOException e) {
-            return;
-        }
-    }
 //    type="+$("#dev_type").val()+"&isDam="+$("#is_damage").val()+"&search="+$("#keywords").val();
 
     @GetMapping("asm/out")

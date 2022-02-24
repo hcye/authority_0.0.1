@@ -26,6 +26,26 @@
                 //实现弹出层间不同frame的传值
             });
         })
+
+        $("#upperDep").click(function () {
+            layer.open({
+                type: 2,
+                title: "设置上级部门",
+                resize: true,
+                area: ['300px', '800px'],
+                content: ['/layer/layer_select_group_group.html', 'no'],
+
+                //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                //实现弹出层间不同frame的传值
+/*                success: function (layero, index) {
+                    var body = layer.getChildFrame('body', index);
+                    body.find('#parentId').val($("#did").val());
+                    //     body.find("#label").html("");
+
+                }*/
+            });
+        })
+
         $("#depName").click(function () {
             $("#valid").text("");
         })
@@ -49,9 +69,7 @@
             <div class="layui-form-item">
                 <label class="layui-form-label">上级部门:</label>
                 <div class="layui-input-block">
-                    <select name="upperDep">
-                        <option th:each="name : ${names}" th:text="${name}"></option>
-                    </select>
+                    <input class="layui-input" name="upperDep" id="upperDep" />
                 </div>
             </div>
 

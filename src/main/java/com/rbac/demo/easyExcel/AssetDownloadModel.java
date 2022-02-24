@@ -12,22 +12,29 @@ public class AssetDownloadModel extends BaseRowModel {
     private String devName="";
     @ExcelProperty(value = "型号",index=2)
     private String model="";
-    @ExcelProperty(value = "SN号",index = 3)
+    @ExcelProperty(value = "供应商",index = 3)
+    private String provider="";
+    @ExcelProperty(value = "主体ID",index = 4)
+    private String sysGroup="";
+    @ExcelProperty(value = "SN号",index = 5)
     private String snNum="";
-    @ExcelProperty(value = "单价",index = 4)
+    @ExcelProperty(value = "单价",index = 6)
     private String price="";
-    @ExcelProperty(value = "到库时间",index = 5)
+    @ExcelProperty(value = "到库时间",index = 7)
     private String putinTime="";
-    @ExcelProperty(value = "借用人",index = 6)
+    @ExcelProperty(value = "借用人",index = 8)
     private String borrower="";
-    @ExcelProperty(value = "借用时间",index = 7)
+    @ExcelProperty(value = "借用时间",index = 9)
     private String borTime="";
-    @ExcelProperty(value = "备注",index = 8)
+    @ExcelProperty(value = "备注",index = 10)
     private String remarks="";
-    @ExcelProperty(value = "报废",index = 9)
+    @ExcelProperty(value = "报废",index = 11)
     private String workless="";
-    @ExcelProperty(value = "资产类型",index = 10)
+    @ExcelProperty(value = "资产类型",index = 12)
     private String assetType="";
+
+
+
 
     @Override
     public String toString() {
@@ -46,6 +53,22 @@ public class AssetDownloadModel extends BaseRowModel {
                 '}';
     }
 
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public String getSysGroup() {
+        return sysGroup;
+    }
+
+    public void setSysGroup(String sysGroup) {
+        this.sysGroup = sysGroup;
+    }
     public String getPrice() {
         return price;
     }

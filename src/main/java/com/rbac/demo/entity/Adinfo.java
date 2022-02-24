@@ -10,7 +10,7 @@ public class Adinfo {
     private String domainadminname;
     private String domainadminpwd;
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public Integer getId() {

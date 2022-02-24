@@ -4,13 +4,13 @@ import javax.persistence.*;
 import java.util.Collection;
 
 @Entity
-@Table(name = "state_code_proj", schema = "mydb1", catalog = "")
+@Table(name = "state_code_proj", schema = "mydb", catalog = "")
 public class StateCodeProj {
     private int id;
     private String projType;
     private String projName;
     private Collection<StateCode> stateCodesById;
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public int getId() {

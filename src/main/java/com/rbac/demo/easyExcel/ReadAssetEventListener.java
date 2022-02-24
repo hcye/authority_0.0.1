@@ -26,31 +26,35 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
     private JpaAssetType jpaAssetType;
     private JpaDevType jpaDevType;
     private AsmService asmService;
+    private JpaGroup jpaGroup;
     private JpaOperatRecord jpaOperatRecord;
     private List<Assert> listOthermeans = new ArrayList<>();
 
-    public ReadAssetEventListener(JpaAssert jpaAssert,JpaEmployee jpaEmployee,JpaAssetType jpaAssetType,AsmService asmService,JpaOperatRecord jpaOperatRecord,JpaDevType jpaDevType) {
+    public ReadAssetEventListener(JpaAssert jpaAssert,JpaEmployee jpaEmployee,JpaAssetType jpaAssetType,AsmService asmService,JpaOperatRecord jpaOperatRecord,JpaDevType jpaDevType,JpaGroup jpaGroup) {
         this.jpaAssert=jpaAssert;
         this.jpaEmployee=jpaEmployee;
         this.jpaAssetType=jpaAssetType;
         this.jpaOperatRecord=jpaOperatRecord;
         this.asmService=asmService;
         this.jpaDevType=jpaDevType;
+        this.jpaGroup=jpaGroup;
     }
 
     @Override
     public void invoke(AssetDownloadModel assetDownloadModel, AnalysisContext analysisContext) {
-        String devName= assetDownloadModel.getDevName();
-        String assetNum= assetDownloadModel.getAssetNum();
-        String borrower= assetDownloadModel.getBorrower();
-        String borTime= assetDownloadModel.getBorTime();
-        String price= assetDownloadModel.getPrice();
-        String model= assetDownloadModel.getModel();
-        String putinTime= assetDownloadModel.getPutinTime();
-        String remarks= assetDownloadModel.getRemarks();
-        String workless= assetDownloadModel.getWorkless();
-        String assetTypeStr= assetDownloadModel.getAssetType();
-        String snNum= assetDownloadModel.getSnNum();
+        String devName= assetDownloadModel.getDevName().trim();
+        String assetNum= assetDownloadModel.getAssetNum().trim();
+        String borrower= assetDownloadModel.getBorrower().trim();
+        String borTime= assetDownloadModel.getBorTime().trim();
+        String price= assetDownloadModel.getPrice().trim();
+        String model= assetDownloadModel.getModel().trim();
+        String putinTime= assetDownloadModel.getPutinTime().trim();
+        String remarks= assetDownloadModel.getRemarks().trim();
+        String workless= assetDownloadModel.getWorkless().trim();
+        String assetTypeStr= assetDownloadModel.getAssetType().trim();
+        String snNum= assetDownloadModel.getSnNum().trim();
+        String provider=assetDownloadModel.getProvider().trim();
+        String groupId=assetDownloadModel.getSysGroup().trim();
         String templat = "";
         Assert anAssert = new Assert();
         DateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
@@ -74,11 +78,11 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
                     anAssert.setAssetTypeByAssertType(assetType);
                     DevType devType =jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(devName.trim(),jpaAssetType.findAssetTypeByName(assetTypeStr.trim()));
                     if(devType==null){
-                        throw new ExcelAnalysisException(num + "行" + "设备类型未预定义！");
+                        throw new ExcelAnalysisException(num + "行" + "设备类型未预定义！资产管理->设备类型->新增，添加对应资产类型下的设备类型");
                     }
                     templat =devType.getAssetNumTemplate();
                 } else {
-                    throw new ExcelAnalysisException(num + "行" + "类型不存在");
+                    throw new ExcelAnalysisException(num + "行" + "类型不存在! 资产管理->资产类型->新增，添加");
                 }
             } else {
                 throw new ExcelAnalysisException(num + "行" + "类型 不能为空");
@@ -151,6 +155,18 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
                 }
             } else {
                 throw new ExcelAnalysisException(num + "行" + "只能填写 报废或者完好");
+            }
+            if(!provider.equals("")){
+                anAssert.setSupplire(provider);
+            }
+            if(!groupId.equals("")){
+                int sysGroupId=Integer.parseInt(groupId);
+                SysGroup sysGroup=jpaGroup.findById(sysGroupId).get();
+                if(sysGroup!=null){
+                    anAssert.setSysGroupBySysGroup(sysGroup);
+                }else {
+                    throw new ExcelAnalysisException(num + "行" + "无法搜索到对应主体");
+                }
             }
 
         } else {

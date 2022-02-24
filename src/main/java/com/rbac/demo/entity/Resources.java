@@ -17,7 +17,7 @@ public class Resources {
     private Collection<Resources> resourcesById;
     private Collection<Role2Resources> role2ResourcesById;
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public Integer getId() {

@@ -166,6 +166,34 @@
                  })
              }
 
+        layui.use('upload',function () {
+            var upload = layui.upload; //得到 upload 对象
+
+            //创建一个上传组件
+            upload.render({
+                elem: '#leadin'
+                ,url: '/user/input'
+                ,done: function(res, index, upload){ //上传后的回调
+                    if(res["ok"]!=null){
+                        layer.alert(res["ok"]);
+                        document.location.href="/user/user";
+                    }else if(res["error"]!=null){
+                        layer.alert(res["error"]);
+                    }else {
+                        layer.alert(res["error"]);
+                    }
+                }
+                ,error:function () {
+                    layer.alert("上传错误");
+                }
+                ,acceptMime: 'file/xlsx'
+                ,accept: 'file' //允许上传的文件类型
+                ,size:10000
+                //,size: 50 //最大允许上传的文件大小
+                //,……
+            });
+        });
+
             //翻页
             $(function () {
                 //前页
@@ -194,6 +222,10 @@
                     checkAdinfo();
                 })
 
+                $("#muban").click(function () {
+                    document.location.href = "/asm/outputUserTemplate";
+                })
+
 
             })
 
@@ -209,13 +241,17 @@
 <!--            layer传回的ad域账号是否校验成功标志位-->
             <input type="hidden" id="adCheckFlag" />
             <div class="layui-row" style="margin-top: 5%">
-                <div class="layui-col-md-offset4 layui-col-md2 layui-input-inline">
+                <div class="layui-col-md-offset1 layui-col-md2 layui-input-inline">
                     <input type="text" class="layui-input" id="searchInput"/>
                 </div>
                 <div class="layui-btn-group ">
                    <button class="layui-btn" id="searchUser"><i class="layui-icon">&#xe615;</i> 查找用户</button>
                     <button class="layui-btn" shiro:hasPermission="asm:user:add" id="addUser"><i class="layui-icon">&#xe654;</i> 新增用户</button>
                     <button class="layui-btn" shiro:hasPermission="asm:user:refresh" id="refresh"><i class="layui-icon">&#xe669;</i>刷新用户列表</button>
+                </div>
+                <div class="layui-btn-group layui-col-md-offset2">
+                    <button class="layui-btn" shiro:hasPermission="asm:user:leadin_muban" id="muban">导出模板</button>
+                    <button class="layui-btn" shiro:hasPermission="asm:user:leadin" id="leadin">导入用户</button>
                 </div>
             </div>
             <div class="layui-row" style="margin-top: 2%">

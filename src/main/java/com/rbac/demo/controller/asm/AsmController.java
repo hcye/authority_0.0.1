@@ -11,9 +11,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.io.UnsupportedEncodingException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
@@ -35,6 +37,8 @@ public class AsmController {
     private JpaResources jpaResources;
     @Autowired
     private JpaDevType jpaDevType;
+    @Autowired
+    private JpaGroup jpaGroup;
     @Autowired
     private AsmRecordService asmRecordService;
     @Autowired
@@ -303,7 +307,8 @@ public class AsmController {
 
     @RequiresPermissions("asm:edit:btn")
     @GetMapping("/asm/save_dev")
-    public String saveDev(int id,String types,String model,String price,String remarks,String sn,String num,String list_type,String list_isDam,String cuindex,String new_bro) throws UnsupportedEncodingException {
+    public String saveDev(int id,String types,String model,String price,String remarks,String sn,String num,String list_type,
+                          String list_isDam,String cuindex,String new_bro,String supplier,String sysGroup) throws UnsupportedEncodingException {
         Assert anAssert=jpaAssert.findById(id).get();
         anAssert.setAssetTypeByAssertType(jpaAssetType.findAssetTypeByName(types));
         anAssert.setModel(model);
@@ -311,19 +316,115 @@ public class AsmController {
         anAssert.setRemarks(remarks);
         anAssert.setSnnum(sn);
         anAssert.setAssestnum(num);
+        anAssert.setSupplire(supplier);
+        if(sysGroup==null || sysGroup.equals("")){
+            anAssert.setSysGroupBySysGroup(null);
+            anAssert.setSysGroupName("");
+        }else {
+            if(sysGroup.contains("-")){
+                String groupId=sysGroup.split("-")[0];
+                SysGroup group=jpaGroup.findById(Integer.parseInt(groupId)).get();
+                anAssert.setSysGroupBySysGroup(group);
+                anAssert.setSysGroupName(group.getGname());
+            }
+        }
         if(new_bro==null || new_bro.equals("")) {
             anAssert.setEmployeeByBorrower(null);
         }else {
-           String py=new_bro.split("-")[1];
-           Employee employee=jpaEmployee.findEmployeeByLoginName(py);
-           anAssert.setEmployeeByBorrower(employee);
+            if(new_bro.contains("-")){
+                String py=new_bro.split("-")[1];
+                Employee employee=jpaEmployee.findEmployeeByLoginName(py);
+                anAssert.setEmployeeByBorrower(employee);
+            }
         }
-        System.out.println(new_bro);
         jpaAssert.save(anAssert);
         asmRecordService.write(AsmAction.dev_edit,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert,"");
         String type=URLEncoder.encode(list_type,"UTF-8");
         String isDam=URLEncoder.encode(list_isDam,"UTF-8");
         return "redirect:/asm/list?type="+type+"&isDam="+isDam+"&cuindex="+cuindex;
 //        String type,String isDam,String search,String pre,String next,int pageIndex,String jumpFlag
+    }
+
+    /**
+     *
+     * 下载模板
+     *
+     * */
+    @GetMapping("asm/outputTemplate")
+    public void exportAssetModel(HttpServletResponse response) throws FileNotFoundException {
+        OutputStream stream = null;
+        try {
+            stream =new BufferedOutputStream(response.getOutputStream()) ;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String path= ClassUtils.getDefaultClassLoader().getResource("static/excel").getPath();   //上传资源到项目路径的路径获得
+
+        File file=new File(path+"/"+"moban1.xlsx");
+//        InputStream inputStream =new FileInputStream(file);
+        InputStream inputStream =this.getClass().getClassLoader().getResourceAsStream("static/excel/moban1.xlsx");
+        response.setHeader("Content-disposition", "attachment; filename=" + "template.xlsx");
+        response.setContentType("application/octet-stream;charset=UTF-8");//设置类型
+        response.setHeader("Pragma", "No-cache");//设置头
+        response.setHeader("Cache-Control", "no-cache");//设置头
+        response.setDateHeader("Expires", 0);//设置日期头
+        byte[] bytes=new byte[1024];
+        try {
+            //除放在static下和templates下的资源
+            //idea必须使用项目路径，即以src开头的路径
+
+            //jspringboot文件下载，的输入流只能按以上方式获得
+            int i=0;
+            while(((i=inputStream.read(bytes))!=-1)){
+                stream.write(bytes,0,i);
+            }
+            inputStream.close();
+            stream.flush();
+            stream.close();
+        } catch (FileNotFoundException e) {
+            return;
+        } catch (IOException e) {
+            return;
+        }
+    }
+
+    @GetMapping("asm/outputUserTemplate")
+    public void exportUserModel(HttpServletResponse response) throws FileNotFoundException {
+        OutputStream stream = null;
+        try {
+            stream =new BufferedOutputStream(response.getOutputStream()) ;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String path= ClassUtils.getDefaultClassLoader().getResource("static/excel").getPath();   //上传资源到项目路径的路径获得
+
+        File file=new File(path+"/"+"user_mb.xlsx");
+//        InputStream inputStream =new FileInputStream(file);
+        InputStream inputStream =this.getClass().getClassLoader().getResourceAsStream("static/excel/user_mb.xlsx");
+        response.setHeader("Content-disposition", "attachment; filename=" + "template.xlsx");
+        response.setContentType("application/octet-stream;charset=UTF-8");//设置类型
+        response.setHeader("Pragma", "No-cache");//设置头
+        response.setHeader("Cache-Control", "no-cache");//设置头
+        response.setDateHeader("Expires", 0);//设置日期头
+        byte[] bytes=new byte[1024];
+        try {
+            //除放在static下和templates下的资源
+            //idea必须使用项目路径，即以src开头的路径
+
+            //jspringboot文件下载，的输入流只能按以上方式获得
+            int i=0;
+            while(((i=inputStream.read(bytes))!=-1)){
+                stream.write(bytes,0,i);
+            }
+            inputStream.close();
+            stream.flush();
+            stream.close();
+        } catch (FileNotFoundException e) {
+            return;
+        } catch (IOException e) {
+            return;
+        }
     }
 }

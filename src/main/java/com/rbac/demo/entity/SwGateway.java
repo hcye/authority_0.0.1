@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "sw_gateway", schema = "mydb1", catalog = "")
+@Table(name = "sw_gateway", schema = "mydb", catalog = "")
 public class SwGateway {
     private int id;
     private String gateway;
@@ -12,7 +12,7 @@ public class SwGateway {
     private String vlanid;
     private String remark;
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public int getId() {

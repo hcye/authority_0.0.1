@@ -39,10 +39,12 @@
                         layer.alert(data["error"]);
                         return;
                     }else {
-                        document.location.href="/asm/save_dev/?id="+$("#id").val()+"&types=" +
-                            ""+$("#types").val()+"&model="+$("#model").val()+"&price="+$("#price").val()+"&remarks="+$("#remarks").val()+
-                            "&sn="+$("#sn_num").val()+"&num="+$("#num").val()+"&list_type="+$("#list_type").val()
-                            +"&list_isDam="+$("#list_isDam").val()+"&cuindex="+$("#cuindex").val()+'&new_bro='+$("#bor_emp").val();
+                        document.location.href="/asm/save_dev/?id="+$("#id").val().trim()+"&types=" +
+                            ""+$("#types").val().trim()+"&model="+$("#model").val().trim()+"&price="+$("#price").val().trim()
+                            +"&remarks="+$("#remarks").val().trim()+ "&sn="+$("#sn_num").val().trim()+"&num="+$("#num").val().trim()
+                            +"&list_type="+$("#list_type").val().trim() +"&list_isDam="+$("#list_isDam").val().trim()
+                            +"&cuindex="+$("#cuindex").val().trim()+'&new_bro='+$("#bor_emp").val().trim()
+                            +'&supplier='+$("#supplier").val().trim()+'&sysGroup='+$("#sysGroup").val().trim();
                     }
                 }, "json");
 
@@ -51,7 +53,7 @@
 
 
         $("#bor_emp").click(function () {
-            console.log("click select browser")
+
             layer.open({
                 type: 2,
                 title: "修改借用人",
@@ -62,6 +64,21 @@
             });
         })
 
+        $("#sysGroup").click(function () {
+            layer.open({
+                type: 2,
+                title: "修改主体",
+                resize: true,
+                area: ['300px', '800px'],
+                content: ['/layer/layer_select_group_asset.html', 'no'],
+                //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                //实现弹出层间不同frame的传值
+            });
+        })
+
+/*        $("#sysGroup").click(function () {
+            document.location.href="/layer/layer_select_group.html";
+        })*/
 
         $("#cancel").click(function () {
             document.location.href="/asm/list";
@@ -153,6 +170,20 @@
                         <label class="layui-form-label">设备价格:</label>
                         <div class="layui-input-block">
                             <input  class="layui-input"  id="price" th:value="${dev.getPrice()}" />
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">供应商:</label>
+                        <div class="layui-input-block">
+                            <input  class="layui-input"  id="supplier" th:value="${dev.getSupplire()}" />
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">主体:</label>
+                        <div class="layui-input-block">
+                            <input  class="layui-input"  id="sysGroup" th:value="${dev.getSysGroupName()}" />
                         </div>
                     </div>
 

@@ -10,7 +10,7 @@ public class User2Role {
     private Employee employeeByUserId;
     private Role roleByRoleId;
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public Integer getId() {

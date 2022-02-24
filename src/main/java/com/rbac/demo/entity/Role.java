@@ -18,7 +18,7 @@ public class Role {
     private Short deleteFlag=0;
     private String remarks="";
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public Integer getId() {

@@ -5,14 +5,17 @@ import java.util.Collection;
 import java.util.Objects;
 
 @Entity
-@Table(name = "sw_firm", schema = "mydb1", catalog = "")
+@Table(name = "sw_firm", schema = "mydb", catalog = "")
 public class SwFirm {
     private int id;
     private String fname;
     private String remark;
     private Collection<SwOidTemp> swOidTempsById;
     private Collection<SwSwitch> swSwitchesById;
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private Collection<Oid> oidsById;
+
+
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public int getId() {
@@ -75,4 +78,15 @@ public class SwFirm {
     public void setSwSwitchesById(Collection<SwSwitch> swSwitchesById) {
         this.swSwitchesById = swSwitchesById;
     }
+
+    @OneToMany(mappedBy = "swFirmByFirm")
+    public Collection<Oid> getOidsById() {
+        return oidsById;
+    }
+
+    public void setOidsById(Collection<Oid> oidsById) {
+        this.oidsById = oidsById;
+    }
+
+
 }

@@ -37,6 +37,24 @@
             });
         })
 
+        $("#sysGroup").click(function () {
+            layer.open({
+                type: 2,
+                title: "修改上级部门",
+                resize: true,
+                area: ['300px', '800px'],
+                content: ['/layer/layer_select_gp_edit.html', 'no'],
+                //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                //实现弹出层间不同frame的传值
+                success: function (layero, index) {
+                    var body = layer.getChildFrame('body', index);
+                    body.find('#parentId').val($("#did").val());
+               //     body.find("#label").html("");
+
+                }
+            });
+        })
+
         $("#cancel").click(function () {
             document.location.href="/group/group";
         });
@@ -50,12 +68,10 @@
         <div class="layui-row">
             <form class="layui-form" action="/group/edit/saveChange" method="post">
                 <div class="layui-form-item">
-                    <input type="hidden" name="did" th:value="${group.id}" />
+                    <input type="hidden" id="did" name="did" th:value="${group.id}" />
                     <div class="layui-form-label">上级部门</div>
                     <div class="layui-input-block">
-                        <select id="select" name="upperDep">
-                            <option th:each="name : ${parent}" th:text="${name}"></option>
-                        </select>
+                        <input class="layui-input" name="upperDep" id="sysGroup" th:value="${parent}" />
                     </div>
                 </div>
 
@@ -70,7 +86,7 @@
                     <div class="layui-form-label">负责人</div>
                     <div class="layui-input-block">
                         <div class="layui-input-inline"> <!--把内部元素转换成行内元素-->
-                            <input class="layui-input" id="name" name="leader" readonly="readonly" th:value="${leader.getEname()}==null ? '':${leader.getEname()}+'-'+${leader.getLoginName()}"  />
+                            <input class="layui-input" id="name" name="leader" readonly="readonly" th:value="${leader==null} ? '':${leader.getEname()}+'-'+${leader.getLoginName()}"  />
                         </div>
                         <button type="button" class="layui-btn" id="change" ><i class="layui-icon">&#xe642;</i> 修改</button>
                     </div>

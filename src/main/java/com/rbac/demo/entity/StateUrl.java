@@ -5,14 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "state_url", schema = "mydb1", catalog = "")
+@Table(name = "state_url", schema = "mydb", catalog = "")
 public class StateUrl {
     private int id;
     private String stateUrl;
     private StateUrlSet stateUrlSetBySetFk;
     private String urlName;
     private String remark;
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public int getId() {

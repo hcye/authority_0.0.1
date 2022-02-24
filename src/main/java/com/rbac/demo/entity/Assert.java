@@ -16,6 +16,10 @@ public class Assert {
     private Date putintime=new Date(new java.util.Date().getTime());
     private String remarks="";
     private String snnum="";
+
+
+
+    private String supplire="";
     private String workless="0";
     private String price="";
     private Date brotime=new Date(new java.util.Date().getTime());
@@ -23,13 +27,18 @@ public class Assert {
     private Date returntime=new Date(new java.util.Date().getTime());
     private String assertPic="";
     private Employee employeeByBorrower;
+    private String sysGroupName;
+
+
 
     private Collection<OperatRecord> operatRecordsById;
 
-    private Collection<EchangeDevs> echangeDevsById;
+ //   private Collection<EchangeDevs> echangeDevsById;
     private AssetType assetTypeByAssertType;
+    private SysGroup sysGroupBySysGroup;
+    private Collection<AssetRecord> assetRecordsById;
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public Integer getId() {
@@ -85,6 +94,16 @@ public class Assert {
     }
 
     @Basic
+    @Column(name = "supplire", nullable = true, length = 255)
+    public String getSupplire() {
+        return supplire;
+    }
+
+    public void setSupplire(String supplire) {
+        this.supplire = supplire;
+    }
+
+    @Basic
     @Column(name = "putintime", nullable = true)
     public Date getPutintime() {
         return putintime;
@@ -102,6 +121,17 @@ public class Assert {
 
     public void setRemarks(String remarks) {
         this.remarks = remarks;
+    }
+
+
+    @Basic
+    @Column(name = "sys_group_name", nullable = true, length = 511)
+    public String getSysGroupName() {
+        return sysGroupName;
+    }
+
+    public void setSysGroupName(String sysGroupName) {
+        this.sysGroupName = sysGroupName;
     }
 
     @Basic
@@ -217,6 +247,7 @@ public class Assert {
         result = 31 * result + (assertPic != null ? assertPic.hashCode() : 0);
         return result;
     }
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "borrower", referencedColumnName = "id")
@@ -228,7 +259,6 @@ public class Assert {
         this.employeeByBorrower = employeeByBorrower;
     }
 
-
     @OneToMany(mappedBy = "assertByAssertAsset")
     public Collection<OperatRecord> getOperatRecordsById() {
         return operatRecordsById;
@@ -238,15 +268,14 @@ public class Assert {
         this.operatRecordsById = operatRecordsById;
     }
 
-    @OneToMany(mappedBy = "devFK")
+/*    @OneToMany(mappedBy = "assertByExchangeDev")
     public Collection<EchangeDevs> getEchangeDevsById() {
         return echangeDevsById;
     }
 
     public void setEchangeDevsById(Collection<EchangeDevs> echangeDevsById) {
         this.echangeDevsById = echangeDevsById;
-    }
-
+    }*/
 
     @JsonIgnore
     @ManyToOne
@@ -257,5 +286,25 @@ public class Assert {
 
     public void setAssetTypeByAssertType(AssetType assetTypeByAssertType) {
             this.assetTypeByAssertType = assetTypeByAssertType;
+    }
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "sys_group", referencedColumnName = "id")
+    public SysGroup getSysGroupBySysGroup() {
+        return sysGroupBySysGroup;
+    }
+
+    public void setSysGroupBySysGroup(SysGroup sysGroupBySysGroup) {
+        this.sysGroupBySysGroup = sysGroupBySysGroup;
+    }
+
+    @OneToMany(mappedBy = "assertByAsset")
+    public Collection<AssetRecord> getAssetRecordsById() {
+        return assetRecordsById;
+    }
+
+    public void setAssetRecordsById(Collection<AssetRecord> assetRecordsById) {
+        this.assetRecordsById = assetRecordsById;
     }
 }

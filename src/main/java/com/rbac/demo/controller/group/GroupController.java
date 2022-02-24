@@ -34,11 +34,9 @@ public class GroupController {
         SysGroup parent=group.getSysGroupByParentId();
         String parentGroupName=parent.getGname();
         //
-        List<String> groupNames=jpaGroup.getDistinctGourpName();
+        String groupNames=group.getId()+"-"+group.getSysGroupByParentId().getGname();
         //移除本部门，把当前父部门调整到队列头
-        groupNames.remove(currentGroupName);
-        groupNames.remove(parentGroupName);
-        groupNames.add(0,parentGroupName);
+
 
         List<String> status=new ArrayList<>();
         if(group.getAvalible()==1){
@@ -75,10 +73,14 @@ public class GroupController {
     @PostMapping("/group/edit/saveChange")
     public String save(int did,String upperDep,String depName,String leader,String status){
         SysGroup group=jpaGroup.findById(did).get();
-        SysGroup uppergroup=jpaGroup.findSysGroupByGname(upperDep);
+        if(!upperDep.equals("") && upperDep.contains("-")){
+            String depId=upperDep.split("-")[0];
+            SysGroup uppergroup=jpaGroup.findById(Integer.parseInt(depId)).get();
+            group.setSysGroupByParentId(uppergroup);
+        }
+       // SysGroup uppergroup=jpaGroup.findSysGroupByGname(upperDep);
         group.setLeader(leader);
         group.setGname(depName);
-        group.setSysGroupByParentId(uppergroup);
         if(status.equals("可用")){
             group.setAvalible((byte) 1);
         }else {
@@ -92,12 +94,21 @@ public class GroupController {
     @GetMapping("/group/delete")
     public String delete(int id, Model model){
         SysGroup group =jpaGroup.findById(id).get();
+        List<Employee> employees= (List<Employee>) group.getEmployeesById();
         if(group.getEmployeesById().isEmpty()){
-            group.setDeleteFlag((byte) 1);
+            jpaGroup.delete(group);
         }else {
-            throw new RuntimeException("部门内有对象无法删除");
+            for(Employee e:employees){
+                if(e.getOnjob().equals("0")){
+                    throw new RuntimeException("部门内有对象无法删除");
+                }
+            }
+            jpaEmployee.deleteAll(employees);
+            jpaEmployee.flush();
+            jpaGroup.delete(group);
+         //   throw new RuntimeException("部门内有对象无法删除");
         }
-        jpaGroup.saveAndFlush(group);
+     //   jpaGroup.saveAndFlush(group);
         return "group/group";
     }
     @RequiresPermissions("asm:group:add")
@@ -110,15 +121,16 @@ public class GroupController {
     @RequiresPermissions("asm:group:add")
     @GetMapping("/group/add")
     public String add(String upperDep, String depName, String leader, String status, Model model){
-        if(depName==null||depName.equals("")||jpaGroup.findSysGroupByGname(depName)!=null){
+        if(depName==null||depName.equals("")||upperDep.equals("")){
             List<String> names = jpaGroup.getDistinctGourpName();
             model.addAttribute("names",names);
             model.addAttribute("flag","×");
-            model.addAttribute("errPrompt","部门名重复,添加失败！");
+            model.addAttribute("errPrompt","部门名不为空！");
             return "group/add";
         }
         SysGroup newGroup=new SysGroup();
-        SysGroup upperGroup =jpaGroup.findSysGroupByGname(upperDep);
+        String groupId=upperDep.split("-")[0];
+        SysGroup upperGroup =jpaGroup.findById(Integer.parseInt(groupId)).get();
         newGroup.setGname(depName);
         newGroup.setSysGroupByParentId(upperGroup);
         newGroup.setLeader(leader);

@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "echange_devs", schema = "mydb1", catalog = "")
+@Table(name = "echange_devs", schema = "mydb", catalog = "")
 public class EchangeDevs {
     private int id;
     private Timestamp sendTime;
@@ -23,8 +23,11 @@ public class EchangeDevs {
 
 
     private Employee resiverFK;
+    private Employee employeeBySenderEmp;
+    // private Assert assertByExchangeDev;
+   // private Employee employeeByReciveEmp;
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id")
     public int getId() {
@@ -40,6 +43,11 @@ public class EchangeDevs {
     public Timestamp getReceviedTime() {
         return receviedTime;
     }
+
+    public void setReceviedTime(Timestamp receviedTime) {
+        this.receviedTime = receviedTime;
+    }
+
     @Basic
     @Column(name = "is_done")
     public String getIsDone() {
@@ -48,10 +56,6 @@ public class EchangeDevs {
 
     public void setIsDone(String isDone) {
         this.isDone = isDone;
-    }
-
-    public void setReceviedTime(Timestamp receviedTime) {
-        this.receviedTime = receviedTime;
     }
 
     @Basic
@@ -74,7 +78,6 @@ public class EchangeDevs {
         this.received = received;
     }
 
-
     @Basic
     @Column(name = "reason")
     public String getReason() {
@@ -84,7 +87,6 @@ public class EchangeDevs {
     public void setReason(String reason) {
         this.reason = reason;
     }
-
 
     @Override
     public boolean equals(Object o) {
@@ -140,4 +142,35 @@ public class EchangeDevs {
     public void setDevFK(Assert devFK) {
         this.devFK = devFK;
     }
+/*
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "sender_emp", referencedColumnName = "id")
+    public Employee getEmployeeBySenderEmp() {
+        return employeeBySenderEmp;
+    }
+
+    public void setEmployeeBySenderEmp(Employee employeeBySenderEmp) {
+        this.employeeBySenderEmp = employeeBySenderEmp;
+    }*/
+/*    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "exchange_dev", referencedColumnName = "id")
+    public Assert getAssertByExchangeDev() {
+        return assertByExchangeDev;
+    }
+
+    public void setAssertByExchangeDev(Assert assertByExchangeDev) {
+       this.assertByExchangeDev = assertByExchangeDev;
+    }*/
+/*    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "recive_emp", referencedColumnName = "id")
+    public Employee getEmployeeByReciveEmp() {
+        return employeeByReciveEmp;
+    }
+
+    public void setEmployeeByReciveEmp(Employee employeeByReciveEmp) {
+        this.employeeByReciveEmp = employeeByReciveEmp;
+    }*/
 }

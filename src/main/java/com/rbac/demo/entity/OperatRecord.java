@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "operat_record", schema = "mydb1", catalog = "")
+@Table(name = "operat_record", schema = "mydb", catalog = "")
 public class OperatRecord {
     private Integer id;
     private String action="";
@@ -29,7 +29,7 @@ public class OperatRecord {
     }
 
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public Integer getId() {

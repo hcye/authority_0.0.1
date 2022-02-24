@@ -7,7 +7,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "sw_oid_temp", schema = "mydb1", catalog = "")
+@Table(name = "sw_oid_temp", schema = "mydb", catalog = "")
 public class SwOidTemp {
     private int id;
     private String oidName;
@@ -15,7 +15,7 @@ public class SwOidTemp {
     private SwFirm swFirmBySwFirm;
     private String remark;
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     public int getId() {

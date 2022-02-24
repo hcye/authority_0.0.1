@@ -53,10 +53,11 @@
     })
 
     function queryDepInfo(id){
-                $.post("/queryDepInfo", {did:id},    //把name数据提交到ajaxRes action内，
+                $.post("/queryDepInfo", {did:id,parentId:'0'},    //把name数据提交到ajaxRes action内，
                     function(data) {
                         $("#context").val(data["gname"]);
                         $("#parent").val(data["parent"]);
+                        $("#depId").val(data["id"]);
                         $("#depCreatTime").val(data["createTime"]);
                         if(data.avalible==1){
                             $("#depStatus").val('可用');
@@ -88,14 +89,15 @@
                 return;
             }
             layer.confirm('确定删除？', {icon: 3, title:'删除'}, function(index){
-                $.post("/group/delete/valid", {did:$("#nodeId").val()},    //把name数据提交到ajaxRes action内，
+                /*$.post("/group/delete/valid", {did:$("#nodeId").val()},    //把name数据提交到ajaxRes action内，
                     function(data) {
                         if(data["msg"]=="ok"){
                             window.location.href="/group/delete?id="+$("#nodeId").val();
                         }else if(data["msg"]=="false"){
                             layer.alert("部门有成员无法删除!");
                         }
-                    }, "json");
+                    }, "json");*/
+                window.location.href="/group/delete?id="+$("#nodeId").val();
 
                 //do something
 
@@ -119,6 +121,13 @@
             <div style="height: 600px; width:100%;overflow: auto;">
                 <div class="layui-form" id="show_form">
                     <input type="hidden" id="nodeId"/>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">部门ID</label>
+                        <div class="layui-input-block ">
+                            <input class="layui-input" readonly="readonly" id="depId" name="context"/>
+                        </div>
+                    </div>
                     <div class="layui-form-item">
                         <label class="layui-form-label">部门名称</label>
                         <div class="layui-input-block ">
