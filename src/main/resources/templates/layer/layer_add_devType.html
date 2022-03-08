@@ -42,14 +42,8 @@
 
             $.post("/asm/getTypeNames", {},    //把name数据提交到ajaxRes action内，
                 function (data) {
-                    for (var key in data) {
-                        $("#type_name").append("<option>" + data[key].typeName + "</option>");
-                    }
                     $('#temp').attr("placeholder", "格式:" + data[0].assetCode);
-                    var form = layui.form;
-                    form.render("select");
                 }, "json");
-
 
         })
 

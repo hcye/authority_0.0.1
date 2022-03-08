@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>导出资产</title>
+</head>
+<link rel="stylesheet" href="/layui/css/layui.css">
+<script type="text/javascript" src="/layui/layui.js"></script>
+<link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+<link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+<script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+<!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+<!--[if lt IE 9]>-->
+<script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+<script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+<script type="text/javascript">
+    layui.use('form', function(){
+        var form = layui.form;
+    });
+
+    $(function () {
+
+        $("#reset").click(function () {
+            document.location.href = "/asm/list";
+        })
+        $("#out").click(function () {
+            document.location.href = "/asm/out?type=" + $("#asset_type").val() +
+                "&isDam=" + $("#is_damage").val() + "&belong_to=" + $("#belong_to").val()
+                + "&supplier=" + $("#supplier").val();
+        });
+        $("#belong_to").click(function () {
+            layer.open({
+                type: 2,
+                title: "选择主体",
+                resize: true,
+                area: ['300px', '800px'],
+                content: ['/layer/layer_select_out_gp.html', 'no'],
+                //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                //实现弹出层间不同frame的传值
+             /*   success: function (layero, index) {
+                    var body = layer.getChildFrame('body', index);
+                    body.find('#parentId').val($("#did").val());
+                    //     body.find("#label").html("");
+
+                }*/
+            });
+        })
+    })
+
+</script>
+<body>
+<div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
+    <p>资产列表</p>
+</div>
+<div class="layui-container">
+    <div class="layui-form"  style="margin-top: 5%;margin-bottom: 18%">
+        <div class="layui-form-item">
+            <input type="hidden" id="id" />
+            <input type="hidden" id="tps">
+            <label class="layui-form-label">资产类型:</label>
+            <div class="layui-input-block">
+                <select class="layui-form-select" id="asset_type">
+                    <option>所有</option>
+                    <option  th:each="atp:${assetTypes}" th:text="${atp.typeName}" shiro:hasPermission="${atp.permiCode}"></option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">供应商:</label>
+            <div class="layui-input-block" id="sup">
+                <select class="layui-form-select" id="supplier">
+                    <option>所有</option>
+                    <option  th:each="suppplier : ${supppliers}"  th:text="${suppplier.supplierName}" ></option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">从属主体:</label>
+            <div class="layui-input-block">
+                <input class="layui-input" id="belong_to" />
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">是否完好:</label>
+            <div class="layui-input-block">
+                <select class="layui-form-select" id="is_damage">
+                    <option>所有</option>
+                    <option>好</option>
+                    <option>坏</option>
+                </select>
+            </div>
+        </div>
+
+
+        <div class="layui-row">
+            <div style="float: right;margin-right: 45%;margin-top: 3%">
+                <button class="layui-btn" id="conform">导出</button>
+                <button class="layui-btn" type="reset" id="reset">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

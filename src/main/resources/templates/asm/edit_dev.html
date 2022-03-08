@@ -176,7 +176,9 @@
                     <div class="layui-form-item">
                         <label class="layui-form-label">供应商:</label>
                         <div class="layui-input-block">
-                            <input  class="layui-input"  id="supplier" th:value="${dev.getSupplire()}" />
+                            <select class="layui-form-select"   id="supplier" >
+                                <option name="supplier" th:each="sup: ${suppliers}" th:text="${sup.supplierName}"></option>
+                            </select>
                         </div>
                     </div>
 

@@ -91,6 +91,30 @@ public class AsmService {
         }
         return page;
     }
+/*
+    public List<Assert> queryList(String type, String isDam, String search){
+        List<Assert> page;
+        String damFlag="0";
+        if(!isDam.equals("完好")){
+            damFlag="1";
+        }
+        if(search.equals("")){
+            page=jpaAssert.findAssertsBytype_to_list(type,damFlag);
+        }else {
+            search= ConvertStrForSearch.getFormatedString(search);
+            page=jpaAssert.findAssertsByAnameLikeAndDamFlagAndType_to_list(type,search,damFlag);
+            if(page.isEmpty()){
+                page=jpaAssert.findAssertsByAssestnumLikeAndDamFlagAndType_to_list(type,search,damFlag);
+                if(page.isEmpty()){
+                    page=jpaAssert.findAssertsByBorroworPingyinLikeAndDamFlag_to_list(search,damFlag);
+                    if(page.isEmpty()){
+                        page=jpaAssert.findAssertsByBorroworNameLikeAndDamFlag_to_list(search,damFlag);
+                    }
+                }
+            }
+        }
+        return page;
+    }*/
 
     public List<Assert> queryList(String type, String isDam, String search){
         List<Assert> list;

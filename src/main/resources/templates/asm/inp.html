@@ -92,6 +92,13 @@
                 content: ['/layer/layer_add_devType', 'no'],
                 //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
                 //实现弹出层间不同frame的传值
+                success: function (layero, index) {
+                    var body = layer.getChildFrame('body', index);
+                    var se = body.find('#type_name');
+                    $('[name="tp"]').each(function (){
+                        se.append("<option>"+$(this).val()+"</option>");
+                    })
+                }
             });
         })
 
@@ -158,7 +165,7 @@
                      <label class="layui-form-label">类型</label>
                      <div class="layui-input-block">
                         <select class="layui-form-select"  lay-filter="astType" id="tp">
-                            <option shiro:hasPermission="${type.getPermiCode()}" th:each="type : ${types}" th:text="${type.getTypeName()}"></option>
+                            <option name="tp" shiro:hasPermission="${type.getPermiCode()}" th:each="type : ${types}" th:text="${type.getTypeName()}"></option>
                         </select>
                     </div>
                 </div>
@@ -197,15 +204,17 @@
                     <span id="max" th:text="${maxNum}"></span>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label"><span style="color: red">*</span>主体</label>
+                    <label class="layui-form-label">主体</label>
                     <div class="layui-input-block">
                         <input class="layui-input" id="sysGroup" />
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label"><span style="color: red">*</span>供应商</label>
+                    <label class="layui-form-label">供应商</label>
                     <div class="layui-input-block">
-                        <input class="layui-input" id="supplire" />
+                        <select class="layui-form-select"   id="supplire" >
+                            <option name="supplier" th:each="sup: ${suppliers}" th:text="${sup.supplierName}"></option>
+                        </select>
                     </div>
                 </div>
                 <div class="layui-form-item">

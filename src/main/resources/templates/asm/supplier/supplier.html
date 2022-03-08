@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>供应商管理</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+    <script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>-->
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <script th:inline="javascript">
+        //在前端利用thymeleaf 直接调用spring bean对象方法。
+
+        //渲染form组件，如果不执行这个函数，form组件中的select radio 等不会被渲染出来
+        layui.use('form', function(){
+            var form = layui.form;
+        });
+        function getPage(pre,next,searchFlag){
+            $.get("/supplier/getAll", {
+                    name: $("#rname").val(),
+                    pre: pre,
+                    next: next,
+                    searchFlag: searchFlag,
+                    pageIndex: $("#pageInput").val(),
+                },    //把name数据提交到ajaxRes action内，
+                function (data) {
+                    var deleteflag= [[${@permission.getPermi('asm:supplier:delete')}]];
+                    var deleteDisable="";
+                    var editflag= [[${@permission.getPermi('asm:supplier:edit')}]];
+                    var editDisable="";
+                    if (deleteflag == "layui-btn-disabled") {
+                        deleteDisable = "disabled='true'";
+                    }
+                    if (editflag == "layui-btn-disabled") {
+                        editDisable = "disabled='true'";
+                    }
+                    var sp=data["suppliers"][0].content;
+                    $("#pageInput").val(data["suppliers"][0].number+1);
+                    $("#PageCount").html(data["suppliers"][0].totalPages);
+                    $("#tb").find("tr").remove();
+                    for (var key in sp){
+                        var remark=sp[key].remark;
+                        if(remark==null){
+                            remark="";
+                        }
+                        $("#tb").append("<tr><td><input type='hidden' value='"+sp[key].id+"'/>"+sp[key].supplierName+"</td><td>"+remark+"" +
+                            "</td><td><button class='layui-btn layui-btn-sm " + editflag + "' " + editDisable + "  name='edit'>编辑</button>" +
+                            "<button class='layui-btn layui-btn-sm " + deleteflag + "' " + deleteDisable + "  name='delete'>删除</button></td></tr>")
+                    }
+                    $("#tb").find("button[name='edit']").click(function () {
+                        document.location.href = "/supplier/edit?id=" + $(this).parent().parent().find("input")[0].value;
+                    });
+
+                    $("#tb").find("button[name='delete']").click(function () {
+                        var id=$(this).parent().parent().find("input")[0].value;
+
+                        layer.confirm("删除供应商？", {
+                            btn: ['确定','取消'] //可以无限个按钮
+                            , btn1:function(index, layero){
+                                //关闭弹出层
+                                document.location.href = "/supplier/del?id=" + id;
+
+                            }, btn2:function (index) {
+                                //关闭弹出层
+                                layer.close(index);
+                            }});
+                    });
+                }, "json");
+        }
+        $(function () {
+            $(document).ready(getPage(0,0,''));
+            $("#add").click(function () {
+                document.location.href="/asm/supplier_add";
+            });
+            $("#next").click(function (){
+                getPage(0,1,'');
+            });
+            $("#pre").click(function (){
+                getPage(1,0,'');
+            });
+            $("#jump").click(function (){
+                getPage(0,0,'');
+            });
+            $("#search").click(function (){
+                getPage(0,0,'1');
+            });
+
+        })
+
+
+    </script>
+</head>
+<body>
+<div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
+    <p>供应商</p>
+</div>
+
+<div class="layui-container" style="width: 90%">
+    <input type="hidden" id="role_name" />
+    <div class="layui-form">
+        <!--layui-inline定义外层行内-->
+        <!--layui-input-inline定义内层行内-->
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">供应商名:</label>
+                <div class="layui-input-inline">
+                    <input id="rname" class="layui-input" />
+                </div>
+            </div>
+
+
+            <div class="layui-btn-group">
+                <button class="layui-btn" id="search"><i class="layui-icon">&#xe615;</i>搜索</button>
+                <button class="layui-btn" id="add" shiro:hasPermission="asm:supplier:add"><i class="layui-icon">&#xe654;</i>新增</button>
+            </div>
+        </div>
+
+
+        <div class="layui-row" style="margin-top: 2%">
+            <table class="layui-table">
+                <thead class="layui-table-header">
+                <tr>
+                    <td>供应商</td>
+                    <td>备注</td>
+                    <td>操作</td>
+                </tr>
+                </thead>
+                <tbody class="layui-table-body" id="tb">
+
+                </tbody>
+            </table>
+        </div>
+        <div class="layui-row">
+            <input type="hidden" id="selectedDepId"/>
+            <div class="layui-col-md-offset2 layui-col-md2">
+                <button class="layui-btn" id="pre" style="float: right">-</button>
+            </div>
+            <div class="layui-col-md2 layui-input-inline">
+                <input type="text" class="layui-input" id="pageInput"  />
+            </div>
+            <div class="layui-col-md1">
+                <button class="layui-btn" id="next">+</button>
+            </div>
+            <div class="layui-col-md2">
+                <button class="layui-btn" id="jump">跳转</button>
+                <span>共 </span><span id="PageCount"></span><span> 页</span>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

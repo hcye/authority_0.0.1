@@ -442,7 +442,7 @@ public class NetworkRestController {
 
 
     @PostMapping("/network/port_query")
-    public Map<String,String> port_query(String ipOrMac,String flag){
+    public Map<String,String> port_query(String ipOrMac,String flag) throws Exception {
         Map<String,String> map=new HashMap<>();
         if(flag.equals("ip")){
             String mac=snmpCore.getMACByIP(ipOrMac);
@@ -477,7 +477,7 @@ public class NetworkRestController {
     }
 
     @PostMapping("/network/mac_query")
-    public Map<String,String> mac_query(String ipOrMac){
+    public Map<String,String> mac_query(String ipOrMac) throws Exception {
         Map<String,String> map=new HashMap<>();
         String res=snmpCore.getMACByIP(ipOrMac);
         if(res==null||res.equals("")){

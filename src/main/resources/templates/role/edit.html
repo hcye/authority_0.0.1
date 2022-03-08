@@ -52,8 +52,8 @@
         $(function () {
             $("#conform").click(function () {
                 var dtree=layui.dtree;
-                if($("#name").val()==''||$("#code").val()==''|| dtree.getCheckbarNodesParam("ResourceTree").length==0){
-                    layer.alert("角色名称和权限字符是必填项,角色必须拥有至少一个权限！");
+                if($("#name").val()==''||dtree.getCheckbarNodesParam("ResourceTree").length==0){
+                    layer.alert("角色名称是必填项,角色必须拥有至少一个权限！");
                 }else {
                     var powers=dtree.getCheckbarNodesParam("ResourceTree");
                     var powerString="";
@@ -61,7 +61,7 @@
                         powers[key].nodeId;
                         powerString=powerString+powers[key].nodeId+'-';
                     }
-                    $.post("/role/editRole", {name:$("#name").val(),code:$("#code").val(),status:$("#status").val(),powers:powerString,remarks:$("#remarks").val(),id:$("#roleId").val()},    //把name数据提交到ajaxRes action内，
+                    $.post("/role/editRole", {name:$("#name").val(),status:$("#status").val(),powers:powerString,remarks:$("#remarks").val(),id:$("#roleId").val()},    //把name数据提交到ajaxRes action内，
                         function (data) {
 
                             if(data["error"]!=null){
@@ -95,12 +95,7 @@
                     <input type="hidden" th:value="${role.getId()}" id="roleId" />
                 </div>
             </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label"><span style="color: red">*</span>权限字符:</label>
-                <div class="layui-input-block">
-                    <input class="layui-input" id="code" th:value="${role.getAuthorityCode()}" />
-                </div>
-            </div>
+
             <div class="layui-form-item">
                 <label class="layui-form-label">状态:</label>
                 <div class="layui-input-block">

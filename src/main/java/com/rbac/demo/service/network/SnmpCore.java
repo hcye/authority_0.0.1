@@ -86,7 +86,7 @@ public class SnmpCore {
 /*
 * mac查ip采用遍历网段方式，效率低下，耗时长。mac地址格式是 aa:bb:cc:dd:11:22
 * */
-    public String getIpByMAC(String mac) {
+    public String getIpByMAC(String mac) throws Exception {
         List<SwGateway> gateways=jpaGateway.findAll();
         for (SwGateway swGateway:gateways){
             String gateway=swGateway.getGateway();
@@ -108,7 +108,7 @@ public class SnmpCore {
     }
 
     //通过ip查询主机mac地址,效率高
-    public String getMACByIP(String ip) {
+    public String getMACByIP(String ip) throws Exception {
         List<SwGateway> gateways=jpaGateway.findAll();
         String[] ips=ip.split("\\.");
         String ip_head=ips[0]+"."+ips[1]+"."+ips[2]+".";
@@ -142,7 +142,15 @@ public class SnmpCore {
                     return "";
                 }
                 SwSwitch swSwitch=jpaSwSwitch.findSwSwitchesByLevel("核心").get(0);
-                String vlanRelateNum = targetGateway.getOidRelateCode();
+
+                String vlanRelateNum = null;
+                if(targetGateway.getOidRelateCode() == null){
+                    getIpMapInteger();
+                    vlanRelateNum = targetGateway.getOidRelateCode();
+                }else {
+                    vlanRelateNum=targetGateway.getOidRelateCode();
+                }
+                //System.out.println(vlanRelateNum);
                 SwOidTemp oidTemp = jpaSwOidTemp.findSwOidTempByOidNameAndAndSwFirmBySwFirm("arp",swSwitch.getSwFirmByFirm());
                 String oid_tmp = oidTemp.getOidTemp();
                 oid_tmp=oid_tmp.replaceAll("\\[p1\\]", vlanRelateNum);
@@ -151,6 +159,7 @@ public class SnmpCore {
                 if(arpRes.equals("null")||arpRes.contains("noSuch")){
                         return "";
                 }
+      //  1.3.6.1.4.1.2011.5.25.123.1.17.1.11.30.192.168.160.30.1.32 = noSuchInstance
 //              return arpRes.substring(arpRes.indexOf("=")+1);
                 return arpRes.split(" = ")[1];
     }
@@ -225,7 +234,9 @@ public class SnmpCore {
                 for (int j=ip_start;j<ip_tail;j++) {
                     String ip=ip_head+j;
                     String oid=oid_head+ip+oid_tail;
+                   // System.out.println(oid);
                     String arpRes=this.getInfo(swip,comm,oid,"","");
+                   // System.out.println(arpRes);
                     if(arpRes==null){
                         continue;
                     }

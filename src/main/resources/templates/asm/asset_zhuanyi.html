@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>资产转移</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+    <script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>-->
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <script th:inline="javascript">
+        layui.use('form', function(){
+            var form = layui.form;
+            //监听提交
+            //checkbox 点击事件
+        });
+        $(function () {
+            $("#target_zhuti").click(function () {
+                layer.open({
+                    type: 2,
+                    title: "修改主体",
+                    resize: true,
+                    area: ['300px', '800px'],
+                    content: ['/layer/layer_select_gp_zhuanyi.html', 'no'],
+                    //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                    //实现弹出层间不同frame的传值
+                });
+            })
+            //跳转到添加类型页面
+            $("#add").click(function () {
+                ids=$("#set_table").find("input[name='asset_id']")
+
+                var arr = new Array();
+                for(var i in ids){
+
+                        arr.push(ids[i].value);
+
+                }
+                document.location.href="/asm/select_4db_zy?cu_row="+arr+"&zy_or_db=zhuanyi";
+            });
+
+            $("button[name='delete']").click(function () {
+                assetid=$(this).parent().parent().find("input")[0].value;
+                ids=$("#set_table").find("input[name='asset_id']")
+
+                var arr = new Array();
+                for(var i in ids){
+                    if(ids[i].value!=assetid)
+                    arr.push(ids[i].value);
+                }
+
+                document.location.href="/asm/zhuanyi?selected="+arr;
+            });
+
+            $("#zhuanyi").click(function () {
+                ids=$("#set_table").find("input[name='asset_id']")
+                group_selected=$("#target_zhuti").val()
+                var arr = new Array();
+                if(ids.length>0){
+                    for(var i in ids){
+                        arr.push(ids[i].value);
+                    }
+                }
+                if(arr.length>0){
+                    if(group_selected!=""){
+                        document.location.href="/asm/do_zhuanyi?assets="+arr+"&group_with_id="+$("#target_zhuti").val();
+                    }else {
+                        layer.msg("接收主体不为空！");
+                    }
+                }else {
+                    layer.msg("被转移的资产不为空！");
+                }
+
+            })
+
+
+
+            //增加行
+
+
+
+
+        })
+
+
+    </script>
+</head>
+<body>
+<div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
+    <p>资产转移</p>
+</div>
+
+<div class="layui-container" style="width: 85%">
+    <input type="hidden" id="role_name" />
+    <div class="layui-row layui-form">
+        <!--layui-inline定义外层行内-->
+        <!--layui-input-inline定义内层行内-->
+        <div class="layui-form-item" style="margin-left: 60%">
+
+            <div class="layui-btn-group">
+                <button class="layui-btn" id="add"><i class="layui-icon">&#xe654;</i>新增行</button>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">接收主体:</label>
+                <div class="layui-input-inline">
+                    <input id="target_zhuti" class="layui-input" />
+                </div>
+                <div class="layui-btn-group">
+                    <button class="layui-btn " id="zhuanyi" ><i class="layui-icon">&#xe601;</i>转移</button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <div class="layui-row" style="margin-top: 5%">
+        <table class="layui-table" >
+            <thead class="layui-table-header">
+            <tr>
+                <td>名称</td>
+                <td>型号</td>
+                <td>编号</td>
+                <td>sn号</td>
+                <td>主体</td>
+                <td>入库时间</td>
+                <td>备注</td>
+                <td>操作</td>
+            </tr>
+            </thead>
+            <tbody class="layui-table-body" id="set_table">
+            <tr th:each="asset:${selected}">
+              <!--  th:each="isdam : ${dam}"  th:text="${isdam}"-->
+                <td th:text="${asset.aname}"></td><td th:text="${asset.model}">
+                </td><td th:text="${asset.assestnum}"></td>
+                <td th:text="${asset.snnum}"></td><td style="color: #ff3f2d" th:text="${asset.sysGroupName}"></td>
+                <td th:text="${asset.putintime}"></td><td th:text="${asset.remarks}"></td>
+                <td><button class='layui-btn layui-btn-xs' name='delete'>删除</button>
+                    <input type='hidden' th:value="${asset.id}" name="asset_id" /></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

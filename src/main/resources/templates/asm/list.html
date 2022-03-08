@@ -185,6 +185,22 @@
             document.location.href = "/asm/out?type=" + $("#dev_type").val() + "&isDam=" + $("#is_damage").val() + "&search=" + $("#keywords").val();
         });
 
+/*        $("#out").click(function () {
+            layer.open({
+                type: 2,
+                title: "导出资产",
+                resize: true,
+                area: ['400px', '900px'],
+                content: ['/layer/layer_leading_out_asset.html', 'no'],
+
+                //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                //实现弹出层间不同frame的传值
+                })
+            });*/
+/*            $("#out").click(function (){
+                document.location.href = "/asm/leading_out";
+            })*/
+
 //导出模板
         $("#outPutTemplate").click(function () {
             document.location.href = "/asm/outputTemplate";
@@ -192,20 +208,23 @@
 
         // type:type,search:search,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag,isDam:isDam
         $("#search").click(function () {
+            console.log('search click')
             queryPage($("#dev_type").val(), $("#keywords").val(), "", "", $("#pageInput").val(), "", $("#is_damage").val());
         })
         $("#next").click(function () {
+            console.log('next click')
             queryPage($("#dev_type").val(), $("#keywords").val(), "", "next", $("#pageInput").val(), "", $("#is_damage").val());
         })
         $("#jump").click(function () {
+            console.log('jump click')
             queryPage($("#dev_type").val(), $("#keywords").val(), "", "", $("#pageInput").val(), "jump", $("#is_damage").val());
         })
         $("#pre").click(function () {
+            console.log('pre click')
             queryPage($("#dev_type").val(), $("#keywords").val(), "pre", "", $("#pageInput").val(), "", $("#is_damage").val());
         })
 
-
-    });
+    })
 
 
 
@@ -221,7 +240,7 @@
                     <label class="layui-form-label">资产类型</label>
                     <div class="layui-input-inline">
                         <select class="layui-form-select" id="dev_type" lay-filter="tp">
-                            <option  th:each="tp : ${types}"  th:text="${tp.getTypeName()}"></option>
+                            <option name="tp"  th:each="tp : ${types}"  th:text="${tp.typeName}" shiro:hasPermission="${tp.permiCode}"></option>
                         </select>
                     </div>
                 </div>
@@ -237,7 +256,7 @@
 
                 <div class="layui-inline">
                     <div class="layui-input-inline">
-                        <input class="layui-input" placeholder="按编号、借用人、设备名检索" id="keywords"/>
+                        <input class="layui-input"   placeholder="按编号、借用人、设备名检索" id="keywords"/>
                     </div>
                     <button class="layui-btn " id="search"> <i class="layui-icon">&#xe615;</i> 查找</button>
                     <div class="layui-btn-group">

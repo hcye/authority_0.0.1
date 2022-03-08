@@ -6,6 +6,7 @@ import com.rbac.demo.service.AsmService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.CannotSerializeTransactionException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,8 +22,7 @@ import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Controller
 public class AsmController {
@@ -45,6 +45,8 @@ public class AsmController {
     private JpaOperatRecord jpaOperatRecord;
     @Autowired
     private AsmService asmService;
+    @Autowired
+    private JpaSupplier jpaSupplier;
     @RequiresPermissions("asm:bro:view")
     @GetMapping("/asm/bro")
     public String broPage(Model model){
@@ -82,6 +84,14 @@ public class AsmController {
     }
 
 
+    @GetMapping("/asm/leading_out")
+    public String leading_out_page(Model model){
+        List<Suppplier> supppliers=jpaSupplier.findAll();
+        List<AssetType> assetTypes=jpaAssetType.findAll();
+        model.addAttribute("supppliers",supppliers);
+        model.addAttribute("assetTypes",assetTypes);
+        return "asm/leading_out";
+    }
 
     @RequiresPermissions("asm:inp:view")
     @GetMapping("/asm/inp")
@@ -89,6 +99,7 @@ public class AsmController {
 
 
         List<AssetType> assetTypes=asmService.getPermitAsmAssetTypes();
+        List<Suppplier> supppliers=jpaSupplier.findAll();
         String firstType;
         if(assetTypes.size()==0){
             firstType="";
@@ -110,7 +121,7 @@ public class AsmController {
 
         model.addAttribute("types",assetTypes);
         model.addAttribute("names",names);
-
+        model.addAttribute("suppliers",supppliers);
         return "asm/inp";
     }
 
@@ -146,6 +157,38 @@ public class AsmController {
         model.addAttribute("cuindex",cuindex);
         return "asm/list";
     }
+
+    @GetMapping("/asm/select_4db_zy")
+    public String selectPage(Model model,String type,String isDam,String cu_row,String zy_or_db) throws UnsupportedEncodingException {
+        String rows_str="";
+        List<String> rows=new ArrayList<>();
+        for(String row:cu_row.split(",")){
+            if(!row.equals("")){
+                rows.add(row);
+            }
+        }
+
+        List<AssetType> types= jpaAssetType.findAssertType();
+        List<String> dam=new ArrayList<>();
+        dam.add("完好");
+        dam.add("损坏");
+        model.addAttribute("types",types);
+        model.addAttribute("dam",dam);
+        if(rows.size()>0){
+            for(String str:rows){
+                rows_str+=str+",";
+            }
+        }
+
+        model.addAttribute("asset_selected",rows_str);
+        if(zy_or_db.equals("zhuanyi")){
+            return "asm/select_asset_zhuanyi";
+        }else {
+            return "asm/select_asset_diaobo";
+        }
+
+    }
+
     @RequiresPermissions("asm:type:view")
     @GetMapping("/asm/type")
     public String typePage(){
@@ -161,11 +204,42 @@ public class AsmController {
         return "asm/devType";
     }
 
+    @RequiresPermissions("asm:supplier:view")
+    @GetMapping("/asm/supplier")
+    public String supplier(){
+        return "asm/supplier/supplier";
+    }
+
+    @RequiresPermissions("asm:supplier:add")
+    @GetMapping("/asm/supplier_add")
+    public String supplier_add(){
+        return "asm/supplier/supplier_add";
+    }
+
+    @RequiresPermissions("asm:supplier:delete")
+    @GetMapping("/supplier/del")
+    public String supplier_del(int id,Model model){
+        try {
+            jpaSupplier.deleteById(id);
+        }catch (Exception e){
+            model.addAttribute("err",e);
+            return "/supplier/error";
+        }
+        return "redirect:/asm/supplier";
+    }
+    @RequiresPermissions("asm:supplier:edit")
+    @GetMapping("/supplier/edit")
+    public String firm_edit(int id, Model model){
+
+        Suppplier suppplier=jpaSupplier.findById(id).get();
+        model.addAttribute("supplier",suppplier);
+        return "asm/supplier/supplier_edit";
+    }
     @RequiresPermissions("asm:type:add")
     @GetMapping("/asm/add_type")
     public String addTypePage(Model model){
-        List<Resources> list=jpaResources.findAll();
-        model.addAttribute("list",list);
+    //    List<Resources> list=jpaResources.findAll();
+        //model.addAttribute("list",list);
         return "asm/add_type";
     }
 
@@ -272,16 +346,29 @@ public class AsmController {
     @GetMapping("/asm/edit_dev")
     public String editDev(int id,String type,String isDam,String cuindex,Model model){
         Assert anAssert= jpaAssert.findById(id).get();
-
-
         String name=anAssert.getAname();
         DevType devType=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(name,anAssert.getAssetTypeByAssertType());
         String temp=devType.getAssetNumTemplate();
+        List<Suppplier> supppliers=jpaSupplier.findAll();
+        Suppplier cu_sup=anAssert.getSuppplierBySupplier();
+        if(cu_sup!=null){
+            for(Suppplier suppplier:supppliers){
+                if(suppplier.equals(cu_sup)){
+                    supppliers.remove(suppplier);
+                    break;
+                }
+            }
+            supppliers.add(0,cu_sup);
+
+        }
+
+
         model.addAttribute("dev",anAssert);
         model.addAttribute("type",type);
         model.addAttribute("isDam",isDam);
         model.addAttribute("temp",temp);
         model.addAttribute("cuindex",cuindex);
+        model.addAttribute("suppliers",supppliers);
         return "asm/edit_dev";
     }
     @RequiresPermissions("asm:exchange:view")
@@ -292,6 +379,112 @@ public class AsmController {
         model.addAttribute("oper",employee);
         model.addAttribute("assertTypes",types);
         return "asm/exchange/exchange_req";
+    }
+
+    @RequiresPermissions("asm:operate:view")
+    @GetMapping("/asm/operate")
+    public String operate_page(Model model){
+
+        return "asm/asm_operate";
+    }
+
+    @RequiresPermissions("asm:zhuanyi.view")
+    @GetMapping("/asm/zhuanyi")
+    public String zhuanyi(Model model,String selected,String asset_selected){
+        List<Assert> asserts=new ArrayList<>();
+        Set<String> ids =new LinkedHashSet<>();
+
+        if(selected!=null && !selected.equals("")){
+            /*for(String an:selected.split(",")){
+                asserts.add(jpaAssert.findById(Integer.parseInt(an)).get());
+            }*/
+            for(String an:selected.split(",")){
+                ids.add(an);
+            }
+            if(asset_selected!=null && !asset_selected.equals("")){
+                for (String an:asset_selected.split(",")){
+                    if(!an.equals("")){
+                        ids.add(an);
+                    }
+                }
+            }
+        }
+
+        for(String as:ids){
+           asserts.add(jpaAssert.findById(Integer.parseInt(as)).get());
+        }
+        List<Assert> asserts_reverse=new ArrayList<>();
+        for(int i=asserts.size()-1;i>=0;i--){
+          asserts_reverse.add(asserts.get(i));
+        }
+
+        model.addAttribute("selected",asserts_reverse);
+        return "asm/asset_zhuanyi";
+    }
+
+    @GetMapping("/asm/do_zhuanyi")
+    public String do_zhuanyi(Model model,String assets,String group_with_id){
+        List<Assert> asserts=new ArrayList<>();
+        for(String aid:assets.split(",")){
+            String gid=group_with_id.split("-")[0];
+            SysGroup sysGroup=jpaGroup.findById(Integer.parseInt(gid)).get();
+            Assert anAssert=jpaAssert.findById(Integer.parseInt(aid)).get();
+            anAssert.setSysGroupName(sysGroup.getGname());
+            anAssert.setSysGroupBySysGroup(sysGroup);
+            jpaAssert.save(anAssert);
+            asserts.add(anAssert);
+        }
+        model.addAttribute("selected",asserts);
+        return "asm/asset_zhuanyi";
+    }
+
+    @RequiresPermissions("asm:diaobo:view")
+    @GetMapping("/asm/diaobo")
+    public String diaobo(Model model,String selected,String asset_selected){
+        List<Assert> asserts=new ArrayList<>();
+        Set<String> ids =new LinkedHashSet<>();
+
+        if(selected!=null && !selected.equals("")){
+            /*for(String an:selected.split(",")){
+                asserts.add(jpaAssert.findById(Integer.parseInt(an)).get());
+            }*/
+            for(String an:selected.split(",")){
+                ids.add(an);
+            }
+            if(asset_selected!=null && !asset_selected.equals("")){
+                for (String an:asset_selected.split(",")){
+                    if(!an.equals("")){
+                        ids.add(an);
+                    }
+                }
+            }
+        }
+
+        for(String as:ids){
+            asserts.add(jpaAssert.findById(Integer.parseInt(as)).get());
+        }
+        List<Assert> asserts_reverse=new ArrayList<>();
+        for(int i=asserts.size()-1;i>=0;i--){
+            asserts_reverse.add(asserts.get(i));
+        }
+
+        model.addAttribute("selected",asserts_reverse);
+        return "asm/asset_diaobo";
+    }
+
+    @GetMapping("/asm/do_diaobo")
+    public String do_diaobo(Model model,String assets,String emp_with_id){
+        List<Assert> asserts=new ArrayList<>();
+        for(String aid:assets.split(",")){
+            String loginname=emp_with_id.split("-")[1];
+            Employee employee=jpaEmployee.findEmployeeByLoginName(loginname);
+            Assert anAssert=jpaAssert.findById(Integer.parseInt(aid)).get();
+            anAssert.setEmployeeByBorrower(employee);
+            jpaAssert.save(anAssert);
+            asserts.add(anAssert);
+        }
+        model.addAttribute("selected",asserts);
+        return "asm/asset_diaobo";
     }
 
     @RequiresPermissions("asm:exchange:view")
@@ -316,7 +509,12 @@ public class AsmController {
         anAssert.setRemarks(remarks);
         anAssert.setSnnum(sn);
         anAssert.setAssestnum(num);
-        anAssert.setSupplire(supplier);
+        for(Suppplier suppplier:jpaSupplier.findAll()){
+            if(suppplier.getSupplierName().equals(supplier)){
+                anAssert.setSuppplierBySupplier(suppplier);
+                break;
+            }
+        }
         if(sysGroup==null || sysGroup.equals("")){
             anAssert.setSysGroupBySysGroup(null);
             anAssert.setSysGroupName("");

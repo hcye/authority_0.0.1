@@ -29,11 +29,13 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 @RestController
@@ -65,6 +67,10 @@ public class AsmRestController {
     private JpaExchangeDevs jpaExchangeDevs;
     @Autowired
     private JpaMail jpaMail;
+    @Autowired
+    private JpaResources jpaResources;
+    @Autowired
+    private JpaSupplier jpaSupplier;
     @PostMapping("/asm/queryPage")
     public Map<String,List<Object>> queryPage(String type,String name,String search,String pre,String next,int pageIndex,String jumpFlag){
         /**
@@ -252,7 +258,7 @@ public class AsmRestController {
     }
 
     @PostMapping("/asm/addAssetType")
-    public Map<String, String> getDevsNames(String devType,String template,String desc,String authority){
+    public Map<String, String> getDevsNames(String devType,String template,String desc){
         Map<String ,String> map=new HashMap<>();
         devType=devType.trim();
         AssetType type = jpaAssetType.findAssetTypeByName(devType);
@@ -268,9 +274,35 @@ public class AsmRestController {
         assertType.setCreator(usname);
         assertType.setRemarks(desc);
         assertType.setTypeName(devType);
-        assertType.setPermiCode(authority);
+        /*
+        * 生成权限字符，
+        * 利用这个权限字符创建资源对象
+        * 保存权限字符。
+        * */
+        Random r =new Random(100);
+        String permissionCode="";
+        while (true){
+            int rand=r.nextInt(1000);
+            permissionCode="asm:oper:"+rand;
+            if(jpaResources.findResourcesByPermission(permissionCode)!=null){
+                continue;
+            }else{
+                break;
+            }
+        }
+
+        Resources resources=new Resources();
+        resources.setResourcesByParentId(jpaResources.findById(79).get());
+        resources.setDescription(devType);
+        resources.setPermission(permissionCode);
+        resources.setType("按钮");
+        jpaResources.save(resources);
+
+        assertType.setPermiCode(permissionCode);
         jpaAssetType.save(assertType);
-        asmRecordService.write(AsmAction.dev_add_type,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null,devType);
+        asmRecordService.write(AsmAction.dev_add_type,new Timestamp(new java.util.Date().getTime()),
+                (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),
+                null,null,devType);
         map.put("ok","新增成功!");
         return map;
     }
@@ -408,6 +440,103 @@ public class AsmRestController {
     public List<AssetType> getTypes(){
 
         return  jpaAssetType.findAll();
+
+    }
+
+
+
+/*    @PostMapping("/supplier/add_commit")
+    public Map<String,String> supplier_add(String name,String remark){
+        Map<String,String> map=new HashMap<>();
+        if(jpaSupplier.findSupppliersBySupplierName(name)!=null){
+            map.put("ERROR","添加失败，同名供应商已存在！");
+            return map;
+        }
+        Suppplier suppplier=new Suppplier();
+        suppplier.setSupplierName(name);
+        suppplier.setRemark(remark);
+        jpaSupplier.save(suppplier);
+        map.put("SUCCESS","添加成功");
+        return map;
+    }*/
+
+    @RequestMapping("/supplier/getAll")
+    public Map<String, List<Object>> getAllSupplier(String searchFlag,String name,String pre,String next,String pageIndex){
+        Map<String,List<Object>> map=new HashMap<>();
+
+        int pagenow=0;
+        int pageSize=10;
+        Page<Suppplier> supppliers = null;
+        //初始页
+        if(pageIndex.equals("")){
+            Pageable pageable=PageRequest.of(pagenow,pageSize);
+            supppliers =jpaSupplier.findAll(pageable);
+        }else
+            //搜索
+            if(!searchFlag.equals("")){
+                name=ConvertStrForSearch.getFormatedString(name);
+                Pageable pageable=PageRequest.of(pagenow,pageSize);
+                supppliers=jpaSupplier.findSupppliersBySupplierNameLike(name,pageable);
+            }else
+                //普通翻页
+                if(name.equals("")){
+                    Pageable pageable=PageRequest.of(Integer.parseInt(pageIndex)-1,pageSize);
+                    if(pre.equals("1")){
+                        pageable=pageable.previousOrFirst();
+                    }
+                    if (next.equals("1")){
+                        pageable=pageable.next();
+                    }
+                    supppliers=jpaSupplier.findAll(pageable);
+
+                }else
+                    //带参数翻页
+                    if(!name.equals("")){
+                        name=ConvertStrForSearch.getFormatedString(name);
+                        Pageable pageable=PageRequest.of(Integer.parseInt(pageIndex)-1,pageSize);
+                        if(pre.equals("1")){
+                            pageable=pageable.previousOrFirst();
+                        }
+                        if (next.equals("1")){
+                            pageable=pageable.next();
+                        }
+                        supppliers=jpaSupplier.findSupppliersBySupplierNameLike(name,pageable);
+                    }
+        map.put("suppliers", Collections.singletonList(supppliers));
+        return map;
+    }
+
+    @PostMapping("/supplier/add_commit")
+    public Map<String,String> supplier_add(String name,String remark){
+        Map<String,String> map=new HashMap<>();
+        if(!jpaSupplier.findSupppliersBySupplierName(name).isEmpty()){
+            map.put("ERROR","添加失败，同名品牌已存在！");
+            return map;
+        }
+        Suppplier suppplier=new Suppplier();
+        suppplier.setSupplierName(name);
+        suppplier.setRemark(remark);
+        jpaSupplier.save(suppplier);
+        map.put("SUCCESS","添加成功");
+        return map;
+    }
+
+    @PostMapping("/supplier/edit_commit")
+    public Map<String,String> supplier_edit(int id,String name,String remark){
+        Map<String,String> map=new HashMap<>();
+        Suppplier suppplier=jpaSupplier.findById(id).get();
+        List<Suppplier> supppliers=jpaSupplier.findSupppliersBySupplierName(name);
+
+        if(!supppliers.isEmpty()&&supppliers.size()>0&&supppliers.get(0).getId()!=id){
+            map.put("ERROR","修改失败，同名品牌已存在！");
+            return map;
+        }
+
+        suppplier.setRemark(remark);
+        suppplier.setSupplierName(name);
+        jpaSupplier.save(suppplier);
+        map.put("SUCCESS","编辑成功");
+        return map;
     }
 
     @PostMapping("/asm/getTypeName")
@@ -456,8 +585,14 @@ public class AsmRestController {
     public Map<String,String> deleteType(int id){
         Map<String,String> map=new HashMap<>();
         AssetType type= jpaAssetType.findById(id).get();
+
         Collection<Assert> asserts=type.getAssertsById();
         if(asserts.isEmpty()){
+            String permiCode=type.getPermiCode();
+            Resources resources=jpaResources.findResourcesByPermission(permiCode);
+            if(resources!=null){
+                jpaResources.delete(resources);
+            }
             type.setDevTypesById(null);
             type.setAssertsById(null);
             jpaAssetType.delete(type);
@@ -495,6 +630,13 @@ public class AsmRestController {
         String devTypeAssetNumTemplate=devType.getAssetNumTemplate();
         map.put("code",devTypeAssetNumTemplate);
         map.put("max",max);
+        return map;
+    }
+    @PostMapping("/supplier/get_supplier")
+    public Map<String, List<Suppplier>> getSupplier(){
+        List<Suppplier> supppliers=jpaSupplier.findAll();
+        Map<String,List<Suppplier>> map=new HashMap<>();
+        map.put("suppliers",supppliers);
         return map;
     }
 
@@ -544,6 +686,7 @@ public class AsmRestController {
          * 确定是否是翻页
          *
          * */
+
         Map<String,List<Object>> map=new HashMap<>();
         List<Employee> bros=new ArrayList<>();
         List<Page<Assert>> pages=new ArrayList<>();
@@ -572,6 +715,26 @@ public class AsmRestController {
         pages.add(page);
         map.put("emp", Collections.singletonList(bros));
         map.put("page", Collections.singletonList(pages));
+        return map;
+    }
+
+    @RequestMapping("/asm/search_asset4db_zy")
+    public Map<String,List<Object>> search4db_zy(String type,String isDam,String search) throws UnsupportedEncodingException {
+
+
+        Map<String,List<Object>> map=new HashMap<>();
+        List<Employee> bros=new ArrayList<>();
+        List<Assert> asserts  = asmService.queryList(type,isDam,search);
+        for (Assert ast:asserts){
+            Employee bro=ast.getEmployeeByBorrower();
+            if(bro==null){
+                bros.add(null);
+            }else {
+                bros.add(bro);
+            }
+        }
+        map.put("emp", Collections.singletonList(bros));
+        map.put("asserts", Collections.singletonList(asserts));
         return map;
     }
 
@@ -680,7 +843,8 @@ public class AsmRestController {
                     ast.setSysGroupBySysGroup(group);
                     ast.setSysGroupName(group.getGname());
                 }
-                ast.setSupplire(supplier);
+                Suppplier suppplier = jpaSupplier.findSupppliersBySupplierName(supplier).get(0);
+                ast.setSuppplierBySupplier(suppplier);
                 list.add(ast);
                 asmRecordService.write(AsmAction.dev_in,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null,"");
             }
@@ -782,7 +946,7 @@ public class AsmRestController {
 
 
             try {
-                reader = EasyExcel.read(inputStream, AssetDownloadModel.class, new ReadAssetEventListener(jpaAssert, jpaEmployee, jpaAssetType, asmService, jpaOperatRecord,jpaDevType,jpaGroup)).excelType(ExcelTypeEnum.XLSX).build();
+                reader = EasyExcel.read(inputStream, AssetDownloadModel.class, new ReadAssetEventListener(jpaSupplier,jpaAssert, jpaEmployee, jpaAssetType, asmService, jpaOperatRecord,jpaDevType,jpaGroup)).excelType(ExcelTypeEnum.XLSX).build();
                 ReadSheet readSheet = EasyExcel.readSheet(0).build();
                 reader.read(readSheet);
             } catch (Exception e) {
@@ -910,6 +1074,12 @@ public class AsmRestController {
             }
             if(anAssert.getEmployeeByBorrower()!=null){
                 model.setBorrower(anAssert.getEmployeeByBorrower().getEname());
+            }
+            if(anAssert.getSuppplierBySupplier()!=null){
+                model.setProvider(anAssert.getSuppplierBySupplier().getSupplierName());
+            }
+            if(anAssert.getSysGroupBySysGroup()!=null){
+                model.setSysGroup(anAssert.getSysGroupBySysGroup().getGname());
             }
             model.setDevName(anAssert.getAname());
             if(anAssert.getBrotime()!=null){

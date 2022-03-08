@@ -45,9 +45,9 @@
 
         $("#conform").click(function () {
             // String devType,String template,String desc
-            var name=$("#type_name").val();
+            var name=$("#type_name").val().trim();
             var temp=$("#encode_template").val().trim();
-            $.post("/asm/addAssetType", {devType:name,template:temp,desc:$("#desc").val(),authority:$("#authority").val()},    //把name数据提交到ajaxRes action内，
+            $.post("/asm/addAssetType", {devType:name,template:temp,desc:$("#desc").val()},    //把name数据提交到ajaxRes action内，
                 function(data) {
                     if(data["error"]!=null){
                         layer.alert(data["error"]);
@@ -95,12 +95,12 @@
                 <p style="margin-left: 12%"><span style="color: firebrick">在新建类型前必须新建类型权限</span>,在此处引用该标识用于授权!</p>
                 <p style="margin-left: 12%">系统管理->菜单管理->操作权限->新增</p>
                 <br/>
-                <label class="layui-form-label">权限标识:</label>
+           <!--     <label class="layui-form-label">权限标识:</label>
                 <div class="layui-input-block">
                     <select id="authority" >
                         <option th:each="res : ${list}" th:text="${res.getPermission()}"></option>
                     </select>
-                </div>
+                </div>-->
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label">描述:</label>

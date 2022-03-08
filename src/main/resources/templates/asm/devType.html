@@ -48,6 +48,13 @@
                     content: ['/layer/layer_add_devType', 'no'],
                     //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
                     //实现弹出层间不同frame的传值
+                    success: function (layero, index) {
+                        var body = layer.getChildFrame('body', index);
+                        var se = body.find('#type_name');
+                        $('[name="devtp"]').each(function (){
+                            se.append("<option>"+$(this).val()+"</option>");
+                        })
+                    }
                 })
             });
                 //初始化数据
@@ -185,7 +192,7 @@
                 <label class="layui-form-label">设备类型:</label>
                 <div class="layui-input-inline">
                     <select id="type">
-                        <option  th:each="tpName : ${list}" shiro:hasPermission="${tpName.getPermiCode()}" th:text="${tpName.getTypeName()}"></option>
+                        <option name="devtp"  th:each="tpName : ${list}" shiro:hasPermission="${tpName.getPermiCode()}" th:text="${tpName.getTypeName()}"></option>
                     </select>
                 </div>
             </div>

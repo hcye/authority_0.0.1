@@ -4,6 +4,7 @@ import com.rbac.demo.entity.*;
 import com.rbac.demo.jpa.JpaResources;
 import com.rbac.demo.jpa.JpaRole;
 import com.rbac.demo.jpa.JpaRole2Resources;
+import com.rbac.demo.service.Chinese2Eng;
 import com.rbac.demo.service.PermissionService;
 import com.rbac.demo.service.RoleService;
 import org.apache.shiro.SecurityUtils;
@@ -15,10 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 public class RoleRestController {
@@ -39,8 +37,12 @@ public class RoleRestController {
 
     }
     @PostMapping("/role/addRole")
-    public Map<String,String> add(String name, String code, String status, String powers,String remarks){
+    public Map<String,String> add(String name, String status, String powers,String remarks){
         Map<String,String > map=new HashMap<>();
+        Random random = new Random(100);
+        int rand=random.nextInt(1000);
+        String py=Chinese2Eng.convertHanzi2Pinyin(name,false);
+        String code="role:"+ py+":"+rand;
         Role savedRole=roleService.saveRole(name, code, status, remarks,null);
         if(savedRole==null){
             map.put("error","关键字重复");
@@ -61,9 +63,10 @@ public class RoleRestController {
         return map;
     }
     @PostMapping("/role/editRole")
-    public Map<String,String> edit(int id,String name, String code, String status, String powers,String remarks){
+    public Map<String,String> edit(int id,String name, String status, String powers,String remarks){
         Map<String,String > map=new HashMap<>();
         Role role=jpaRole.findById(id).get();
+        String code = role.getAuthorityCode();
         Role savedRole=roleService.saveRole(name, code, status, remarks,role);
         if(savedRole==null){
             map.put("error","关键字重复");

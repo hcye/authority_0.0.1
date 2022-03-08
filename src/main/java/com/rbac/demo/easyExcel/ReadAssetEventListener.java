@@ -27,10 +27,11 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
     private JpaDevType jpaDevType;
     private AsmService asmService;
     private JpaGroup jpaGroup;
+    private JpaSupplier jpaSupplier;
     private JpaOperatRecord jpaOperatRecord;
     private List<Assert> listOthermeans = new ArrayList<>();
 
-    public ReadAssetEventListener(JpaAssert jpaAssert,JpaEmployee jpaEmployee,JpaAssetType jpaAssetType,AsmService asmService,JpaOperatRecord jpaOperatRecord,JpaDevType jpaDevType,JpaGroup jpaGroup) {
+    public ReadAssetEventListener(JpaSupplier jpaSupplier,JpaAssert jpaAssert,JpaEmployee jpaEmployee,JpaAssetType jpaAssetType,AsmService asmService,JpaOperatRecord jpaOperatRecord,JpaDevType jpaDevType,JpaGroup jpaGroup) {
         this.jpaAssert=jpaAssert;
         this.jpaEmployee=jpaEmployee;
         this.jpaAssetType=jpaAssetType;
@@ -38,6 +39,7 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
         this.asmService=asmService;
         this.jpaDevType=jpaDevType;
         this.jpaGroup=jpaGroup;
+        this.jpaSupplier=jpaSupplier;
     }
 
     @Override
@@ -157,7 +159,18 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
                 throw new ExcelAnalysisException(num + "行" + "只能填写 报废或者完好");
             }
             if(!provider.equals("")){
-                anAssert.setSupplire(provider);
+                List<Suppplier> supppliers=jpaSupplier.findAll();
+                boolean flag=false;
+                for (Suppplier suppplier:supppliers){
+                    if(suppplier.getSupplierName().equals(provider.trim())){
+                        anAssert.setSuppplierBySupplier(suppplier);
+                        flag=true;
+                        break;
+                    }
+                }
+                if(!flag){
+                    throw new ExcelAnalysisException(num + "行" + "名为 "+provider+" 的供应商不存在,资产管理->供应商->新增");
+                }
             }
             if(!groupId.equals("")){
                 int sysGroupId=Integer.parseInt(groupId);

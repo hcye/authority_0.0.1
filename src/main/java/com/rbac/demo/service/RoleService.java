@@ -89,7 +89,7 @@ public class RoleService {
     }
     public Role saveRole(String name, String code, String status,String remarks,Role role1){
 
-        if(jpaRole.findRoleByRname(name)!=null&&jpaRole.findRoleByAuthorityCode(code)!=null){
+        if(jpaRole.findRoleByRname(name)!=null||jpaRole.findRoleByAuthorityCode(code)!=null){
             if(role1==null||!role1.getRname().equals(jpaRole.findRoleByRname(name).getRname())||
                     !role1.getAuthorityCode().equals(jpaRole.findRoleByAuthorityCode(code).getAuthorityCode())){
                 return null;
