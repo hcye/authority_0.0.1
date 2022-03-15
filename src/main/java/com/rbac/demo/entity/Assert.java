@@ -17,6 +17,7 @@ public class Assert {
     private String remarks="";
     private String snnum="";
     private String broName="";
+    private String maintain="0";
     private String workless="0";
     private String price="";
     private Date brotime=new Date(new java.util.Date().getTime());
@@ -73,6 +74,15 @@ public class Assert {
         }
     }
 
+    @Basic
+    @Column(name = "maintain", nullable = true, length = 64)
+    public String getMaintain() {
+        return maintain;
+    }
+
+    public void setMaintain(String maintain) {
+        this.maintain = maintain;
+    }
 
     @Basic
     @Column(name = "assestnum", nullable = true, length = 64)

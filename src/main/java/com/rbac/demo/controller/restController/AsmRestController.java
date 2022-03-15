@@ -11,16 +11,14 @@ import com.rbac.demo.service.*;
 import com.rbac.demo.tool.ConvertStrForSearch;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.cache.ehcache.EhCacheManager;
-import org.apache.shiro.session.Session;
-import org.apache.shiro.web.servlet.ShiroHttpSession;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
-import org.springframework.util.ClassUtils;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -71,6 +69,11 @@ public class AsmRestController {
     private JpaResources jpaResources;
     @Autowired
     private JpaSupplier jpaSupplier;
+    @Autowired
+    private JpaAssetRecord jpaAssetRecord;
+    @Autowired
+    private  JpaAssetAction jpaAssetAction;
+
     @PostMapping("/asm/queryPage")
     public Map<String,List<Object>> queryPage(String type,String name,String search,String pre,String next,int pageIndex,String jumpFlag){
         /**
@@ -203,7 +206,8 @@ public class AsmRestController {
                     Assert ast=jpaAssert.findById(Integer.parseInt(str)).get();
                     ast.setEmployeeByBorrower(borrower);
                     asmRecordService.write(AsmAction.dev_borrow,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),borrower,ast,"");
-                    jpaAssert.saveAndFlush(ast);
+                    Assert anAssert=jpaAssert.save(ast);
+                    asmRecordService.createAndSaveAssetRecord(AssetAction.borrow,anAssert,borrower,null);
                 }
             }
         }else if(actionFlag.equals("ret")){
@@ -212,7 +216,8 @@ public class AsmRestController {
                     Assert ast=jpaAssert.findById(Integer.parseInt(str)).get();
                     ast.setEmployeeByBorrower(null);
                     asmRecordService.write(AsmAction.dev_return,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),borrower,ast,"");
-                    jpaAssert.saveAndFlush(ast);
+                    Assert anAssert=jpaAssert.save(ast);
+                    asmRecordService.createAndSaveAssetRecord(AssetAction.retrun_asset,anAssert,borrower,null);
                 }
             }
         }
@@ -434,6 +439,49 @@ public class AsmRestController {
         return  typeService.getTypePage( name, pre, next, pageNow);
     }
 
+    @PostMapping("/asm/scarp")
+    public Map<String,String> scarp(int id,String reason){
+        Assert anAssert=jpaAssert.findById(id).get();
+        anAssert.setWorkless("1");
+        AssetRecord assetRecord=new AssetRecord();
+        assetRecord.setAssetActionByAssetAction(jpaAssetAction.findAssetActionByAssetAction("报废"));
+        assetRecord.setActDetail(reason);
+        assetRecord.setAssertByAsset(anAssert);
+        jpaAssetRecord.save(assetRecord);
+        Map<String,String> map=new HashMap<>();
+        map.put("success","success");
+        return map;
+    }
+
+    @PostMapping("/asm/maintain")
+    public Map<String,String> maintain(int id,String reason){
+        Assert anAssert=jpaAssert.findById(id).get();
+        anAssert.setMaintain("1");
+        AssetRecord assetRecord=new AssetRecord();
+        assetRecord.setAssetActionByAssetAction(jpaAssetAction.findAssetActionByAssetAction("维修"));
+        assetRecord.setActDetail(reason);
+        assetRecord.setAssertByAsset(anAssert);
+        assetRecord.setStartTime(new java.sql.Date(new Date().getTime()));
+        jpaAssetRecord.save(assetRecord);
+        Map<String,String> map=new HashMap<>();
+        map.put("success","success");
+        return map;
+    }
+    // exit maintain
+    @PostMapping("/asm/emaintain")
+    public Map<String,String> emaintain(int id,String reason){
+        Assert anAssert=jpaAssert.findById(id).get();
+        anAssert.setMaintain("0");
+        AssetRecord assetRecord=new AssetRecord();
+        assetRecord.setAssetActionByAssetAction(jpaAssetAction.findAssetActionByAssetAction("维修"));
+        assetRecord.setActDetail(reason);
+        assetRecord.setAssertByAsset(anAssert);
+        assetRecord.setStartTime(new java.sql.Date(new Date().getTime()));
+        jpaAssetRecord.save(assetRecord);
+        Map<String,String> map=new HashMap<>();
+        map.put("success","success");
+        return map;
+    }
 
 
     @PostMapping("/asm/getTypeNames")
@@ -719,7 +767,7 @@ public class AsmRestController {
     }
 
     @RequestMapping("/asm/search_asset4db_zy")
-    public Map<String,List<Object>> search4db_zy(String type,String isDam,String search) throws UnsupportedEncodingException {
+    public Map<String,List<Object>> search4db_zy(String type,String isDam,String search){
 
 
         Map<String,List<Object>> map=new HashMap<>();
@@ -770,6 +818,8 @@ public class AsmRestController {
         if(borrower!=null){
             map.put("error","设备被借出！归还后才能删除");
         }else {
+            List<AssetRecord> assetRecords= (List<AssetRecord>) anAssert.getAssetRecordsById();
+            jpaAssetRecord.deleteAll(assetRecords);
             jpaAssert.delete(anAssert);
             asmRecordService.write(AsmAction.dev_del,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null,"");
             map.put("ok","删除成功");
@@ -845,10 +895,15 @@ public class AsmRestController {
                 }
                 Suppplier suppplier = jpaSupplier.findSupppliersBySupplierName(supplier).get(0);
                 ast.setSuppplierBySupplier(suppplier);
-                list.add(ast);
                 asmRecordService.write(AsmAction.dev_in,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null,"");
             }
-            jpaAssert.saveAll(list);
+          //  jpaAssert.saveAll(list);
+            for(Assert ast:list){
+                Assert anAssert=jpaAssert.save(ast);
+                asmRecordService.createAndSaveAssetRecord(AssetAction.putin,anAssert,null,null);
+
+            }
+
             map.put("ok","入库成功！");
             return map;
         }
@@ -904,7 +959,11 @@ public class AsmRestController {
             list.add(ast);
     //        asmRecordService.write(AsmAction.dev_in,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null);
         }
-        jpaAssert.saveAll(list);
+
+        for(Assert ast:list){
+            Assert anAssert=jpaAssert.save(ast);
+            asmRecordService.createAndSaveAssetRecord(AssetAction.putin,anAssert,null,null);
+        }
         map.put("ok","入库成功！");
         return map;
     }
@@ -946,7 +1005,7 @@ public class AsmRestController {
 
 
             try {
-                reader = EasyExcel.read(inputStream, AssetDownloadModel.class, new ReadAssetEventListener(jpaSupplier,jpaAssert, jpaEmployee, jpaAssetType, asmService, jpaOperatRecord,jpaDevType,jpaGroup)).excelType(ExcelTypeEnum.XLSX).build();
+                reader = EasyExcel.read(inputStream, AssetDownloadModel.class, new ReadAssetEventListener(asmRecordService,jpaAssetRecord,jpaSupplier,jpaAssert, jpaEmployee, jpaAssetType, asmService, jpaOperatRecord,jpaDevType,jpaGroup)).excelType(ExcelTypeEnum.XLSX).build();
                 ReadSheet readSheet = EasyExcel.readSheet(0).build();
                 reader.read(readSheet);
             } catch (Exception e) {

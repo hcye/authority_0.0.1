@@ -5,6 +5,7 @@ import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.excel.exception.ExcelAnalysisException;
 import com.rbac.demo.entity.*;
 import com.rbac.demo.jpa.*;
+import com.rbac.demo.service.AsmRecordService;
 import com.rbac.demo.service.AsmService;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.stereotype.Component;
@@ -30,8 +31,10 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
     private JpaSupplier jpaSupplier;
     private JpaOperatRecord jpaOperatRecord;
     private List<Assert> listOthermeans = new ArrayList<>();
+    private JpaAssetRecord jpaAssetRecord;
+    private AsmRecordService asmRecordService;
 
-    public ReadAssetEventListener(JpaSupplier jpaSupplier,JpaAssert jpaAssert,JpaEmployee jpaEmployee,JpaAssetType jpaAssetType,AsmService asmService,JpaOperatRecord jpaOperatRecord,JpaDevType jpaDevType,JpaGroup jpaGroup) {
+    public ReadAssetEventListener(AsmRecordService asmRecordService,JpaAssetRecord jpaAssetRecord,JpaSupplier jpaSupplier,JpaAssert jpaAssert,JpaEmployee jpaEmployee,JpaAssetType jpaAssetType,AsmService asmService,JpaOperatRecord jpaOperatRecord,JpaDevType jpaDevType,JpaGroup jpaGroup) {
         this.jpaAssert=jpaAssert;
         this.jpaEmployee=jpaEmployee;
         this.jpaAssetType=jpaAssetType;
@@ -40,6 +43,8 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
         this.jpaDevType=jpaDevType;
         this.jpaGroup=jpaGroup;
         this.jpaSupplier=jpaSupplier;
+        this.jpaAssetRecord=jpaAssetRecord;
+        this.asmRecordService=asmRecordService;
     }
 
     @Override
@@ -207,6 +212,10 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
         record.setActionTime(new Timestamp(new java.util.Date().getTime()));
         record.setEmployeeByDealer(employee);
         jpaOperatRecord.save(record);
-        jpaAssert.saveAll(listOthermeans);
+        for(Assert ast:listOthermeans){
+            Assert anAssert=jpaAssert.save(ast);
+            asmRecordService.createAndSaveAssetRecord(AssetAction.putin,anAssert,null,null);
+        }
+       // jpaAssert.saveAll(listOthermeans);
     }
 }

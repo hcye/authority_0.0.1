@@ -82,9 +82,12 @@ public class AsmService {
             if(page.isEmpty()){
                 page=jpaAssert.findAssertsByAssestnumLikeAndDamFlagAndType(type,search,damFlag,pageable);
                 if(page.isEmpty()){
-                    page=jpaAssert.findAssertsByBorroworPingyinLikeAndDamFlag(search,damFlag,pageable);
+                    page=jpaAssert.findAssertBySnnumLikeAndDamFlag(search,damFlag,pageable);
                     if(page.isEmpty()){
-                        page=jpaAssert.findAssertsByBorroworNameLikeAndDamFlag(search,damFlag,pageable);
+                        page=jpaAssert.findAssertsByBorroworPingyinLikeAndDamFlag(search,damFlag,pageable);
+                        if(page.isEmpty()){
+                            page=jpaAssert.findAssertsByBorroworNameLikeAndDamFlag(search,damFlag,pageable);
+                        }
                     }
                 }
             }
@@ -130,9 +133,12 @@ public class AsmService {
             if(list.isEmpty()){
                 list=jpaAssert.findAssertsByAssestnumLikeAndDamFlagAndType(type,search,damFlag);
                 if(list.isEmpty()){
-                    list=jpaAssert.findAssertsByBorroworPingyinLikeAndDamFlag(search,damFlag);
-                    if(list.isEmpty()){
-                        list=jpaAssert.findAssertsByBorroworNameLikeAndDamFlag(search,damFlag);
+                    list=jpaAssert.findAssertBySnnumLikeAndDamFlag(search,damFlag);
+                    if(list.isEmpty()) {
+                        list = jpaAssert.findAssertsByBorroworPingyinLikeAndDamFlag(search, damFlag);
+                        if (list.isEmpty()) {
+                            list = jpaAssert.findAssertsByBorroworNameLikeAndDamFlag(search, damFlag);
+                        }
                     }
                 }
             }

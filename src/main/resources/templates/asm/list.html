@@ -37,10 +37,11 @@
                 var editflag = [[${@permission.getPermi('asm:edit:btn')}]];
                 var badflag = [[${@permission.getPermi('asm:dem:btn')}]];
                 var deleteflag= [[${@permission.getPermi('asm:delete:btn')}]];
+                var maintainflag= [[${@permission.getPermi('asm:maintain:btn')}]];
                 var editDisable = "";
                 var badDisable = "";
                 var deleteDisable="";
-
+                var maintainDisable="";
                 if (editflag == "layui-btn-disabled") {
                     editDisable = "disabled='true'";
                 }
@@ -50,12 +51,15 @@
                 if (deleteflag == "layui-btn-disabled") {
                     deleteDisable = "disabled='true'";
                 }
-
+                if (maintainflag == "layui-btn-disabled") {
+                    maintainDisable = "disabled='true'";
+                }
 
 
                 var bro = data["emp"][0];
                 var page = data["page"][0][0];
                 var astList = page.content;
+
                 $("#tb").find("tr").remove();
                 for (var key in astList) {
                     var browser;
@@ -66,12 +70,35 @@
                     }
                     var sn = transformNullStr(astList[key].snnum);
                     var assetNum=transformNullStr(astList[key].assestnum);
+                    var wh = '维护';
+                    var whname = 'maintain';
+                    var btn_color = ''
+
+                    var bf = '报废';
+                    var btn_color = ''
+
+                    if(astList[key].maintain=='1'){
+                        wh='维护完成';
+                        whname='emaintain';
+                        btn_color = 'style="background-color: #ff3f2d"';
+                    }
+                    if(astList[key].workless=='1'){
+                        bf='已报废';
+                        badDisable = "disabled='true'";
+                        badflag="layui-btn-disabled";
+                        maintainDisable = "disabled='true'";
+                        maintainflag = "layui-btn-disabled";
+                        editDisable = "disabled='true'";
+                        editflag = "layui-btn-disabled";
+                    }
                     $("#tb").append("<tr><td><input type='hidden' value='" + astList[key].id + "' />" + astList[key].aname + "" +
                         "</td><td>" + astList[key].model + "</td><td>" + assetNum + "" +
                         "</td><td>" + browser + "</td><td>" + sn + "</td><td>" + astList[key].price + "</td><td>" + astList[key].putintime +
                         "</td><td>" + astList[key].remarks + "</td><td>" +
                         "<button class='layui-btn layui-btn-xs " + editflag + "' " + editDisable + "  name='edit'>编辑</button>" +
-                        "<button class='layui-btn layui-btn-xs " + badflag + "' " + badDisable + "  name='bad'>报损</button>" +
+                        "<button class='layui-btn layui-btn-xs " + maintainflag + "' " + maintainDisable + " "+btn_color+"  name="+whname+">"+wh+"</button>" +
+                        "<button class='layui-btn layui-btn-xs " + badflag + "' " + badDisable + "  name='bad'>"+bf+"</button>" +
+                        "<button class='layui-btn layui-btn-xs '   name='record'>资产履历</button>" +
                         "<button class='layui-btn layui-btn-xs " + deleteflag + "' " + deleteDisable + "  name='del'>删除</button></td></tr>");
                 }
 
@@ -82,8 +109,13 @@
 
                     //获得操作角色id
                 });
+                $("#tb").find("button[name='record']").click(function () {
+                    document.location.href = "/asm/record_view?id=" + $(this).parent().parent().find("input")[0].value;
+
+                    //获得操作角色id
+                });
                 //添加报损按钮点击事件
-                $("#tb").find("button[name='bad']").click(function () {
+  /*              $("#tb").find("button[name='bad']").click(function () {
                     var btn = $(this);
                     layer.confirm('确定报损！', {
                         btn: ['确定', '取消'] //可以无限个按钮
@@ -103,7 +135,94 @@
                         layer.close(index);
                     });
 
-                })
+                })*/
+
+                $("#tb").find("button[name='maintain']").click(function () {
+                    var btn = $(this);
+                    var aid = btn.parent().parent().find("input")[0].value;
+                    layer.open({
+                        type: 2,
+                        title: "维修原因",
+                        area: ['800px', '200px'],
+                        content: ['/layer/layer_maintain_reason.html', 'no'],
+                        btn: ['确定', '取消'],
+                        //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                        //实现弹出层间不同frame的传值
+                        yes: function(index, layero){
+                        //按钮【按钮一】的回调
+                            var body = layer.getChildFrame('body', index);
+                            var reason = body.find('#reason');
+                            $.post("/asm/maintain", {id:aid,reason:$(reason).val()},    //把name数据提交到ajaxRes action内，
+                                function(data) {
+                                    queryPage($("#dev_type").val(), $("#keywords").val(), "", "", $("#pageInput").val(), "jump", $("#is_damage").val());
+                                    layer.close(index);
+                                }, "json");
+                             },
+                        btn2: function(index, layero){
+                        //按钮【按钮二】的回调
+                            layer.close(index);
+                        //return false 开启该代码可禁止点击该按钮关闭
+                        }
+                    })
+                });
+
+                $("#tb").find("button[name='emaintain']").click(function () {
+                    var btn = $(this);
+                    var aid = btn.parent().parent().find("input")[0].value;
+                    layer.open({
+                        type: 2,
+                        title: "维护结果",
+                        area: ['800px', '200px'],
+                        content: ['/layer/layer_maintain_complete.html', 'no'],
+                        btn: ['确定', '取消'],
+                        //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                        //实现弹出层间不同frame的传值
+                        yes: function(index, layero){
+                            //按钮【按钮一】的回调
+                            var body = layer.getChildFrame('body', index);
+                            var reason = body.find('#res');
+                            $.post("/asm/emaintain", {id:aid,reason:$(reason).val()},    //把name数据提交到ajaxRes action内，
+                                function(data) {
+                                    queryPage($("#dev_type").val(), $("#keywords").val(), "", "", $("#pageInput").val(), "jump", $("#is_damage").val());
+                                    layer.close(index);
+                                }, "json");
+                        },
+                        btn2: function(index, layero){
+                            //按钮【按钮二】的回调
+                            layer.close(index);
+                            //return false 开启该代码可禁止点击该按钮关闭
+                        }
+                    })
+                });
+
+                $("#tb").find("button[name='bad']").click(function () {
+                    var btn = $(this);
+                    var aid = btn.parent().parent().find("input")[0].value;
+                    layer.open({
+                        type: 2,
+                        title: "确定报废",
+                        area: ['800px', '200px'],
+                        content: ['/layer/layer_scarp_reason.html', 'no'],
+                        btn: ['确定', '取消'],
+                        //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
+                        //实现弹出层间不同frame的传值
+                        yes: function(index, layero){
+                            //按钮【按钮一】的回调
+                            var body = layer.getChildFrame('body', index);
+                            var reason = body.find('#reason');
+                            $.post("/asm/scarp", {id:aid,reason:$(reason).val()},    //把name数据提交到ajaxRes action内，
+                                function(data) {
+                                    queryPage($("#dev_type").val(), $("#keywords").val(), "", "", $("#pageInput").val(), "jump", $("#is_damage").val());
+                                    layer.close(index);
+                                }, "json");
+                        },
+                        btn2: function(index, layero){
+                            //按钮【按钮二】的回调
+                            layer.close(index);
+                            //return false 开启该代码可禁止点击该按钮关闭
+                        }
+                    })
+                });
 
                 //添加删除按钮点击事件
                 $("#tb").find("button[name='del']").click(function () {
@@ -208,19 +327,15 @@
 
         // type:type,search:search,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag,isDam:isDam
         $("#search").click(function () {
-            console.log('search click')
             queryPage($("#dev_type").val(), $("#keywords").val(), "", "", $("#pageInput").val(), "", $("#is_damage").val());
         })
         $("#next").click(function () {
-            console.log('next click')
             queryPage($("#dev_type").val(), $("#keywords").val(), "", "next", $("#pageInput").val(), "", $("#is_damage").val());
         })
         $("#jump").click(function () {
-            console.log('jump click')
             queryPage($("#dev_type").val(), $("#keywords").val(), "", "", $("#pageInput").val(), "jump", $("#is_damage").val());
         })
         $("#pre").click(function () {
-            console.log('pre click')
             queryPage($("#dev_type").val(), $("#keywords").val(), "pre", "", $("#pageInput").val(), "", $("#is_damage").val());
         })
 
@@ -246,10 +361,12 @@
                 </div>
 
                 <div class="layui-inline">
-                    <label class="layui-form-label">是否损坏</label>
+                    <label  class="layui-form-label">状态</label>
                     <div class="layui-input-inline">
                         <select class="layui-form-select" id="is_damage">
-                            <option  th:each="isdam : ${dam}"  th:text="${isdam}"></option>
+                            <!--<option  th:each="isdam : ${dam}"  th:text="${isdam}"></option>-->
+                            <option>完好</option>
+                            <option>损坏</option>
                         </select>
                     </div>
                 </div>
@@ -299,7 +416,7 @@
                 <button class="layui-btn" id="next">+</button>
             </div>
             <div class="layui-col-md2">
-                <button class="layui-btn" id="jump">跳转</button>
+                <button style="background-color: #ff3f2d" class="layui-btn" id="jump">跳转</button>
                 <span id="PageCount"></span>
             </div>
         </div>

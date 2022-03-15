@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>资产履历</title>
+</head>
+<link rel="stylesheet" href="/layui/css/layui.css">
+<link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+<link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+<script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+<script type="text/javascript" src="/layui/layui.js"></script>
+<!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+<!--[if lt IE 9]>-->
+<script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+<script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+<script type="text/javascript">
+    layui.use('form', function(){
+        var form = layui.form;
+        //监听提交
+        //checkbox 点击事件
+        form.on("select(lvli)", function(data){
+            var select_ll=data.value;
+            document.location.href = "/asm/record_view?id=" + $("#dev_id").val()+"&recAct="+select_ll;
+
+        });
+    });
+
+</script>
+<body>
+<div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
+    <p>资产履历</p>
+</div>
+<input type="hidden" id="id" th:value="${dev.getId()}" />
+    <div class="layui-container">
+        <div class="layui-form">
+
+            <fieldset class="layui-elem-field">
+                <legend>资产信息</legend>
+                <div class="layui-field-box">
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">设备名称:</label>
+                            <input id="dev_id" type="hidden" th:value="${dev.id}">
+                            <div class="layui-input-inline">
+                                <input class="layui-input"  th:value="${dev.getAname()}" disabled="disabled" />
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">入库时间:</label>
+                            <div class="layui-input-inline">
+                                <input class="layui-input" th:value="${dev.getPutintime()}" disabled="disabled" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">借用人:</label>
+                            <div class="layui-input-inline">
+                                <input class="layui-input"   th:value="${dev.getEmployeeByBorrower()==null?'':dev.getEmployeeByBorrower().getEname()}"  />
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">借用时间:</label>
+                            <div class="layui-input-inline">
+                                <input class="layui-input"  th:value="${dev.getBrotime()}" disabled="disabled" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">从属类型:</label>
+                        <div class="layui-input-block">
+                            <input class="layui-input"  th:value="${dev.getAssetTypeByAssertType().getTypeName()}" readonly="readonly" />
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">设备型号:</label>
+                        <div class="layui-input-block">
+                            <input  class="layui-input"   th:value="${dev.getModel()}"/>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;约束码:</span><span th:text= "${temp}"></span><span>(由-分隔最后的几位9代表资产序列可以是任意数字，前面为资产标识不可以改变)</span>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">资产编号:</label>
+                        <div class="layui-input-block">
+                            <input  class="layui-input"  th:value="${dev.getAssestnum()}"/>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">sn编号:</label>
+                        <div class="layui-input-block">
+                            <input  class="layui-input"  th:value="${dev.getSnnum()}" />
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">设备价格:</label>
+                        <div class="layui-input-block">
+                            <input  class="layui-input"   th:value="${dev.getPrice()}" />
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">供应商:</label>
+                        <div class="layui-input-block">
+                            <input  class="layui-input"  th:value="${dev.getSupplierName()}" />
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">主体:</label>
+                        <div class="layui-input-block">
+                            <input  class="layui-input"  th:value="${dev.getSysGroupName()}" />
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">备注:</label>
+                        <div class="layui-input-block">
+                            <input  class="layui-input"  th:value="${dev.getRemarks()}" />
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+
+            <!--<option name="tp"  th:each="tp : ${types}"  th:text="${tp.typeName}" shiro:hasPermission="-->
+            <blockquote class="layui-elem-quote">履历列表</blockquote>
+            <div class="layui-inline" style="margin-top: 2%;margin-bottom: 2%">
+                <label class="layui-form-label" style="font-size: medium">筛选:</label>
+                <div class="layui-input-inline">
+                    <select class="layui-form-select" id="all_rec" lay-filter="lvli">
+                        <option>所有履历</option>
+                        <option name="tp"  th:each="act : ${astAct}"  th:text="${act.assetAction}"></option>
+                    </select>
+                </div>
+            </div>
+                <fieldset th:each="rec: ${assetRecords}" class="layui-elem-field">
+                    <legend th:text="${rec.getAssetActionByAssetAction().getAssetAction()}"></legend>
+                    <div class="layui-field-box">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">动作细节:</label>
+                            <div class="layui-input-block">
+                                <input  class="layui-input"  th:value="${rec.getActDetail()}" />
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">动作日期:</label>
+                            <div class="layui-input-block">
+                                <input  class="layui-input"  th:value="${rec.getStartTime()}" />
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">备注:</label>
+                            <div class="layui-input-block">
+                                <input  class="layui-input"  th:value="${rec.getRemark()}" />
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+        </div>
+    </div>
+</body>
+</html>

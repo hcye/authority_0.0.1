@@ -47,6 +47,8 @@ public class AsmController {
     private AsmService asmService;
     @Autowired
     private JpaSupplier jpaSupplier;
+    @Autowired
+    private JpaAssetAction jpaAssetAction;
     @RequiresPermissions("asm:bro:view")
     @GetMapping("/asm/bro")
     public String broPage(Model model){
@@ -371,6 +373,34 @@ public class AsmController {
         model.addAttribute("suppliers",supppliers);
         return "asm/edit_dev";
     }
+
+
+    @GetMapping("/asm/record_view")
+    public String record_view(int id,String recAct,Model model){
+        Assert anAssert= jpaAssert.findById(id).get();
+        String name=anAssert.getAname();
+        DevType devType=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(name,anAssert.getAssetTypeByAssertType());
+        String temp=devType.getAssetNumTemplate();
+        List<AssetAction> assetActions=jpaAssetAction.findAll();
+        List<AssetRecord> assetRecords= (List<AssetRecord>) anAssert.getAssetRecordsById();
+        List<AssetRecord> assetRecordList=new ArrayList<>();
+        if(recAct!=null && recAct.equals("所有履历")){
+            for (AssetRecord record:assetRecords){
+                if(record.getAssetActionByAssetAction().getAssetAction().equals(recAct)){
+                    assetRecordList.add(record);
+                }
+            }
+        }else {
+            assetRecordList=assetRecords;
+        }
+
+        model.addAttribute("dev",anAssert);
+        model.addAttribute("temp",temp);
+        model.addAttribute("assetRecords",assetRecordList);
+        model.addAttribute("astAct",assetActions);
+        return "asm/asset_record";
+    }
+
     @RequiresPermissions("asm:exchange:view")
     @GetMapping("/asm/exchange")
     public String exchange(Model model){
@@ -424,17 +454,18 @@ public class AsmController {
 
     @GetMapping("/asm/do_zhuanyi")
     public String do_zhuanyi(Model model,String assets,String group_with_id){
-        List<Assert> asserts=new ArrayList<>();
+      //  List<Assert> asserts=new ArrayList<>();
         for(String aid:assets.split(",")){
             String gid=group_with_id.split("-")[0];
             SysGroup sysGroup=jpaGroup.findById(Integer.parseInt(gid)).get();
             Assert anAssert=jpaAssert.findById(Integer.parseInt(aid)).get();
             anAssert.setSysGroupName(sysGroup.getGname());
             anAssert.setSysGroupBySysGroup(sysGroup);
-            jpaAssert.save(anAssert);
-            asserts.add(anAssert);
+            Assert ast=jpaAssert.save(anAssert);
+            asmRecordService.createAndSaveAssetRecord(AssetAction.zhuanyi,ast,null,sysGroup);
+      //      asserts.add(anAssert);
         }
-        model.addAttribute("selected",asserts);
+      //  model.addAttribute("selected",asserts);
         return "asm/asset_zhuanyi";
     }
 
@@ -445,11 +476,10 @@ public class AsmController {
         Set<String> ids =new LinkedHashSet<>();
 
         if(selected!=null && !selected.equals("")){
-            /*for(String an:selected.split(",")){
-                asserts.add(jpaAssert.findById(Integer.parseInt(an)).get());
-            }*/
             for(String an:selected.split(",")){
-                ids.add(an);
+                if(!an.equals("")){
+                    ids.add(an);
+                }
             }
             if(asset_selected!=null && !asset_selected.equals("")){
                 for (String an:asset_selected.split(",")){
@@ -468,22 +498,24 @@ public class AsmController {
             asserts_reverse.add(asserts.get(i));
         }
 
+
         model.addAttribute("selected",asserts_reverse);
         return "asm/asset_diaobo";
     }
 
     @GetMapping("/asm/do_diaobo")
     public String do_diaobo(Model model,String assets,String emp_with_id){
-        List<Assert> asserts=new ArrayList<>();
+      //  List<Assert> asserts=new ArrayList<>();
         for(String aid:assets.split(",")){
             String loginname=emp_with_id.split("-")[1];
             Employee employee=jpaEmployee.findEmployeeByLoginName(loginname);
             Assert anAssert=jpaAssert.findById(Integer.parseInt(aid)).get();
             anAssert.setEmployeeByBorrower(employee);
-            jpaAssert.save(anAssert);
-            asserts.add(anAssert);
+            Assert ast=jpaAssert.save(anAssert);
+            asmRecordService.createAndSaveAssetRecord(AssetAction.diaobo,ast,employee,null);
+       //     asserts.add(anAssert);
         }
-        model.addAttribute("selected",asserts);
+      //  model.addAttribute("selected",asserts);
         return "asm/asset_diaobo";
     }
 

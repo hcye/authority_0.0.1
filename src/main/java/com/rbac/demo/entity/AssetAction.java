@@ -6,11 +6,24 @@ import java.util.Collection;
 @Entity
 @Table(name = "asset_action", schema = "mydb", catalog = "")
 public class AssetAction {
+    public static final String maintain="维修";
+    public static final String putin="入库";
+    public static final String damage="报废";
+    public static final String borrow="借用";
+    public static final String retrun_asset="归还";
+    public static final String zhuanyi="转移";
+    public static final String diaobo="调拨";
     private int id;
     private String assetAction;
     private String remark;
     private Collection<AssetRecord> assetRecordsById;
 
+    public AssetAction(){
+
+    }
+    public AssetAction(String action){
+        this.assetAction=action;
+    }
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id")
