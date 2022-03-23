@@ -54,7 +54,30 @@
                 }
             });
         })
+        $("#commit").click(function () {
+            $.post("/group/edit/valid", {did:$("#did").val(),upper_group:$("#sysGroup").val()
+                    ,depName:$("#depName").val()},    //把name数据提交到ajaxRes action内，
+                function(data) {
+                    if(data["error"]!=null){
+                        layer.alert(data["error"]);
+                    }else {
+                        $.post("/group/edit/save", {did:$("#did").val(),upper_group:$("#sysGroup").val()
+                                ,depName:$("#depName").val(),leader:$("#name").val(),dep_status:$("#dep_st").val()},    //把name数据提交到ajaxRes action内，
+                            function(data) {
+                                if(data["error"]!=null){
+                                    layer.alert(data["error"]);
+                                }else {
+                                    layer.alert("保存成功!");
+                                }
 
+                            }, "json");
+                    }
+
+                }, "json");
+        })
+        // action="/group/edit/saveChange"
+        // {did:$("#did").val(),upper_group:$("#sysGroup").val()
+            // ,depName:$("#depName").val(),leader:$("#name").val(),dep_status:$("#dep_st").val()},
         $("#cancel").click(function () {
             document.location.href="/group/group";
         });
@@ -66,7 +89,7 @@
 </div>
     <div class="layui-container">
         <div class="layui-row">
-            <form class="layui-form" action="/group/edit/saveChange" method="post">
+
                 <div class="layui-form-item">
                     <input type="hidden" id="did" name="did" th:value="${group.id}" />
                     <div class="layui-form-label">上级部门</div>
@@ -95,14 +118,14 @@
                 <div class="layui-form-item">
                     <div class="layui-form-label">部门状态</div>
                     <div class="layui-input-block">
-                        <select class="layui-input" name="status" >
+                        <select class="layui-input" name="status" id="dep_st" >
                             <option th:each="st: ${status}" th:text="${st}"></option>
                         </select>
                     </div>
                 </div>
-                <button type="submit" class="layui-btn" style="margin-left: 30%">确定</button>
-                <button type="cancel" class="layui-btn" style="margin-left: 5%">取消</button>
-            </form>
+                <button  id="commit" class="layui-btn" style="margin-left: 30%">确定</button>
+                <button type="cancel" id="cancel" class="layui-btn" style="margin-left: 5%">取消</button>
+
         </div>
 
     </div>
