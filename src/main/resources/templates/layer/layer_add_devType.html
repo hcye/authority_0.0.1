@@ -42,8 +42,20 @@
 
             $.post("/asm/getTypeNames", {},    //把name数据提交到ajaxRes action内，
                 function (data) {
-                    $('#temp').attr("placeholder", "格式:" + data[0].assetCode);
+                    var types=data["types"]
+                    $('#temp').attr("placeholder", "格式:" + types[0].assetCode);
+                    for(var i in types){
+                        $("#type_name").append("<option>"+types[i].typeName+"</option>")
+                    }
                 }, "json");
+    /*        $.post("/asm/getDevType", {},    //把name数据提交到ajaxRes action内，
+                function (data) {
+                    var permitTypes=data['types']
+                    for(var i in permitTypes){
+                        $("#type_name").append("<option>"+permitTypes[i].typeName+"</option>")
+                    }
+                }, "json");*/
+
 
         })
 
@@ -84,7 +96,7 @@
 </script>
 <body>
     <div class="layui-container" style="margin-top: 5%">
-        <div class="layui-form">
+
             <div class="layui-form-item">
                 <label class="layui-form-label">设备名称:</label>
                 <div class="layui-input-block">
@@ -95,7 +107,7 @@
             <div class="layui-form-item">
                 <label class="layui-form-label">所属类型:</label>
                 <div class="layui-input-block">
-                    <select  id="type_name" lay-filter="tp">
+                    <select class="layui-form-select"  id="type_name" lay-filter="tp">
 
                     </select>
                 </div>
@@ -113,7 +125,7 @@
             <div class="layui-form-item">
                 <label class="layui-form-label">是否流转:</label>
                 <div class="layui-input-block">
-                    <select id="exc">
+                    <select class="layui-form-select" id="exc">
                         <option>否</option>
                         <option>是</option>
                     </select>
@@ -135,8 +147,8 @@
                     </div>
                 </div>
             </div>
-        </div>
-
     </div>
+
+
 </body>
 </html>

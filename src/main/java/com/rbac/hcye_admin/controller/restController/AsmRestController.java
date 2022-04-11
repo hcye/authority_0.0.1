@@ -13,6 +13,8 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 
+import org.apache.shiro.session.Session;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -70,7 +72,12 @@ public class AsmRestController {
     private JpaAssetRecord jpaAssetRecord;
     @Autowired
     private  JpaAssetAction jpaAssetAction;
-
+    @Autowired
+    private  PermissionService permissionService;
+    @Autowired
+    private  JpaRole jpaRole;
+    @Autowired
+    private  JpaRole2Resources jpaRole2Resources;
     @PostMapping("/asm/queryPage")
     public Map<String,List<Object>> queryPage(String type,String name,String search,String pre,String next,int pageIndex,String jumpFlag){
         /**
@@ -298,10 +305,14 @@ public class AsmRestController {
         resources.setDescription(devType);
         resources.setPermission(permissionCode);
         resources.setType("按钮");
-        jpaResources.save(resources);
+        jpaResources.saveAndFlush(resources);
 
         assertType.setPermiCode(permissionCode);
-        jpaAssetType.save(assertType);
+        jpaAssetType.saveAndFlush(assertType);
+
+        Session session=SecurityUtils.getSubject().getSession();
+        Employee employee= (Employee) session.getAttribute("user");
+        permissionService.addPermissionToUser(employee,resources);
         asmRecordService.write(AsmAction.dev_add_type,new Timestamp(new java.util.Date().getTime()),
                 (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),
                 null,null,devType);
@@ -482,9 +493,17 @@ public class AsmRestController {
 
 
     @PostMapping("/asm/getTypeNames")
-    public List<AssetType> getTypes(){
-
-        return  jpaAssetType.findAll();
+    public Map<String,List<AssetType>> getTypes(){
+        Map<String,List<AssetType>> map=new HashMap<>();
+        List<AssetType> types=jpaAssetType.findAll();
+        List<AssetType> permitTypes=new ArrayList<>();
+        for (AssetType type:types){
+            if(permissionService.isPermit(type.getPermiCode())){
+                permitTypes.add(type);
+            }
+        }
+        map.put("types",permitTypes);
+        return  map;
 
     }
 
@@ -635,9 +654,7 @@ public class AsmRestController {
         if(asserts.isEmpty()){
             String permiCode=type.getPermiCode();
             Resources resources=jpaResources.findResourcesByPermission(permiCode);
-            if(resources!=null){
-                jpaResources.delete(resources);
-            }
+            permissionService.cleanPermission(resources);
             type.setDevTypesById(null);
             type.setAssertsById(null);
             jpaAssetType.delete(type);
@@ -823,6 +840,9 @@ public class AsmRestController {
         }
         return map;
     }
+
+
+
     @RequiresPermissions("asm:exchange:view")
     @PostMapping("/asm/exchange_req")
     public Map<String,String> exchange(String  reason,String selectDevIds){
