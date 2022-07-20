@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>开始盘点</title>
+</head>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+    <link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+    <script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>-->
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <script type="text/javascript">
+
+        $(function () {
+
+            $("#start").click(function () {
+                document.location.href = "/asm/asset_check?start=on";
+            })
+            $("#history").click(function () {
+                document.location.href = "/asm/check_history";
+            })
+        })
+
+    </script>
+
+<body>
+<div class="layui-container">
+    <div id="image-container" style="margin-top: 20%">
+        <div class="layui-col-md8 layui-col-md-offset2">
+            <div class="layui-col-md6">
+                <img id="start" src="/img/asset/start.jpg" /><br/>
+                <span style="margin-left: 50px">开始盘点</span>
+            </div>
+            <div class="layui-col-md6">
+                <img id="history" src="/img/asset/history.jpg" /><br/>
+                <span style="margin-left: 50px">盘点历史</span>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -39,102 +39,46 @@
             $("#liuzhuan").click(function () {
                 document.location.href = "/asm/exchange";
             })
-/*            $("#out").click(function () {
-                document.location.href = "/asm/out?type=" + $("#asset_type").val() +
-                    "&isDam=" + $("#is_damage").val() + "&belong_to=" + $("#belong_to").val()
-                    + "&supplier=" + $("#supplier").val();
-            });
-            $("#belong_to").click(function () {
-                layer.open({
-                    type: 2,
-                    title: "选择主体",
-                    resize: true,
-                    area: ['300px', '800px'],
-                    content: ['/layer/layer_select_out_gp.html', 'no'],
-                    //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
-                    //实现弹出层间不同frame的传值
-                    /!*   success: function (layero, index) {
-                           var body = layer.getChildFrame('body', index);
-                           body.find('#parentId').val($("#did").val());
-                           //     body.find("#label").html("");
-
-                       }*!/
-                });
-            })*/
+            $("#pandian").click(function () {
+                document.location.href = "/asm/asset_check";
+            })
         })
 
     </script>
 
 <body>
 <div class="layui-container">
-<!--    <h1 class="site-h1" style="margin-top: 5%">代码统计模块说明</h1>
-    <hr>
-    <blockquote class="layui-elem-quote">主要功能</blockquote>
-
-    <fieldset class="layui-elem-field layui-field-title">
-        <legend>模块架构</legend>
-        <div class="layui-field-box">
-            <img src="/img/codestate/frame.bmp" style="height: 80%;width: 80%"><br/>
-            <br/>
-            本模块提供一站式的代码统计功能，配置完成后一键输出结果集！Web服务在192.168.100.81，需要统计的代码仓库在192.168.100.82，采用ansible远程调度！
-            <br/>
-            <br/>
-        </div>
-    </fieldset>
-
-    <fieldset class="layui-elem-field layui-field-title">
-        <legend>仓库管理页</legend>
-        <div class="layui-field-box">
-            <img src="/img/codestate/rmsg.bmp" style="height: 80%;width: 80%"><br/>
-            <br/>
-            本页提供仓库的增删改查，改动后可以在nginx映射的静态资源页看到<br/>
-            <br/>
-        </div>
-    </fieldset>
-
-    <fieldset class="layui-elem-field layui-field-title">
-        <legend>代码统计页</legend>
-        <div class="layui-field-box">
-            <img src="/img/codestate/sum.bmp" style="height: 80%;width: 80%"><br/>
-            <br/>
-            使用步骤:<br/>
-            1.新增集合<br/>
-            2.浏览仓库，点击右上角浏览仓库按钮开启如下新页面，找到目标仓库，复制地址栏url<br/>
-            <img src="/img/codestate/source.bmp" style="height: 80%;width: 80%"><br/>
-            <br/>
-            3.新增item，填入仓库名，把复制的url粘贴进对应输入框，点击保存<br/>
-            4.更新仓库，点击更新仓库按钮，同步最新代码。<br/>
-            5.输出统计集合，先点击时间范围输入框选择时间范围，然后点击生成报表集合。根据item的数量和仓库大小，需要适当等待<br/>
-        </div>
-
-    </fieldset>-->
     <div id="image-container" style="margin-top: 20%">
         <div class="layui-col-md8 layui-col-md-offset2">
-            <div class="layui-col-md4" shiro:hasPermission="asm:bro:view">
+            <div class="layui-col-md3" shiro:hasPermission="asm:bro:view">
                 <img id="jieyong" src="/img/asset/dg.png" /><br/>
                 <span style="margin-left: 50px">资产借用</span>
             </div>
-            <div class="layui-col-md4" shiro:hasPermission="asm:ret:view">
+            <div class="layui-col-md3" shiro:hasPermission="asm:ret:view">
                 <img id="guihuan" src="/img/asset/jb.png" /><br/>
                 <span style="margin-left: 50px">资产归还</span>
             </div>
-            <div class="layui-col-md4" shiro:hasPermission="asm:inp:view">
+            <div class="layui-col-md3" shiro:hasPermission="asm:inp:view">
                 <img id="ruku" src="/img/asset/jt.png" /><br/>
                 <span style="margin-left: 50px">资产入库</span>
+            </div>
+            <div class="layui-col-md3" shiro:hasPermission="asm:check:view">
+                <img id="pandian" src="/img/asset/dg.png" /><br/>
+                <span style="margin-left: 50px">资产盘点</span>
             </div>
 
 
         </div>
         <div class="layui-col-md8 layui-col-md-offset2" style="margin-top: 5%;">
-            <div class="layui-col-md4" shiro:hasPermission="asm:diaobo:view">
+            <div class="layui-col-md3" shiro:hasPermission="asm:diaobo:view">
                 <img id="diaobo" src="/img/asset/xf.png" /><br/>
                 <span style="margin-left: 50px">资产调拨</span>
             </div>
-            <div class="layui-col-md4" shiro:hasPermission="asm:zhuanyi.view">
+            <div class="layui-col-md3" shiro:hasPermission="asm:zhuanyi.view">
                 <img id="zhuanyi" src="/img/asset/mz.png" /><br/>
                 <span style="margin-left: 50px">资产转移</span>
             </div>
-            <div class="layui-col-md4" shiro:hasPermission="asm:exchange:view">
+            <div class="layui-col-md3" shiro:hasPermission="asm:exchange:view">
                 <img id="liuzhuan" src="/img/asset/lw.png" /><br/>
                 <span style="margin-left: 50px">资产流转</span>
             </div>

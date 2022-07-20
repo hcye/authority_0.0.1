@@ -22,9 +22,10 @@
 
     $(function () {
         $("#encode_template").blur(function () {
-            var patt=new RegExp("([x0]{1,4})((-[x0]{0,4})*)");
+            var patt=new RegExp("([x0]{1,5})((-[x0]{0,5})*)");
             var val=$(this).val();
             var res=patt.exec(val);
+            console.log(res)
             var len=res.length;
             var i=0;
             var flag=false;

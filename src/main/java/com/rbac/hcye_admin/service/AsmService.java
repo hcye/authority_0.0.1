@@ -52,10 +52,11 @@ public class AsmService {
                     isMatch = Pattern.matches(engRegex, input[i]);
                 }else if(tp[i].contains("0")){
                     isMatch = Pattern.matches(numRegex, input[i]);
-                    if(Pattern.matches(allZero, input[i])){
-                        return false;
-                    }
                 }
+                if(Pattern.matches(allZero, input[input.length-1])){
+                    return false;
+                }
+
                 if(!isMatch){
                     return false;
                 }
@@ -211,7 +212,7 @@ public class AsmService {
          *
          * 前导不相同的情况
          * */
-        if(!prefixIn.equals(prefixTemp)||suffixIn.length()!=suffixTemp.length()){
+        if((!prefixIn.equals(prefixTemp))||(suffixIn.length()!=suffixTemp.length())){
             return false;
         }
         /**

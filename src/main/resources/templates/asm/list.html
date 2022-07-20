@@ -19,8 +19,10 @@
         var form = layui.form;
         //监听提交
         //checkbox 点击事件
+        form.on("select(tp)", function(data){
+            queryPage($("#dev_type").val(), $("#keywords").val(), "", "", $("#pageInput").val(), "jump", $("#is_damage").val());
+        });
     });
-
 
     function queryPage(type, search, pre, next, pageIndex, jumpFlag, isDam) {
         $.post("/asm/queryListPage", {

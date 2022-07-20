@@ -28,6 +28,9 @@ public class AsmController {
     private static final int pageSize=10;
     @Autowired
     private JpaAssetType jpaAssetType;
+
+    @Autowired
+    private JpaAssetCheck jpaAssetCheck;
     @Autowired
     private JpaEmployee jpaEmployee;
     @Autowired
@@ -160,7 +163,7 @@ public class AsmController {
     }
 
     @GetMapping("/asm/select_4db_zy")
-    public String selectPage(Model model,String type,String isDam,String cu_row,String zy_or_db) throws UnsupportedEncodingException {
+    public String selectPage(Model model,String cu_row,String zy_or_db) {
         String rows_str="";
         List<String> rows=new ArrayList<>();
         for(String row:cu_row.split(",")){
@@ -188,6 +191,46 @@ public class AsmController {
             return "asm/select_asset_diaobo";
         }
 
+    }
+
+    @GetMapping("/asm/asset_check")
+    public String assetCheck(Model model,String selected_id,String selected_remark,String start,String stop_check) {
+        if( start!=null && start.equals("on") ){
+            AssetCheck ac=new AssetCheck();
+            ac.setCheckDate(new java.sql.Date(System.currentTimeMillis()));
+            ac.setStatus("on");
+            jpaAssetCheck.saveAndFlush(ac);
+            return "asm/check/asset_check";
+        }
+        if(stop_check!=null && stop_check.equals("true")){
+
+        }
+        List<AssetCheck> assetChecks=jpaAssetCheck.findAll();
+        boolean flag=false;
+        if(assetChecks.size()>0){
+            for(AssetCheck assetCheck:assetChecks){
+                if(assetCheck.getStatus().equals("on")){
+                    flag=true;
+                }
+            }
+        }
+        if(!flag){
+            return "asm/check/start_check";
+        }
+        List<AssetType> types= jpaAssetType.findAssertType();
+        List<String> dam=new ArrayList<>();
+        dam.add("完好");
+        dam.add("损坏");
+        if(selected_id!=null && selected_remark!=null){
+            String[] ids=selected_id.split(",");
+
+            System.out.println(selected_id+"-------"+selected_remark);
+        }else {
+            model.addAttribute("types",types);
+            model.addAttribute("dam",dam);
+
+        }
+        return "asm/check/asset_check";
     }
 
     @RequiresPermissions("asm:type:view")
@@ -365,6 +408,11 @@ public class AsmController {
 
 
         model.addAttribute("dev",anAssert);
+        String sysgroup="";
+        if(anAssert.getSysGroupBySysGroup()!=null){
+            sysgroup=anAssert.getSysGroupBySysGroup().getId()+"-"+ anAssert.getSysGroupBySysGroup().getGname();
+        }
+        model.addAttribute("sysgroup",sysgroup);
         model.addAttribute("type",type);
         model.addAttribute("isDam",isDam);
         model.addAttribute("temp",temp);
@@ -383,7 +431,7 @@ public class AsmController {
         List<AssetAction> assetActions=jpaAssetAction.findAll();
         List<AssetRecord> assetRecords= (List<AssetRecord>) anAssert.getAssetRecordsById();
         List<AssetRecord> assetRecordList=new ArrayList<>();
-        if(recAct!=null && recAct.equals("所有履历")){
+        if(recAct!=null && !recAct.equals("所有履历")){
             for (AssetRecord record:assetRecords){
                 if(record.getAssetActionByAssetAction().getAssetAction().equals(recAct)){
                     assetRecordList.add(record);
@@ -452,7 +500,7 @@ public class AsmController {
     }
 
     @GetMapping("/asm/do_zhuanyi")
-    public String do_zhuanyi(Model model,String assets,String group_with_id){
+    public String do_zhuanyi(String assets,String group_with_id){
       //  List<Assert> asserts=new ArrayList<>();
         for(String aid:assets.split(",")){
             String gid=group_with_id.split("-")[0];
@@ -503,7 +551,7 @@ public class AsmController {
     }
 
     @GetMapping("/asm/do_diaobo")
-    public String do_diaobo(Model model,String assets,String emp_with_id){
+    public String do_diaobo(String assets,String emp_with_id){
       //  List<Assert> asserts=new ArrayList<>();
         for(String aid:assets.split(",")){
             String loginname=emp_with_id.split("-")[1];
@@ -553,19 +601,36 @@ public class AsmController {
             if(sysGroup.contains("-")){
                 String groupId=sysGroup.split("-")[0];
                 SysGroup group=jpaGroup.findById(Integer.parseInt(groupId)).get();
+                SysGroup bySysGroup=anAssert.getSysGroupBySysGroup();
+                if(bySysGroup!=group){
+                    asmRecordService.createAndSaveAssetRecord(AssetAction.zhuanyi,anAssert,null,group);
+                }
                 anAssert.setSysGroupBySysGroup(group);
                 anAssert.setSysGroupName(group.getGname());
             }
         }
         if(new_bro==null || new_bro.equals("")) {
+
+            Employee borrower=anAssert.getEmployeeByBorrower();
+            if(borrower!=null){
+                asmRecordService.createAndSaveAssetRecord(AssetAction.retrun_asset,anAssert,borrower,null);
+            }
             anAssert.setEmployeeByBorrower(null);
         }else {
             if(new_bro.contains("-")){
                 String py=new_bro.split("-")[1];
                 Employee employee=jpaEmployee.findEmployeeByLoginName(py);
+                Employee cu_borrower=anAssert.getEmployeeByBorrower();
+                if(cu_borrower!=null && cu_borrower!=employee){
+                    asmRecordService.createAndSaveAssetRecord(AssetAction.retrun_asset,anAssert,cu_borrower,null);
+                    asmRecordService.createAndSaveAssetRecord(AssetAction.borrow,anAssert,employee,null);
+                } else if (cu_borrower==null) {
+                    asmRecordService.createAndSaveAssetRecord(AssetAction.borrow,anAssert,employee,null);
+                }
                 anAssert.setEmployeeByBorrower(employee);
             }
         }
+//
         jpaAssert.save(anAssert);
         asmRecordService.write(AsmAction.dev_edit,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert,"");
         String type=URLEncoder.encode(list_type,"UTF-8");

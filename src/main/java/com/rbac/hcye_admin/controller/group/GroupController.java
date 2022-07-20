@@ -30,9 +30,15 @@ public class GroupController {
         String currentGroupName=group.getGname();
         //上级部门
         SysGroup parent=group.getSysGroupByParentId();
-        String parentGroupName=parent.getGname();
+        String groupNames="";
+        if(parent!=null){
+            String parentGroupName=parent.getGname();
+            groupNames=group.getSysGroupByParentId().getId()+"-"+group.getSysGroupByParentId().getGname();
+        }
+
         //
-        String groupNames=group.getSysGroupByParentId().getId()+"-"+group.getSysGroupByParentId().getGname();
+
+
         //移除本部门，把当前父部门调整到队列头
 
 

@@ -7,12 +7,27 @@ import java.util.Collection;
 
 @Entity
 public class Employee {
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @Column(name = "id", nullable = false)
     private Integer id;
+    @Basic
+    @Column(name = "edepart", nullable = true, length = 64)
     private String edepart="";
+    @Basic
+    @Column(name = "email", nullable = true, length = 128)
     private String email="";
+    @Basic
+    @Column(name = "ename", nullable = true, length = 64)
     private String ename="";
+    @Basic
+    @Column(name = "onjob", nullable = true, length = 4)
     private String onjob="";
+    @Basic
+    @Column(name = "pingyin", nullable = true, length = 128)
     private String pingyin="";
+    @Basic
+    @Column(name = "pwd", nullable = true, length = 255)
     private String pwd="";
     private Collection<OperatRecord> operatRecordsById;
     private Collection<OperatRecord> operatRecordsById_0;
@@ -20,15 +35,35 @@ public class Employee {
     private Collection<EchangeDevs> exchangeSender;
     private Collection<EchangeDevs> exchangeResiver;
     private Collection<User2Role> user2RolesById;
+    @Basic
+    @Column(name = "login_name", nullable = true, length = 64)
     private String loginName;
     private SysGroup sysGroupByGroupId;
     private Collection<SysGroup> sysGroupsById;
+    @Basic
+    @Column(name = "status", nullable = true)
     private Byte status=0;
+    @Basic
+    @Column(name = "sex", nullable = true, length = 8)
     private String sex="男";
+    @Basic
+    @Column(name = "tx_uri", nullable = true, length = 255)
     private String txUri="tx_ms_04.gif";
     private Collection<Assert> assertsById;
+
     //private Collection<EchangeDevs> echangeDevsById;
     //private Collection<EchangeDevs> echangeDevsById_0;
+/*    @OneToMany(mappedBy = "employeeByReciveEmp")
+    public Collection<EchangeDevs> getEchangeDevsById_0() {
+        return echangeDevsById_0;
+    }
+
+    public void setEchangeDevsById_0(Collection<EchangeDevs> echangeDevsById_0) {
+        this.echangeDevsById_0 = echangeDevsById_0;
+    }*/
+    @Basic
+    @Column(name = "group_id", nullable = true)
+    private Integer groupId;
 
     public Employee(){
 
@@ -249,10 +284,6 @@ public class Employee {
         return assertsById;
     }
 
-    public void setAssertsById(Collection<Assert> assertsById) {
-        this.assertsById = assertsById;
-    }
-
 /*    @OneToMany(mappedBy = "employeeBySenderEmp")
     public Collection<EchangeDevs> getEchangeDevsById() {
         return echangeDevsById;
@@ -262,12 +293,15 @@ public class Employee {
         this.echangeDevsById = echangeDevsById;
     }*/
 
-/*    @OneToMany(mappedBy = "employeeByReciveEmp")
-    public Collection<EchangeDevs> getEchangeDevsById_0() {
-        return echangeDevsById_0;
+    public void setAssertsById(Collection<Assert> assertsById) {
+        this.assertsById = assertsById;
     }
 
-    public void setEchangeDevsById_0(Collection<EchangeDevs> echangeDevsById_0) {
-        this.echangeDevsById_0 = echangeDevsById_0;
-    }*/
+    public Integer getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Integer groupId) {
+        this.groupId = groupId;
+    }
 }

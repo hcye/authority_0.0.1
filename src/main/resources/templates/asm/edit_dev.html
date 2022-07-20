@@ -23,28 +23,36 @@
 
     $(function () {
         $("#confirm").click(function () {
-            var pri=$("#price").val();
-            if(pri!=""){
-                var regx=/[0-9]+[\.]?[0-9]+/;
-                var a=regx.exec(pri);
-                if(a==null||a[0]!=pri){
-                    $("#price").val("");
-                    layer.alert("价格字符输入错误");
-                    return;
-                }
-            }
+            // var pri=$("#price").val();
+            // console.log(pri+"-----")
+            // if(pri!=""){
+            //     var regx=/(^(0|-[1-9][0-9]*)$)|(^(0|[+-]?((0|([1-9]\d*))\.\d+)?)$)/;
+            //     var a=regx.exec(pri);
+            //     console.log(a+"====")
+            //     if(a==null||a[0]!=pri){
+            //         $("#price").val("");
+            //         layer.alert("价格字符输入错误");
+            //         return;
+            //     }
+            // }
             $.post("/asm/validAssetNum", {num:$("#num").val(),id:$("#id").val()},    //把name数据提交到ajaxRes action内，
                 function(data) {
                     if(data["error"]!=null){
                         layer.alert(data["error"]);
                         return;
                     }else {
+                        var sup=""
+                        if($("#supplier").val()!=null){
+                            sup=$("#supplier").val().trim()
+                        }
+
                         document.location.href="/asm/save_dev/?id="+$("#id").val().trim()+"&types=" +
                             ""+$("#types").val().trim()+"&model="+$("#model").val().trim()+"&price="+$("#price").val().trim()
                             +"&remarks="+$("#remarks").val().trim()+ "&sn="+$("#sn_num").val().trim()+"&num="+$("#num").val().trim()
                             +"&list_type="+$("#list_type").val().trim() +"&list_isDam="+$("#list_isDam").val().trim()
                             +"&cuindex="+$("#cuindex").val().trim()+'&new_bro='+$("#bor_emp").val().trim()
-                            +'&supplier='+$("#supplier").val().trim()+'&sysGroup='+$("#sysGroup").val().trim();
+                            +'&supplier='+sup+'&sysGroup='+$("#sysGroup").val().trim();
+                        console.log("----123212-----")
                     }
                 }, "json");
 
@@ -185,7 +193,7 @@
                     <div class="layui-form-item">
                         <label class="layui-form-label">主体:</label>
                         <div class="layui-input-block">
-                            <input  class="layui-input"  id="sysGroup" th:value="${dev.getSysGroupName()}" />
+                            <input  class="layui-input"  id="sysGroup" th:value="${sysgroup}" />
                         </div>
                     </div>
 

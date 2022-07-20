@@ -27,7 +27,17 @@
                         $('#temp').attr("placeholder", "");
                         $('#temp').attr("readonly","readonly");
                     }else {
-                        $('#temp').attr("placeholder", "格式:" + data["code"]);
+                        var temp=data["code"]
+                        var temp_prefix=""
+                        for(var i=0;i<temp.split("-").length-1;i++){
+                            if(i!=temp.split("-").length-2){
+                                temp_prefix=temp_prefix+temp.split("-")[i]+"-"
+                            }else {
+                                temp_prefix=temp_prefix+temp.split("-")[i]
+                            }
+                        }
+                        // $('#temp').attr("placeholder", "格式:" + data["code"]);
+                        $('#temp').attr("placeholder", "格式:" + temp_prefix);
                         $('#temp').removeAttr("readonly");
                     }
                     form.render("select");
@@ -48,15 +58,6 @@
                         $("#type_name").append("<option>"+types[i].typeName+"</option>")
                     }
                 }, "json");
-    /*        $.post("/asm/getDevType", {},    //把name数据提交到ajaxRes action内，
-                function (data) {
-                    var permitTypes=data['types']
-                    for(var i in permitTypes){
-                        $("#type_name").append("<option>"+permitTypes[i].typeName+"</option>")
-                    }
-                }, "json");*/
-
-
         })
 
 
@@ -96,7 +97,7 @@
 </script>
 <body>
     <div class="layui-container" style="margin-top: 5%">
-
+        <div class="layui-form">
             <div class="layui-form-item">
                 <label class="layui-form-label">设备名称:</label>
                 <div class="layui-input-block">
@@ -113,7 +114,7 @@
                 </div>
             </div>
             <div class="layui-form-item">
-            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;不为空的模板，以-分割的最后一组0必须使用全部9代替</span>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;不为空的模板，x代表任意字母，0代表任意数字，xxx-000，资产标识可以设置为abc-001</span>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label">编号模板:</label>
@@ -147,6 +148,7 @@
                     </div>
                 </div>
             </div>
+        </div>
     </div>
 
 

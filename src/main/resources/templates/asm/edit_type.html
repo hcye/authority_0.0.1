@@ -25,7 +25,7 @@
             if($(this).val()==null){
                 return;
             }
-            var patt=new RegExp("([x0]{1,4})((-[x0]{0,4})*)");
+            var patt=new RegExp("([x0]{1,9})((-[x0]{0,9})*)");
             var val=$(this).val();
             var res=patt.exec(val);
             var len=res.length;
@@ -54,7 +54,7 @@
                 layer.alert("标*输入框不能为空");
                 return;
             }
-            $.post("/asm/saveAssetType", {id:$("#tp_id").val(),devType:name,template:$("#encode_template").val(),desc:$("#desc").val(),authority:$("#authority").val()},    //把name数据提交到ajaxRes action内，
+            $.post("/asm/saveAssetType", {id:$("#tp_id").val(),devType:name,template:$("#encode_template").val(),desc:$("#desc").val()},    //把name数据提交到ajaxRes action内，
                 function(data) {
                     if(data["error"]!=null){
                         layer.alert(data["error"]);

@@ -19,6 +19,9 @@
         //渲染form组件，如果不执行这个函数，form组件中的select radio 等不会被渲染出来
         layui.use('form', function(){
             var form = layui.form;
+            form.on("select(dev_type)", function(data){
+                queryDevTypes("", "", "", 0, $("#type").val());
+            });
         });
         //渲染dataPicker
         //格式化事件字符串
@@ -119,7 +122,7 @@
                                 "<td>" + timeStamp2String(types[key].createTime) + "</td><td>  <input type='checkbox'  name='switch' "+checked+" lay-skin='switch'></td><td>" + transformNullStr(types[key].remarks) + "</td><td>" +
                                 "<button class='layui-btn layui-btn-xs " + editflag + "' " + editDisable + "  name='edit'>保存</button><button class='layui-btn layui-btn-xs " + deleteflag + "' " + deleteDisable + "  name='delete'>删除</button></td></tr>");
                         }
-                            var form = layui.form;
+                             var form = layui.form;
                              form.render();//重新渲染
 
 
@@ -191,7 +194,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label">设备类型:</label>
                 <div class="layui-input-inline">
-                    <select id="type">
+                    <select id="type" lay-filter="dev_type" >
                         <option name="devtp"  th:each="tpName : ${list}" shiro:hasPermission="${tpName.getPermiCode()}" th:text="${tpName.getTypeName()}"></option>
                     </select>
                 </div>

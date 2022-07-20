@@ -359,13 +359,13 @@ public class AsmRestController {
     }
     @RequiresPermissions("asm:type:edit")
     @PostMapping("/asm/saveAssetType")
-    public Map<String, String> saveType(int id,String devType,String template,String desc,String authority){
+    public Map<String, String> saveType(int id,String devType,String template,String desc){
         Map<String ,String> map=new HashMap<>();
         devType=devType.trim();
-        if(authority.equals("")){
-            map.put("error","权限字符不能为空!");
-            return map;
-        }
+//        if(authority.equals("")){
+//            map.put("error","权限字符不能为空!");
+//            return map;
+//        }
         AssetType type = jpaAssetType.findAssetTypeByName(devType);
         AssetType assertTypeOld= jpaAssetType.findById(id).get();
         if(type!=null&&type.getId()!=id){
@@ -375,7 +375,6 @@ public class AsmRestController {
         assertTypeOld.setAssetCode(template);
         assertTypeOld.setRemarks(desc);
         assertTypeOld.setTypeName(devType);
-        assertTypeOld.setPermiCode(authority);
         jpaAssetType.save(assertTypeOld);
         map.put("ok","修改成功!");
         return map;
@@ -412,6 +411,11 @@ public class AsmRestController {
         Map<String,String> map=new HashMap<>();
         AssetType assertType= jpaAssetType.findAssetTypeByName(devType);
         String assetCode=assertType.getAssetCode();
+        String[] assetCodes=assetCode.split("-");
+        int len=assetCodes.length;
+        String tail=assetCodes[len-1];
+        tail=tail.replace("0","9");
+        temp=temp+"-"+tail;
         boolean b=asmService.valid(temp,assetCode);
         if(!b){
             map.put("error","设备类型编码不匹配资产类型编码");
@@ -419,7 +423,6 @@ public class AsmRestController {
         }
         DevType dtp=jpaDevType.findDevTypeByDevNameAndAssertType(dev_name,assertType);
         if(dtp!=null){
-
             map.put("error","资产名称重复！请重新填写");
             return map;
         }
@@ -654,7 +657,9 @@ public class AsmRestController {
         if(asserts.isEmpty()){
             String permiCode=type.getPermiCode();
             Resources resources=jpaResources.findResourcesByPermission(permiCode);
-            permissionService.cleanPermission(resources);
+            if(resources!=null){
+                permissionService.cleanPermission(resources);
+            }
             type.setDevTypesById(null);
             type.setAssertsById(null);
             jpaAssetType.delete(type);

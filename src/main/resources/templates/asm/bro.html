@@ -29,8 +29,13 @@
                     }
                     var form = layui.form;
                     form.render("select");
+                    queryPage($("#astType").val(), $("#devName").val(), $("#search").val(), "", "", $("#pageInput").val(), "");
                 }, "json");
 
+        });
+
+        form.on("select(astName)", function (data) {
+            queryPage($("#astType").val(), data.value, $("#search").val(), "", "", $("#pageInput").val(), "");
         });
     });
 
@@ -203,7 +208,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label" style="padding-left: 5px">资产名称:</label>
                 <div class="layui-input-inline">
-                    <select id="devName" class="layui-form-select">
+                    <select id="devName" class="layui-form-select" lay-filter="astName">
 
                         <option th:each="devname : ${assertNames}" th:text="${devname}"></option>
                     </select>

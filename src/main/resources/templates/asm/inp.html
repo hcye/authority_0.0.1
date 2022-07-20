@@ -30,7 +30,6 @@
                         }
                     }
                     $("#max").html('');
-                    var codes=dt["code"];
                     var devCodes;
                     if(dt["devCode"]==null){
                         $("#encode").attr("placeholder","");
@@ -43,10 +42,10 @@
                         $("#encode").attr("placeholder","");
                         $("#encode").attr("readonly","readonly");
                     }else {
+                        $("#code").val(devCodes[0]);
                         $("#encode").attr("placeholder",'格式:'+devCodes[0]);
                         $("#encode").removeAttr("readonly");
                     }
-                    $("#code").val(codes[0]);
                     var form = layui.form;
                     form.render('select');//修改select后需要重新渲染
                 }, "json");
@@ -70,6 +69,7 @@
 
                     }else {
                         $("#code").val(temp);
+
                         $("#encode").attr("placeholder",'格式:'+temp);
                         $("#max").html(max);
                         $("#encode").removeAttr("readonly");
@@ -159,7 +159,7 @@
 </div>
     <div class="layui-container">
         <input type="hidden" id="code" th:value="${code}" />
-        <input type="hidden" id="devCode" th:value="${code}" />
+<!--        <input type="hidden" id="devCode" th:value="${code}" />-->
         <div class="layui-form">
                 <div class="layui-form-item">
                      <label class="layui-form-label">类型</label>
@@ -213,6 +213,7 @@
                     <label class="layui-form-label">供应商</label>
                     <div class="layui-input-block">
                         <select class="layui-form-select"   id="supplire" >
+                            <option></option>
                             <option name="supplier" th:each="sup: ${suppliers}" th:text="${sup.supplierName}"></option>
                         </select>
                     </div>

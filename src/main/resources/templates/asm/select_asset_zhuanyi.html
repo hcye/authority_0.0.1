@@ -19,6 +19,9 @@
         var form = layui.form;
         //监听提交
         //checkbox 点击事件
+        form.on("select(tp)", function(data){
+            queryList($("#dev_type").val(), $("#keywords").val(),  $("#is_damage").val());
+        });
     });
 
 

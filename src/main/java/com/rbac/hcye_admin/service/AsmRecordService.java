@@ -25,7 +25,7 @@ public class AsmRecordService {
     }
     public void createAndSaveAssetRecord(String action,Assert ast,Employee e,SysGroup sysGroup){
         AssetRecord assetRecord=new AssetRecord();
-        AssetAction assetAction=jpaAssetAction.save(new AssetAction(action));
+        AssetAction assetAction=jpaAssetAction.findAssetActionByAssetAction(action);
         assetRecord.setAssetActionByAssetAction(assetAction);
         assetRecord.setAssertByAsset(ast);
         if(action.equals(AssetAction.retrun_asset)){
