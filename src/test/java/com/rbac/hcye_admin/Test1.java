@@ -3,6 +3,7 @@ package com.rbac.hcye_admin;
 import com.rbac.hcye_admin.entity.*;
 import com.rbac.hcye_admin.jpa.*;
 import com.rbac.hcye_admin.service.network.SnmpCore;
+import org.apache.shiro.SecurityUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -82,6 +83,6 @@ public class Test1 {
                     System.out.println(ip_start+"--"+ip_tail);
                 }
             }
-
+            String usname= (String) SecurityUtils.getSubject().getPrincipal();
     }
 }}

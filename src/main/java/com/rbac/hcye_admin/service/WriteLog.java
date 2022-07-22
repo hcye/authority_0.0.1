@@ -17,7 +17,8 @@ public class WriteLog {
     private JpaOperatRecord jpaOperatRecord;
     public void write(Assert ast, Employee employee,String ac){
         OperatRecord operatRecord=new OperatRecord();
-        Employee dealer= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        String loginUserName= (String) SecurityUtils.getSubject().getPrincipal();
+        Employee dealer= (Employee) SecurityUtils.getSubject().getSession().getAttribute(loginUserName);
         operatRecord.setAction(ac);
         operatRecord.setActionTime(new Timestamp(new Date().getTime()));
         operatRecord.setAssertByAssertAsset(ast);

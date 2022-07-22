@@ -61,9 +61,9 @@ public class Employee {
     public void setEchangeDevsById_0(Collection<EchangeDevs> echangeDevsById_0) {
         this.echangeDevsById_0 = echangeDevsById_0;
     }*/
-    @Basic
-    @Column(name = "group_id", nullable = true)
-    private Integer groupId;
+//    @Basic
+//    @Column(name = "group_id", nullable = true)
+//    private Integer groupId;
 
     public Employee(){
 
@@ -284,24 +284,8 @@ public class Employee {
         return assertsById;
     }
 
-/*    @OneToMany(mappedBy = "employeeBySenderEmp")
-    public Collection<EchangeDevs> getEchangeDevsById() {
-        return echangeDevsById;
-    }
-
-    public void setEchangeDevsById(Collection<EchangeDevs> echangeDevsById) {
-        this.echangeDevsById = echangeDevsById;
-    }*/
-
     public void setAssertsById(Collection<Assert> assertsById) {
         this.assertsById = assertsById;
     }
 
-    public Integer getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(Integer groupId) {
-        this.groupId = groupId;
-    }
 }

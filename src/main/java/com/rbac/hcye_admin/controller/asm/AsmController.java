@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -31,6 +32,13 @@ public class AsmController {
 
     @Autowired
     private JpaAssetCheck jpaAssetCheck;
+
+
+    @Autowired
+    private JpaCheckHistory jpaCheckHistory;
+
+    @Autowired
+    private JpaAssetCkRecord jpaAssetCkRecord;
     @Autowired
     private JpaEmployee jpaEmployee;
     @Autowired
@@ -195,44 +203,131 @@ public class AsmController {
 
     @GetMapping("/asm/asset_check")
     public String assetCheck(Model model,String selected_id,String selected_remark,String start,String stop_check) {
-        if( start!=null && start.equals("on") ){
-            AssetCheck ac=new AssetCheck();
+        String usname= (String) SecurityUtils.getSubject().getPrincipal();
+        List<AssetType> types = jpaAssetType.findAssertType();
+        List<String> dam = new ArrayList<>();
+        dam.add("完好");
+        dam.add("损坏");
+        model.addAttribute("types", types);
+        model.addAttribute("dam", dam);
+
+        if (start != null && start.equals("on")) {
+            Employee starter = (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname);
+            AssetCheck ac = new AssetCheck();
             ac.setCheckDate(new java.sql.Date(System.currentTimeMillis()));
             ac.setStatus("on");
+            ac.setStater(starter.getId());
+            ac.setStarter_name(starter.getLoginName());
             jpaAssetCheck.saveAndFlush(ac);
             return "asm/check/asset_check";
         }
-        if(stop_check!=null && stop_check.equals("true")){
-
-        }
-        List<AssetCheck> assetChecks=jpaAssetCheck.findAll();
-        boolean flag=false;
-        if(assetChecks.size()>0){
-            for(AssetCheck assetCheck:assetChecks){
-                if(assetCheck.getStatus().equals("on")){
-                    flag=true;
+        Employee cu_user = (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname);
+        List<AssetCheck> assetChecks = jpaAssetCheck.findAll();
+        AssetCheck assetCheck_1 = null;
+        if (assetChecks.size() > 0) {
+            for (AssetCheck assetCheck : assetChecks) {
+                // if login user is the starter user into the asset check page
+                if (assetCheck.getStatus().equals("on") && (cu_user.getId()) == assetCheck.getStater()) {
+                    assetCheck_1 = assetCheck;
                 }
             }
         }
-        if(!flag){
+        if(assetCheck_1==null){
             return "asm/check/start_check";
         }
-        List<AssetType> types= jpaAssetType.findAssertType();
-        List<String> dam=new ArrayList<>();
-        dam.add("完好");
-        dam.add("损坏");
-        if(selected_id!=null && selected_remark!=null){
-            String[] ids=selected_id.split(",");
-
-            System.out.println(selected_id+"-------"+selected_remark);
-        }else {
-            model.addAttribute("types",types);
-            model.addAttribute("dam",dam);
-
+        if (stop_check != null && stop_check.equals("true")) {
+            List<AssetCkRecord> assetCkRecords=jpaAssetCkRecord.findAssetCkRecordsByAssetCheckByAssetCheck(assetCheck_1);
+            jpaAssetCkRecord.deleteAll(assetCkRecords);
+            jpaAssetCheck.delete(assetCheck_1);
+            return "asm/check/start_check";
         }
+        if (start != null && start.equals("on")) {
+            if (assetCheck_1 == null) {
+                return "asm/check/start_check";
+            }
+        }
+
+        if (selected_id != null && selected_remark != null) {
+            String[] ids = selected_id.split(",");
+            String[] selected_remarks = selected_remark.split(",");
+            int remarks_len=selected_remarks.length;
+            List<String> remarks=new ArrayList<>();
+            if(remarks_len<ids.length){
+
+                int cha=ids.length-remarks_len;
+                if(remarks_len>0){
+                    for(int i=0;i< remarks_len;i++){
+                        remarks.add(selected_remarks[i]);
+                    }
+                    for(int i=0;i<cha;i++){
+                        remarks.add("");
+                    }
+                }else if (remarks_len==0){
+                    for (int i=0;i<ids.length;i++){
+                        remarks.add("");
+                    }
+                }
+            }else {
+                for(int i=0;i<remarks_len;i++){
+                    remarks.add(selected_remarks[i]);
+                }
+            }
+
+            for (int i = 0;i<ids.length;i++){
+                if(ids[i].equals("")){
+                    return "asm/check/asset_check";
+                }
+                Assert anAssert=jpaAssert.findById(Integer.parseInt(ids[i])).get();
+                AssetCkRecord assetCkRecord=new AssetCkRecord();
+                assetCkRecord.setAssetCheckByAssetCheck(assetCheck_1);
+                assetCkRecord.setAssetName(anAssert.getAname());
+                assetCkRecord.setAssetId(anAssert.getId());
+                assetCkRecord.setAssetCode(anAssert.getAssestnum());
+                if(!remarks.get(i).equals("")){
+                    assetCkRecord.setCheckRemark(selected_remarks[i]);
+                }
+                jpaAssetCkRecord.save(assetCkRecord);
+            }
+        }
+
         return "asm/check/asset_check";
     }
-
+    @GetMapping("/asm/check_history")
+    public String check_history(Model model,String show_list,String history_id) {
+        List<CheckHistory> checkHistories = jpaCheckHistory.findAll();
+        if (show_list != null) {
+            List<String> operator_names = new ArrayList<>();
+            for (CheckHistory checkHistory : checkHistories) {
+                Employee operator = jpaEmployee.findById(checkHistory.getCheckOperator()).get();
+                operator_names.add(operator.getEname());
+            }
+            model.addAttribute("list", checkHistories);
+            return "asm/check/check_history";
+        } else if (history_id != null) {
+            CheckHistory checkHistory = jpaCheckHistory.findById(Integer.parseInt(history_id)).get();
+            System.out.println(checkHistory.getCheckTime() + "-" + checkHistory.getCheckKongIds());
+            String[] kongIds = checkHistory.getCheckKongIds().split(",");
+            String[] acks = checkHistory.getCheckRecordsIds().split(",");
+            List<Assert> asserts = new ArrayList<>();
+            List<AssetCkRecord> assetCkRecords = new ArrayList<>();
+            for (int i = 0; i < kongIds.length; i++) {
+                if (!kongIds[i].equals("")) {
+                    Assert anAssert = jpaAssert.findById(Integer.parseInt(kongIds[i])).get();
+                    asserts.add(anAssert);
+                }
+            }
+            for (int i = 0; i < acks.length; i++) {
+                if (!acks[i].equals("")) {
+                    AssetCkRecord assetCkRecord = jpaAssetCkRecord.findById(Integer.parseInt(acks[i])).get();
+                    assetCkRecords.add(assetCkRecord);
+                }
+            }
+            model.addAttribute("ast",asserts);
+            model.addAttribute("ack",assetCkRecords);
+            return "asm/check/history_detail";
+        }
+        return "";
+    }
     @RequiresPermissions("asm:type:view")
     @GetMapping("/asm/type")
     public String typePage(){
@@ -451,7 +546,8 @@ public class AsmController {
     @RequiresPermissions("asm:exchange:view")
     @GetMapping("/asm/exchange")
     public String exchange(Model model){
-        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        String usname= (String) SecurityUtils.getSubject().getPrincipal();
+        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname);
         List<AssetType> types=jpaAssetType.findAll();
         model.addAttribute("oper",employee);
         model.addAttribute("assertTypes",types);
@@ -569,18 +665,101 @@ public class AsmController {
     @RequiresPermissions("asm:exchange:view")
     @GetMapping("/asm/exchange_resp")
     public String exchangeResp(Model model){
-        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        String usname= (String) SecurityUtils.getSubject().getPrincipal();
+        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname);
         List<AssetType> types=jpaAssetType.findAll();
         model.addAttribute("oper",employee);
         model.addAttribute("assertTypes",types);
         return "asm/exchange/exchange_resp";
     }
 
+    @GetMapping("/asm/check_done")
+    public String check_done(Model model){
+        String usname= (String) SecurityUtils.getSubject().getPrincipal();
+        Employee check_operater= (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname);
+        List<AssetCheck> assetChecks=jpaAssetCheck.findAll();
+        AssetCheck cu_assetCheck=null;
+        for(AssetCheck assetCheck:assetChecks){
+            if(assetCheck.getStatus()!=null && assetCheck.getStatus().equals("on") && assetCheck.getStater()
+                    ==check_operater.getId()){
+                cu_assetCheck=assetCheck;
+                break;
+            }
+        }
+        List<AssetCkRecord> assetCkRecords=jpaAssetCkRecord.findAssetCkRecordsByAssetCheckByAssetCheck(cu_assetCheck);
+
+        List<AssetCkRecord> recordsWithRemark=new ArrayList<>();
+        for(AssetCkRecord assetCkRecord:assetCkRecords){
+            if(assetCkRecord.getCheckRemark()!=null && !assetCkRecord.getCheckRemark().trim().equals("")){
+                recordsWithRemark.add(assetCkRecord);
+            }
+        }
+
+        List<AssetType> types = jpaAssetType.findAssertType();
+
+
+
+        String assetIds="";
+        String recIds="";
+
+
+        List<AssetType> typeList=new ArrayList<>();
+        for(AssetType type:types){
+            if(SecurityUtils.getSubject().isPermitted(type.getPermiCode())){
+                typeList.add(type);
+            }
+        }
+//        for(AssetType type:typeList){
+//            List<Assert> asserts=jpaAssert.findAssertByAssetType_without_damflag(type.getTypeName());
+//            for(Assert ast:asserts){
+//                for(AssetCkRecord assetCkRecord:recordsWithRemark){
+//                    if(ast.getAssestnum().equals(assetCkRecord.getAssetCode())){
+//                        recIds+=","+ast.getId();
+//                    }
+//                }
+//            }
+//        }
+        for(AssetCkRecord assetCkRecord:recordsWithRemark){
+            recIds+=","+assetCkRecord.getId();
+        }
+        List<Assert> pankong=new ArrayList<>();
+        for(AssetType type:typeList){
+            List<Assert> asserts=jpaAssert.findAssertByAssetType_without_damflag(type.getTypeName());
+            for(int i=asserts.size()-1;i>=0;i--){
+                for(AssetCkRecord ack:assetCkRecords){
+                        if(ack.getAssetCode().equals(asserts.get(i).getAssestnum())){
+                            asserts.remove(asserts.get(i));
+                            break;
+                        }
+                    }
+                }
+            pankong.addAll(asserts);
+            }
+
+
+        cu_assetCheck.setStatus("close");
+        jpaAssetCheck.save(cu_assetCheck);
+        for(Assert ast:pankong){
+            assetIds+=","+ast.getId();
+        }
+        CheckHistory checkHistory=new CheckHistory();
+        checkHistory.setCheckKongIds(assetIds);
+        checkHistory.setCheckRecordsIds(recIds);
+        checkHistory.setCheckTime(new java.sql.Date(System.currentTimeMillis()));
+        checkHistory.setCheckOperator(check_operater.getId());
+        checkHistory.setOperatorName(check_operater.getEname());
+        jpaCheckHistory.save(checkHistory);
+        model.addAttribute("rec",recordsWithRemark);
+        model.addAttribute("types", types);
+
+        return "asm/check/asset_check_done";
+    }
 
     @RequiresPermissions("asm:edit:btn")
     @GetMapping("/asm/save_dev")
     public String saveDev(int id,String types,String model,String price,String remarks,String sn,String num,String list_type,
                           String list_isDam,String cuindex,String new_bro,String supplier,String sysGroup) throws UnsupportedEncodingException {
+        String usname= (String) SecurityUtils.getSubject().getPrincipal();
         Assert anAssert=jpaAssert.findById(id).get();
         anAssert.setAssetTypeByAssertType(jpaAssetType.findAssetTypeByName(types));
         anAssert.setModel(model);
@@ -632,7 +811,7 @@ public class AsmController {
         }
 //
         jpaAssert.save(anAssert);
-        asmRecordService.write(AsmAction.dev_edit,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert,"");
+        asmRecordService.write(AsmAction.dev_edit,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname),null,anAssert,"");
         String type=URLEncoder.encode(list_type,"UTF-8");
         String isDam=URLEncoder.encode(list_isDam,"UTF-8");
         return "redirect:/asm/list?type="+type+"&isDam="+isDam+"&cuindex="+cuindex;

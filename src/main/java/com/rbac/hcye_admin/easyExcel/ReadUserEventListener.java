@@ -105,7 +105,8 @@ public class ReadUserEventListener extends AnalysisEventListener<UserModel> {
     @Transactional(rollbackFor = ExcelAnalysisException.class)
     @Override
     public void doAfterAllAnalysed(AnalysisContext context) {
-        Employee employee = (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        String usname= (String) SecurityUtils.getSubject().getPrincipal();
+        Employee employee = (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname);
         OperatRecord record = new OperatRecord();
         record.setAction("上传");
         record.setActionTime(new Timestamp(new java.util.Date().getTime()));

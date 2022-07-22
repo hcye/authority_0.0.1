@@ -117,7 +117,8 @@ public class UserController {
         Session session = subject.getSession();
         ShiroUtils.clearCachedAuthorizationInfo();
         Set<Resources> resourcesSet;
-        if (session.getAttribute("user") == null) {
+        String loginUserName= (String) SecurityUtils.getSubject().getPrincipal();
+        if (loginUserName==null || session.getAttribute(loginUserName) == null) {
             if(username==null){
                 //session过期
                 return "login";
@@ -138,15 +139,17 @@ public class UserController {
             Employee employee= jpaEmployee.findEmployeeByLoginName(username);
             resourcesSet=userService.getResourcesByEmployee(employee);
             subject.hasRole("超级管理员");
-            session.setAttribute("user", employee);
+            session.setAttribute(username, employee);
             loginUser=employee;
 
         }else {
 
-            Employee employee= (Employee) session.getAttribute("user");
+            Employee employee= (Employee) session.getAttribute(loginUserName);
             loginUser=employee;
             resourcesSet=userService.getResourcesByEmployee(employee);
         }
+
+
         model.addAttribute("user",loginUser);
         model.addAttribute("resources", resourcesSet);
         return "index";
@@ -161,8 +164,8 @@ public class UserController {
 
     @GetMapping("/user/personal_center")
     public String personal_center(Model model){
-
-        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        String loginUserName= (String) SecurityUtils.getSubject().getPrincipal();
+        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute(loginUserName);
         model.addAttribute("user",employee);
         List<String> sexs=new ArrayList<>();
         if(employee.getSex().equals("男")){
@@ -178,7 +181,8 @@ public class UserController {
 
     @GetMapping("/user/change_personal_info")
     public String personal_center(String tx_uri,String mail,String sex,Model model){
-        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        String loginUserName= (String) SecurityUtils.getSubject().getPrincipal();
+        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute(loginUserName);
         if(tx_uri!=null&&!tx_uri.equals("")){
             employee.setTxUri(tx_uri.split("/")[3]);
         }
@@ -210,7 +214,8 @@ public class UserController {
 
     @GetMapping("/user/change_password")
     public String change_pwd(Model model){
-        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        String loginUserName= (String) SecurityUtils.getSubject().getPrincipal();
+        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute(loginUserName);
         model.addAttribute("user",employee);
         return "user/change_pwd";
     }

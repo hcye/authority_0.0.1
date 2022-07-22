@@ -340,8 +340,8 @@ public class EmployeeRestController {
     @PostMapping("/user/reset_password")
     public Map<String,String> turn(String oldPwd,String newPwd,String pwdConf){
         Map<String,String> map=new HashMap<>();
-
-        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        String usname= (String) SecurityUtils.getSubject().getPrincipal();
+        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname);
         String dbPwd=employee.getPwd();
         String encryptPwd=ShiroUtils.encryption(oldPwd,ByteSource.Util.bytes(employee.getLoginName()).toHex());
 

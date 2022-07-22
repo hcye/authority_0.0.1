@@ -25,6 +25,31 @@ public class AssetCheck {
     @Basic
     @Column(name = "remarks", nullable = true, length = 100)
     private String remarks;
+
+    @Basic
+    @Column(name = "starter", nullable = true)
+    private Integer stater;
+
+    @Basic
+    @Column(name = "starter_name", nullable = true, length = 30)
+    private String starter_name;
+
+    public int getStater() {
+        return stater;
+    }
+
+    public void setStater(int stater) {
+        this.stater = stater;
+    }
+
+    public String getStarter_name() {
+        return starter_name;
+    }
+
+    public void setStarter_name(String starter_name) {
+        this.starter_name = starter_name;
+    }
+
     @OneToMany(mappedBy = "assetCheckByAssetCheck")
     private Collection<AssetCkRecord> assetCkRecordsById;
 

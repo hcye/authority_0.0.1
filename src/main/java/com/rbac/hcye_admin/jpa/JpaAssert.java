@@ -44,8 +44,13 @@ public interface JpaAssert extends JpaRepository<Assert,Integer> {
     List<Assert> findAssertsByBorroworNameLikeAndDamFlag(@Param("searchKey")String search,@Param("dam") String damFlag);
     @Query("select ast from Assert ast where ast.workless=:dam and ast.assetTypeByAssertType.typeName=:tp")
     List<Assert> findAssertsBytype(@Param("tp") String type,@Param("dam") String damFlag);
+    @Query("select ast from Assert ast where ast.assetTypeByAssertType.typeName=:tp")
+    List<Assert> findAssertByAssetType_without_damflag(@Param("tp") String type);
+
     @Query("select ast from Assert ast where ast.workless=:dam and ast.snnum like :searchKey")
     List<Assert> findAssertBySnnumLikeAndDamFlag(@Param("searchKey")String search,@Param("dam") String damFlag);
+
+
 
 
 

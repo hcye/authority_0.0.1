@@ -43,7 +43,6 @@ public  class RepeatSubmitInterceptor extends HandlerInterceptorAdapter
         if (handler instanceof HandlerMethod)
         {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
-            Method method = handlerMethod.getMethod();
                 if (this.isRepeatSubmit(request))
                 {
                     return false;

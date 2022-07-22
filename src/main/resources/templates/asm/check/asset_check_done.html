@@ -3,7 +3,7 @@
       xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <meta charset="UTF-8">
-    <title>资产盘点</title>
+    <title>盘点结果</title>
 </head>
 <link rel="stylesheet" href="/layui/css/layui.css">
 <link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
@@ -20,13 +20,19 @@
         //监听提交
         //checkbox 点击事件
         form.on("select(tp)", function(data){
-            queryList($("#dev_type").val(), $("#keywords").val(),  $("#is_damage").val());
+            queryList($("#dev_type").val(),"",  "");
         });
     });
 
+    function transformNullStr(str){
+        if (str==null){
+            return "";
+        }
+        return str;
+    }
 
-    function queryList(type, search, isDam) {
-        $.post("/asm/search_asset4check", {
+    function queryList(type,search,isDam) {
+        $.post("/asm/check_done_list", {
                 type: type,
                 search: search,
                 isDam: isDam
@@ -48,8 +54,8 @@
                     $("#tb").append("<tr><td><input type='hidden' value='" + assets[key].id + "' />" + assets[key].aname + "" +
                         "</td><td>" + assets[key].model + "</td><td>" + assetNum + "" +
                         "</td><td>" + browser + "</td><td>" + sn + "</td><td>" + assets[key].sysGroupName + "</td><td>" + assets[key].putintime +
-                        "</td><td><input class='layui-input' name='remark' /></td><td>" +
-                        "<input type='checkbox' name='add' lay-skin='switch'></td></tr>");
+                        "</td><td>"+assets[key].remarks+"</td>" +
+                        "</tr>");
                 }
 
                 var form = layui.form;
@@ -58,50 +64,12 @@
             }, "json");
     }
 
-
-    function transformNullStr(str){
-        if (str==null){
-            return "";
-        }
-        return str;
-    }
-
-
-
-
     $(function () {
 
-        $(document).ready(function (){
+        $(document).ready(function () {
             queryList($("#dev_type").val(), "",  "");
         })
 
-        // type:type,search:search,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag,isDam:isDam
-        $("#search").click(function () {
-            queryList($("#dev_type").val(), $("#keywords").val(),  $("#is_damage").val());
-        })
-
-        $("#stop_check").click(function () {
-            document.location.href="/asm/asset_check?stop_check=true";
-        })
-
-        $("#done").click(function () {
-            document.location.href="/asm/check_done";
-        })
-
-
-        $("#conform").click(function () {
-            var sw_list=$("#tb").find("input[name='add']")
-            var id_arr=new Array();
-            var remark_arr=new Array();
-            for (var i in sw_list){
-                if(sw_list[i].checked==true){
-                    id_arr.push($(sw_list[i]).parent().parent().find("input")[0].value);
-                    remark_arr.push($(sw_list[i]).parent().parent().find("input")[1].value);
-                }
-            }
-            console.log(id_arr+"---"+remark_arr)
-            document.location.href="/asm/asset_check?selected_id="+id_arr+"&selected_remark="+remark_arr
-        })
     })
 
 
@@ -109,11 +77,12 @@
 </script>
 <body>
 <div class="layui-row" style="background-color: #D0D0D0;margin-bottom: 3%;padding: 1%;border: #4E5465 1px">
-    <p>资产盘点</p>
+    <p>盘点结果</p>
 </div>
     <div class="layui-container"  style="width: 90%">
         <div class="layui-form">
             <div class="layui-form-item">
+                <blockquote class="layui-elem-quote">盘空列表</blockquote>
                 <div class="layui-inline">
                     <label class="layui-form-label">资产类型</label>
                     <div class="layui-input-inline">
@@ -122,33 +91,6 @@
                         </select>
                     </div>
                 </div>
-
-                <div class="layui-inline">
-                    <label class="layui-form-label">是否损坏</label>
-                    <div class="layui-input-inline">
-                        <select class="layui-form-select" id="is_damage">
-                            <option  th:each="isdam : ${dam}"  th:text="${isdam}"></option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="layui-inline">
-                    <div class="layui-input-inline">
-                        <input class="layui-input"   placeholder="按编号、借用人、设备名、sn号检索" id="keywords"/>
-                    </div>
-                </div>
-                <div class="layui-inline">
-                    <div class="btn-group">
-                        <button class="layui-btn " id="search"> <i class="layui-icon">&#xe615;</i> 查找</button>
-                        <button class="layui-btn " id="conform"> <i class="layui-icon">&#xe615;</i> 确定</button>
-                        <button class="layui-btn " id="done">盘点完成</button>
-                    </div>
-
-                </div>
-                <div class="layui-inline">
-                    <button class="layui-btn " id="stop_check" style="background-color: #e74c3c">取消盘点</button>
-                </div>
-
             </div>
             <div class="layui-form-item">
                 <table class="layui-table">
@@ -162,7 +104,6 @@
                             <td>主体</td>
                             <td>入库时间</td>
                             <td>备注</td>
-                            <td>选择</td>
                         </tr>
                     </thead>
                     <tbody id="tb">
@@ -171,6 +112,26 @@
                 </table>
             </div>
         </div>
+        <blockquote class="layui-elem-quote">盘点记录</blockquote>
+        <div class="layui-form-item">
+            <table class="layui-table">
+                <thead>
+                <tr>
+                    <td>名称</td>
+                    <td>编号</td>
+                    <td>盘点备注</td>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="ch: ${rec}">
+                        <td th:text="${ch.assetName}"></td>
+                        <td th:text="${ch.assetCode}"></td>
+                        <td th:text="${ch.checkRemark}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
     </div>
 </body>
 </html>

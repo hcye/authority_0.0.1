@@ -118,6 +118,9 @@ public class AsmService {
 
     public List<Assert> queryList(String type, String isDam, String search){
         List<Assert> list;
+        if(isDam.equals("")&&search.equals("")){
+            return jpaAssert.findAssertByAssetType_without_damflag(type);
+        }
         String damFlag="0";
         if(!isDam.equals("完好")){
             damFlag="1";

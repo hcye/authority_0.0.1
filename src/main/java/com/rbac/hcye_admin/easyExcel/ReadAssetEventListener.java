@@ -204,7 +204,8 @@ public class ReadAssetEventListener extends AnalysisEventListener<AssetDownloadM
     @Transactional(rollbackFor = ExcelAnalysisException.class)
     @Override
     public void doAfterAllAnalysed(AnalysisContext analysisContext) {
-        Employee employee = (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        String loginUserName= (String) SecurityUtils.getSubject().getPrincipal();
+        Employee employee = (Employee) SecurityUtils.getSubject().getSession().getAttribute(loginUserName);
         OperatRecord record = new OperatRecord();
         record.setAction("上传");
         record.setActionTime(new Timestamp(new java.util.Date().getTime()));

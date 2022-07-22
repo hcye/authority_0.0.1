@@ -9,6 +9,7 @@ import com.rbac.hcye_admin.entity.*;
 import com.rbac.hcye_admin.jpa.*;
 import com.rbac.hcye_admin.service.*;
 import com.rbac.hcye_admin.tool.ConvertStrForSearch;
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -34,6 +35,8 @@ import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @RestController
 public class AsmRestController {
@@ -42,6 +45,12 @@ public class AsmRestController {
     private JpaEmployee jpaEmployee;
     @Autowired
     private JpaAssert jpaAssert;
+
+    @Autowired
+    private JpaAssetCheck jpaAssetCheck;
+
+    @Autowired
+    private JpaAssetCkRecord jpaAssetCkRecord;
     @Autowired
     private JpaAssetType jpaAssetType;
     @Autowired
@@ -175,8 +184,8 @@ public class AsmRestController {
             }
         }
 
-
-        me.add((Employee) SecurityUtils.getSubject().getSession().getAttribute("user"));
+        String usname= (String) SecurityUtils.getSubject().getPrincipal();
+        me.add((Employee) SecurityUtils.getSubject().getSession().getAttribute(usname));
         pages.add(page);
         map.put("page", Collections.singletonList(pages));
         map.put("emp", Collections.singletonList(bros));
@@ -203,13 +212,14 @@ public class AsmRestController {
             login_name=login_name+res[res.length-1];
             borrower=jpaEmployee.findEmployeeByLoginName(login_name);
         }
-
+        String usname= (String) SecurityUtils.getSubject().getPrincipal();
         if(actionFlag.equals("bo")){
             for (String str:ids){
                 if(!str.trim().equals("")){
                     Assert ast=jpaAssert.findById(Integer.parseInt(str)).get();
                     ast.setEmployeeByBorrower(borrower);
-                    asmRecordService.write(AsmAction.dev_borrow,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),borrower,ast,"");
+
+                    asmRecordService.write(AsmAction.dev_borrow,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname),borrower,ast,"");
                     Assert anAssert=jpaAssert.save(ast);
                     asmRecordService.createAndSaveAssetRecord(AssetAction.borrow,anAssert,borrower,null);
                 }
@@ -219,7 +229,7 @@ public class AsmRestController {
                 if(!str.trim().equals("")){
                     Assert ast=jpaAssert.findById(Integer.parseInt(str)).get();
                     ast.setEmployeeByBorrower(null);
-                    asmRecordService.write(AsmAction.dev_return,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),borrower,ast,"");
+                    asmRecordService.write(AsmAction.dev_return,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname),borrower,ast,"");
                     Assert anAssert=jpaAssert.save(ast);
                     asmRecordService.createAndSaveAssetRecord(AssetAction.retrun_asset,anAssert,borrower,null);
                 }
@@ -309,12 +319,11 @@ public class AsmRestController {
 
         assertType.setPermiCode(permissionCode);
         jpaAssetType.saveAndFlush(assertType);
-
         Session session=SecurityUtils.getSubject().getSession();
-        Employee employee= (Employee) session.getAttribute("user");
+        Employee employee= (Employee) session.getAttribute(usname);
         permissionService.addPermissionToUser(employee,resources);
         asmRecordService.write(AsmAction.dev_add_type,new Timestamp(new java.util.Date().getTime()),
-                (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),
+                (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname),
                 null,null,devType);
         map.put("ok","新增成功!");
         return map;
@@ -805,6 +814,92 @@ public class AsmRestController {
         return map;
     }
 
+
+    @RequestMapping("/asm/search_asset4check")
+    public Map<String,List<Object>> search4check(String type,String isDam,String search){
+        String usname= (String) SecurityUtils.getSubject().getPrincipal();
+        Employee check_operater= (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname);
+        List<AssetCheck> assetChecks=jpaAssetCheck.findAll();
+        AssetCheck cu_assetCheck=null;
+        for(AssetCheck assetCheck:assetChecks){
+            if(assetCheck.getStatus()!=null && assetCheck.getStatus().equals("on") && assetCheck.getStater()
+                    ==check_operater.getId()){
+                cu_assetCheck=assetCheck;
+                break;
+            }
+        }
+        List<AssetCkRecord> assetCkRecords=jpaAssetCkRecord.findAssetCkRecordsByAssetCheckByAssetCheck(cu_assetCheck);
+        Map<String,List<Object>> map=new HashMap<>();
+        List<Employee> bros=new ArrayList<>();
+        List<Assert> asserts  = asmService.queryList(type,isDam,search);
+        int asset_size=asserts.size();
+        if(assetCkRecords.size()>0) {
+            for (int i = asset_size - 1; i >= 0; i--) {
+                for (AssetCkRecord assetCkRecord : assetCkRecords) {
+                    if (asserts.get(i).getAssestnum().equals(assetCkRecord.getAssetCode())) {
+                        asserts.remove(asserts.get(i));
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (Assert ast:asserts){
+            Employee bro=ast.getEmployeeByBorrower();
+            if(bro==null){
+                bros.add(null);
+            }else {
+                bros.add(bro);
+            }
+        }
+        map.put("emp", Collections.singletonList(bros));
+        map.put("asserts", Collections.singletonList(asserts));
+        return map;
+    }
+
+
+    @RequestMapping("/asm/check_done_list")
+    public Map<String,List<Object>> check_done(String type){
+        String loginUserName= (String) SecurityUtils.getSubject().getPrincipal();
+        Employee check_operater= (Employee) SecurityUtils.getSubject().getSession().getAttribute(loginUserName);
+        List<AssetCheck> assetChecks=jpaAssetCheck.findAll();
+        AssetCheck cu_assetCheck=null;
+        for(int i=assetChecks.size()-1;i>=0;i--){
+            AssetCheck assetCheck=assetChecks.get(i);
+            if(assetCheck.getStatus()!=null && assetCheck.getStatus().equals("close") && assetCheck.getStater()
+                    ==check_operater.getId()){
+                cu_assetCheck=assetCheck;
+                break;
+            }
+        }
+        List<AssetCkRecord> assetCkRecords=jpaAssetCkRecord.findAssetCkRecordsByAssetCheckByAssetCheck(cu_assetCheck);
+        Map<String,List<Object>> map=new HashMap<>();
+        List<Employee> bros=new ArrayList<>();
+        List<Assert> asserts  = asmService.queryList(type,"","");
+        if(assetCkRecords.size()>0) {
+            for (int i = asserts.size() - 1; i >= 0; i--) {
+                for (AssetCkRecord assetCkRecord : assetCkRecords) {
+                    if (asserts.get(i).getAssestnum().equals(assetCkRecord.getAssetCode())) {
+                        asserts.remove(i);
+                        break;
+                    }
+                }
+            }
+        }
+        for (Assert ast:asserts){
+            Employee bro=ast.getEmployeeByBorrower();
+            if(bro==null){
+                bros.add(null);
+            }else {
+                bros.add(bro);
+            }
+        }
+
+        map.put("emp", Collections.singletonList(bros));
+        map.put("asserts", Collections.singletonList(asserts));
+        return map;
+    }
+
     /**
      *
      * 报损校验
@@ -822,7 +917,8 @@ public class AsmRestController {
             anAssert.setWorkless("1");
             anAssert.setDamagetime(new java.sql.Date(new java.util.Date().getTime()));
             jpaAssert.save(anAssert);
-            asmRecordService.write(AsmAction.dev_dam,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,anAssert,"");
+            String loginUserName= (String) SecurityUtils.getSubject().getPrincipal();
+            asmRecordService.write(AsmAction.dev_dam,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute(loginUserName),null,anAssert,"");
             map.put("ok","校验成功");
         }
         return map;
@@ -840,7 +936,8 @@ public class AsmRestController {
             List<AssetRecord> assetRecords= (List<AssetRecord>) anAssert.getAssetRecordsById();
             jpaAssetRecord.deleteAll(assetRecords);
             jpaAssert.delete(anAssert);
-            asmRecordService.write(AsmAction.dev_del,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null,"");
+            String loginUserName= (String) SecurityUtils.getSubject().getPrincipal();
+            asmRecordService.write(AsmAction.dev_del,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute(loginUserName),null,null,"");
             map.put("ok","删除成功");
         }
         return map;
@@ -851,7 +948,8 @@ public class AsmRestController {
     @RequiresPermissions("asm:exchange:view")
     @PostMapping("/asm/exchange_req")
     public Map<String,String> exchange(String  reason,String selectDevIds){
-        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        String loginUserName= (String) SecurityUtils.getSubject().getPrincipal();
+        Employee employee= (Employee) SecurityUtils.getSubject().getSession().getAttribute(loginUserName);
         SysMail sysMail=jpaMail.findSysMailByForwhat("asm");
         Map<String,String> map=new HashMap<>();
         EchangeDevs echangeDevs=new EchangeDevs();
@@ -895,6 +993,7 @@ public class AsmRestController {
     public Map<String,String> putin(String type, String model, String price, String name, String encode,
                                     String num,String sysGroup,String supplier){
         int nu=Integer.parseInt(num);
+        String loginUserName= (String) SecurityUtils.getSubject().getPrincipal();
         SysGroup group=null;
         if(!sysGroup.equals("")){
             String groupId=sysGroup.split("-")[0];
@@ -917,7 +1016,8 @@ public class AsmRestController {
                 }
                 Suppplier suppplier = jpaSupplier.findSupppliersBySupplierName(supplier).get(0);
                 ast.setSuppplierBySupplier(suppplier);
-                asmRecordService.write(AsmAction.dev_in,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null,"");
+
+                asmRecordService.write(AsmAction.dev_in,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute(loginUserName),null,null,"");
             }
           //  jpaAssert.saveAll(list);
             for(Assert ast:list){

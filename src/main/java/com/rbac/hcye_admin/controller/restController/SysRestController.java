@@ -31,8 +31,8 @@ public class SysRestController {
         List<EchangeDevs> list = jpaExchangeDevs.findAll();
 
 
-
-        Employee employee = (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        String usname= (String) SecurityUtils.getSubject().getPrincipal();
+        Employee employee = (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname);
         if(list.size()==0){
             return map;
         }
@@ -138,7 +138,8 @@ public class SysRestController {
     public Map<String, Object> getEven() {
         Map<String, Object> map = new HashMap<>();
         List<EchangeDevs> echangeDevs = jpaExchangeDevs.findAll();
-        Employee employee = (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+        String usname= (String) SecurityUtils.getSubject().getPrincipal();
+        Employee employee = (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname);
         for (EchangeDevs echange : echangeDevs) {
             if (echange.getReceived().equals("") && echange.getIsDone().equals("0") && echange.getResiverFK().getId() .equals(employee.getId()) ) {
                 map.put("sender", echange.getSenderFK().getEname() + "-" + echange.getSenderFK().getLoginName());
@@ -157,12 +158,12 @@ public class SysRestController {
     @PostMapping("/sys/exchangePermit")
     public Map<String,String> exP(String[] data) {
         Map<String, String> map = new HashMap<>();
-
+        String usname= (String) SecurityUtils.getSubject().getPrincipal();
         if(data==null){
             return map;
         }
         for (String str:data){
-            Employee employee = (Employee) SecurityUtils.getSubject().getSession().getAttribute("user");
+            Employee employee = (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname);
             String[] re=str.split("-");
             int id=Integer.parseInt(re[0]);
             String td=re[1];
