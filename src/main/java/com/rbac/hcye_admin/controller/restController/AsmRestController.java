@@ -426,6 +426,8 @@ public class AsmRestController {
         tail=tail.replace("0","9");
         temp=temp+"-"+tail;
         boolean b=asmService.valid(temp,assetCode);
+
+
         if(!b){
             map.put("error","设备类型编码不匹配资产类型编码");
             return map;
@@ -433,6 +435,11 @@ public class AsmRestController {
         DevType dtp=jpaDevType.findDevTypeByDevNameAndAssertType(dev_name,assertType);
         if(dtp!=null){
             map.put("error","资产名称重复！请重新填写");
+            return map;
+        }
+        List<DevType> types=jpaDevType.findDevTypesByAssetNumTemplate(temp);
+        if(types.size()>0){
+            map.put("error","编码模板重复！请重新填写");
             return map;
         }
 

@@ -81,11 +81,25 @@
         })
 
         $("#stop_check").click(function () {
-            document.location.href="/asm/asset_check?stop_check=true";
+            layer.confirm('确定取消 ！', {
+                btn: ['确定', '取消'] //可以无限个按钮
+            }, function () {
+                document.location.href="/asm/asset_check?stop_check=true";
+            }, function (index) {
+                //关闭弹出层
+                layer.close(index);
+            });
         })
 
         $("#done").click(function () {
-            document.location.href="/asm/check_done";
+            layer.confirm('确定结束盘点 ！', {
+                btn: ['确定', '取消'] //可以无限个按钮
+            }, function () {
+                document.location.href="/asm/check_done";
+            }, function (index) {
+                //关闭弹出层
+                layer.close(index);
+            });
         })
 
 
@@ -141,11 +155,12 @@
                     <div class="btn-group">
                         <button class="layui-btn " id="search"> <i class="layui-icon">&#xe615;</i> 查找</button>
                         <button class="layui-btn " id="conform"> <i class="layui-icon">&#xe615;</i> 确定</button>
-                        <button class="layui-btn " id="done">盘点完成</button>
+
                     </div>
 
                 </div>
-                <div class="layui-inline">
+                <div class="layui-inline" style="margin-left: 5%">
+                    <button class="layui-btn " id="done">盘点完成</button>
                     <button class="layui-btn " id="stop_check" style="background-color: #e74c3c">取消盘点</button>
                 </div>
 

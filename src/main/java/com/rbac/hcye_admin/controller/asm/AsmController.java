@@ -305,7 +305,6 @@ public class AsmController {
             return "asm/check/check_history";
         } else if (history_id != null) {
             CheckHistory checkHistory = jpaCheckHistory.findById(Integer.parseInt(history_id)).get();
-            System.out.println(checkHistory.getCheckTime() + "-" + checkHistory.getCheckKongIds());
             String[] kongIds = checkHistory.getCheckKongIds().split(",");
             String[] acks = checkHistory.getCheckRecordsIds().split(",");
             List<Assert> asserts = new ArrayList<>();

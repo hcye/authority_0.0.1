@@ -83,6 +83,5 @@ public class Test1 {
                     System.out.println(ip_start+"--"+ip_tail);
                 }
             }
-            String usname= (String) SecurityUtils.getSubject().getPrincipal();
     }
 }}
