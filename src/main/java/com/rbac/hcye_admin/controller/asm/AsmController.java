@@ -502,12 +502,11 @@ public class AsmController {
 
 
         model.addAttribute("dev",anAssert);
-        String sysgroup="";
-        if(anAssert.getSysGroupBySysGroup()!=null){
-            sysgroup=anAssert.getSysGroupBySysGroup().getId()+"-"+ anAssert.getSysGroupBySysGroup().getGname();
-        }
-        model.addAttribute("sysgroup",sysgroup);
+
+        List<AssetType> assetTypes=jpaAssetType.findAll();
+        assetTypes.remove(type);
         model.addAttribute("type",type);
+        model.addAttribute("all_types",assetTypes);
         model.addAttribute("isDam",isDam);
         model.addAttribute("temp",temp);
         model.addAttribute("cuindex",cuindex);
@@ -565,7 +564,7 @@ public class AsmController {
     public String zhuanyi(Model model,String selected,String asset_selected){
         List<Assert> asserts=new ArrayList<>();
         Set<String> ids =new LinkedHashSet<>();
-
+        List<AssetType> assetTypes=jpaAssetType.findAll();
         if(selected!=null && !selected.equals("")){
             /*for(String an:selected.split(",")){
                 asserts.add(jpaAssert.findById(Integer.parseInt(an)).get());
@@ -591,20 +590,20 @@ public class AsmController {
         }
 
         model.addAttribute("selected",asserts_reverse);
+        model.addAttribute("types",assetTypes);
         return "asm/asset_zhuanyi";
     }
 
     @GetMapping("/asm/do_zhuanyi")
-    public String do_zhuanyi(String assets,String group_with_id){
+    public String do_zhuanyi(String assets,String type_with_id){
       //  List<Assert> asserts=new ArrayList<>();
         for(String aid:assets.split(",")){
-            String gid=group_with_id.split("-")[0];
-            SysGroup sysGroup=jpaGroup.findById(Integer.parseInt(gid)).get();
+            String tid=type_with_id.split("-")[0];
+            AssetType assetType=jpaAssetType.findById(Integer.parseInt(tid)).get();
             Assert anAssert=jpaAssert.findById(Integer.parseInt(aid)).get();
-            anAssert.setSysGroupName(sysGroup.getGname());
-            anAssert.setSysGroupBySysGroup(sysGroup);
+            anAssert.setAssetTypeByAssertType(assetType);
             Assert ast=jpaAssert.save(anAssert);
-            asmRecordService.createAndSaveAssetRecord(AssetAction.zhuanyi,ast,null,sysGroup);
+            asmRecordService.createAndSaveAssetRecord(AssetAction.zhuanyi,ast,null,assetType);
       //      asserts.add(anAssert);
         }
       //  model.addAttribute("selected",asserts);
@@ -757,7 +756,7 @@ public class AsmController {
     @RequiresPermissions("asm:edit:btn")
     @GetMapping("/asm/save_dev")
     public String saveDev(int id,String types,String model,String price,String remarks,String sn,String num,String list_type,
-                          String list_isDam,String cuindex,String new_bro,String supplier,String sysGroup) throws UnsupportedEncodingException {
+                          String list_isDam,String cuindex,String new_bro,String supplier,String zhuanyi) throws UnsupportedEncodingException {
         String usname= (String) SecurityUtils.getSubject().getPrincipal();
         Assert anAssert=jpaAssert.findById(id).get();
         anAssert.setAssetTypeByAssertType(jpaAssetType.findAssetTypeByName(types));
@@ -772,19 +771,15 @@ public class AsmController {
                 break;
             }
         }
-        if(sysGroup==null || sysGroup.equals("")){
-            anAssert.setSysGroupBySysGroup(null);
-            anAssert.setSysGroupName("");
-        }else {
-            if(sysGroup.contains("-")){
-                String groupId=sysGroup.split("-")[0];
-                SysGroup group=jpaGroup.findById(Integer.parseInt(groupId)).get();
-                SysGroup bySysGroup=anAssert.getSysGroupBySysGroup();
-                if(bySysGroup!=group){
-                    asmRecordService.createAndSaveAssetRecord(AssetAction.zhuanyi,anAssert,null,group);
+        if(zhuanyi!=null && !zhuanyi.equals("")){
+            if(zhuanyi.contains("-")){
+                String groupId=zhuanyi.split("-")[0];
+                AssetType assetType=jpaAssetType.findById(Integer.parseInt(groupId)).get();
+                AssetType cast=anAssert.getAssetTypeByAssertType();
+                if(assetType!=cast){
+                    asmRecordService.createAndSaveAssetRecord(AssetAction.zhuanyi,anAssert,null,assetType);
                 }
-                anAssert.setSysGroupBySysGroup(group);
-                anAssert.setSysGroupName(group.getGname());
+                anAssert.setAssetTypeByAssertType(assetType);
             }
         }
         if(new_bro==null || new_bro.equals("")) {

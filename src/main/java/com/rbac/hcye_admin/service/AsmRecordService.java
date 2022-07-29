@@ -23,7 +23,7 @@ public class AsmRecordService {
         OperatRecord op=new OperatRecord( action,  actionTime,  employeeByDealer,  employeeByAssertEmp,  assertByAssertAsset,remarks);
         jpaOperatRecord.save(op);
     }
-    public void createAndSaveAssetRecord(String action,Assert ast,Employee e,SysGroup sysGroup){
+    public void createAndSaveAssetRecord(String action,Assert ast,Employee e,AssetType assetType){
         AssetRecord assetRecord=new AssetRecord();
         AssetAction assetAction=jpaAssetAction.findAssetActionByAssetAction(action);
         assetRecord.setAssetActionByAssetAction(assetAction);
@@ -32,10 +32,10 @@ public class AsmRecordService {
             assetRecord.setActDetail("从"+e.getLoginName()+"归还");
         }
         if(action.equals(AssetAction.borrow)){
-            assetRecord.setActDetail("借用给:"+e.getLoginName());
+            assetRecord.setActDetail("借用给:"+e.getEname());
         }
         if(action.equals(AssetAction.zhuanyi)){
-            assetRecord.setActDetail("转移到:"+sysGroup.getGname());
+            assetRecord.setActDetail("转移到:"+assetType.getTypeName());
         }
         if(action.equals(AssetAction.diaobo)){
             assetRecord.setActDetail("调拨到"+e.getLoginName());

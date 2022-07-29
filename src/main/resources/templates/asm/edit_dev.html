@@ -51,7 +51,7 @@
                             +"&remarks="+$("#remarks").val().trim()+ "&sn="+$("#sn_num").val().trim()+"&num="+$("#num").val().trim()
                             +"&list_type="+$("#list_type").val().trim() +"&list_isDam="+$("#list_isDam").val().trim()
                             +"&cuindex="+$("#cuindex").val().trim()+'&new_bro='+$("#bor_emp").val().trim()
-                            +'&supplier='+sup+'&sysGroup='+$("#sysGroup").val().trim();
+                            +'&supplier='+sup+'&zhuanyi='+$("#zhuanyi").val().trim();
                         console.log("----123212-----")
                     }
                 }, "json");
@@ -191,9 +191,12 @@
                     </div>
 
                     <div class="layui-form-item">
-                        <label class="layui-form-label">主体:</label>
+                        <label class="layui-form-label">转移:</label>
                         <div class="layui-input-block">
-                            <input  class="layui-input"  id="sysGroup" th:value="${sysgroup}" />
+                            <select id="zhuanyi">
+                                <option></option>
+                                <option th:each="ast:${all_types}" th:text="${ast.getId()}+'-'+${ast.getTypeName()}"></option>
+                            </select>
                         </div>
                     </div>
 

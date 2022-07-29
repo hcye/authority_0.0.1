@@ -724,7 +724,7 @@ public class AsmRestController {
     }
 
     @PostMapping("/asm/validInputAssetNum")
-    public Map<String,String> valid(String inputCode,String tep,String num,String model,String price,String sysGroup){
+    public Map<String,String> valid(String inputCode,String tep,String num,String model,String price){
         Map<String,String> map=new HashMap<>();
         String numRegex="[0-9]+";
         String priceRegex="[0-9]+[\\.]?[0-9]*";
@@ -736,23 +736,13 @@ public class AsmRestController {
             map.put("error","数量必填且只接受数字！");
             return map;
         }
-        if(!price.equals("")){
+        if(!price.trim().equals("")){
             if(!Pattern.matches(priceRegex, price)){
                 map.put("error","价格只接受数字！");
                 return map;
             }
         }
-        if(!sysGroup.equals("")){
-            String groupId=sysGroup.split("-")[0];
-            if(jpaGroup.findById(Integer.parseInt(groupId))==null){
-                map.put("error","从属主体不存在！");
-                return map;
-            }
-            if(!Pattern.matches(priceRegex, price)){
-                map.put("error","价格只接受数字！");
-                return map;
-            }
-        }
+
         boolean validRes=asmService.validDevTypeNum(inputCode, tep);
         if(validRes){
             map.put("ok","编号校验成功");
@@ -998,14 +988,9 @@ public class AsmRestController {
     @RequiresPermissions("asm:inp:view")
     @PostMapping("/asm/putin")
     public Map<String,String> putin(String type, String model, String price, String name, String encode,
-                                    String num,String sysGroup,String supplier){
+                                    String num,String supplier){
         int nu=Integer.parseInt(num);
         String loginUserName= (String) SecurityUtils.getSubject().getPrincipal();
-        SysGroup group=null;
-        if(!sysGroup.equals("")){
-            String groupId=sysGroup.split("-")[0];
-            group=jpaGroup.findById(Integer.parseInt(groupId)).get();
-        }
         Map<String,String> map=new HashMap<>();
         List<Assert> list=new ArrayList<>();
         AssetType assetType=jpaAssetType.findAssetTypeByName(type);
@@ -1017,10 +1002,6 @@ public class AsmRestController {
                 ast.setPrice(price);
                 ast.setModel(model);
                 ast.setAssetTypeByAssertType(assetType);
-                if(group!=null){
-                    ast.setSysGroupBySysGroup(group);
-                    ast.setSysGroupName(group.getGname());
-                }
                 Suppplier suppplier = jpaSupplier.findSupppliersBySupplierName(supplier).get(0);
                 ast.setSuppplierBySupplier(suppplier);
 

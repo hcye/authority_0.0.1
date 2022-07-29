@@ -108,7 +108,10 @@
             <div class="layui-inline">
                 <label class="layui-form-label">接收主体:</label>
                 <div class="layui-input-inline">
-                    <input id="target_zhuti" class="layui-input" />
+                    <select>
+                        <option th:each="type:${types}" th:text="${type.getId()}+'-'+${type.getTypeName()}" shiro:hasPermission="${type.permiCode}"></option>
+                    </select>
+<!--                    <input id="target_zhuti" class="layui-input" />-->
                 </div>
                 <div class="layui-btn-group">
                     <button class="layui-btn " id="zhuanyi" ><i class="layui-icon">&#xe601;</i>转移</button>

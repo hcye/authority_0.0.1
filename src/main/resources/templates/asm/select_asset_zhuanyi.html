@@ -73,6 +73,11 @@
 
     $(function () {
 
+        $(document).ready(function () {
+            // type,search,pre,next,pageIndex,jumpFlag,isDam
+            queryList($("#dev_type").val(), "",  $("#is_damage").val());
+        });
+
 
         // type:type,search:search,pre:pre,next:next,pageIndex:pageIndex,jumpFlag:jumpFlag,isDam:isDam
         $("#search").click(function () {
