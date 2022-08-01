@@ -170,6 +170,17 @@ public class AsmController {
         return "asm/list";
     }
 
+    @RequiresPermissions("asm:kucun:view")
+    @GetMapping("/asm/stock")
+    public String stockPage(Model model,String cuindex) {
+        List<AssetType> types= jpaAssetType.findAssertType();
+        List<DevType> devTypes=jpaDevType.findDevTypesByAssertType(types.get(0).getTypeName());
+        model.addAttribute("dev_types",devTypes);
+        model.addAttribute("types",types);
+        model.addAttribute("cuindex",cuindex);
+        return "asm/stock";
+    }
+
     @GetMapping("/asm/select_4db_zy")
     public String selectPage(Model model,String cu_row,String zy_or_db) {
         String rows_str="";

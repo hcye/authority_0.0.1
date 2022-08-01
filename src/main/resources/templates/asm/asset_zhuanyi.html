@@ -68,7 +68,7 @@
                 }
                 if(arr.length>0){
                     if(group_selected!=""){
-                        document.location.href="/asm/do_zhuanyi?assets="+arr+"&group_with_id="+$("#target_zhuti").val();
+                        document.location.href="/asm/do_zhuanyi?assets="+arr+"&type_with_id="+$("#target_repo").val();
                     }else {
                         layer.msg("接收主体不为空！");
                     }
@@ -106,9 +106,9 @@
                 <button class="layui-btn" id="add"><i class="layui-icon">&#xe654;</i>新增行</button>
             </div>
             <div class="layui-inline">
-                <label class="layui-form-label">接收主体:</label>
+                <label class="layui-form-label">接收仓库:</label>
                 <div class="layui-input-inline">
-                    <select>
+                    <select id="target_repo">
                         <option th:each="type:${types}" th:text="${type.getId()}+'-'+${type.getTypeName()}" shiro:hasPermission="${type.permiCode}"></option>
                     </select>
 <!--                    <input id="target_zhuti" class="layui-input" />-->

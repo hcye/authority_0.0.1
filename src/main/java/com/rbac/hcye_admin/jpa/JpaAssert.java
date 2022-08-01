@@ -53,6 +53,9 @@ public interface JpaAssert extends JpaRepository<Assert,Integer> {
 
 
 
+//    @Query("select ast from Assert ast where ast.workless=:dam and ast.assetTypeByAssertType.typeName=:tp")
+//    List<Assert> findAssertsBytypeAndDevType(@Param("tp") String type,@Param("dtp") String dev_type);
+
 
 
 
@@ -68,6 +71,11 @@ public interface JpaAssert extends JpaRepository<Assert,Integer> {
     @Query("select ast from Assert ast where ast.workless=:dam and ast.snnum like :searchKey")
     Page<Assert> findAssertBySnnumLikeAndDamFlag(@Param("searchKey")String search,@Param("dam") String damFlag,  Pageable pageable);
 
+    @Query("select ast from Assert ast where ast.assetTypeByAssertType.typeName=:tp and ast.employeeByBorrower is null")
+    Page<Assert> findAssertByAssetTypeWithoutDamflagWithoutBroByPage(@Param("tp") String type,Pageable pageable);
+
+    @Query("select ast from Assert ast where ast.assetTypeByAssertType.typeName=:tp and ast.aname=:dtp and ast.employeeByBorrower is null")
+    Page<Assert> findAssertsByAnameAndAssetTypeNameWithoutBro(@Param("tp") String type,@Param("dtp") String dev_type,Pageable pageable);
 
 
 

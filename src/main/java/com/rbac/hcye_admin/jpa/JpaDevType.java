@@ -1,4 +1,5 @@
 package com.rbac.hcye_admin.jpa;
+import com.rbac.hcye_admin.entity.Assert;
 import com.rbac.hcye_admin.entity.AssetType;
 import com.rbac.hcye_admin.entity.DevType;
 import org.springframework.data.domain.Page;
@@ -30,7 +31,9 @@ public interface JpaDevType extends JpaRepository<DevType,Integer> {
     @Query("select dev from DevType dev where dev.assetTypeByAssertTypeId=:tp and dev.devName=:name")
     DevType findDevTypeByDevNameAndAssetTypeByAssertTypeId(@Param("name")String name,@Param("tp")AssetType assetType);
 
-    Page<DevType> findDevTypesByDevNameLike(String name, Pageable pageable);
+
+    @Query("select devtype from DevType devtype where devtype.devName=:name and devtype.assetTypeByAssertTypeId.typeName=:tp")
+    DevType findDevTypeByDevNameAndAssetTypeName(@Param("name")String name,@Param("tp") String tp);
 
     @Query("select dev from DevType dev where dev.devName like :name and dev.assetTypeByAssertTypeId.typeName=:type")
     Page<DevType> findDevTypesByDevNameLikeAndAssetType(@Param("name") String name,@Param("type") String type, Pageable pageable);

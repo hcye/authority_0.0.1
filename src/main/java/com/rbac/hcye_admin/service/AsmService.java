@@ -3,6 +3,7 @@ package com.rbac.hcye_admin.service;
 import com.rbac.hcye_admin.entity.*;
 import com.rbac.hcye_admin.jpa.JpaAssert;
 import com.rbac.hcye_admin.jpa.JpaAssetType;
+import com.rbac.hcye_admin.jpa.JpaDevType;
 import com.rbac.hcye_admin.jpa.JpaResources;
 import com.rbac.hcye_admin.tool.ConvertStrForSearch;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class AsmService {
     @Autowired
     private JpaAssetType jpaAssetType;
     @Autowired
-    private JpaResources jpaResources;
+    private JpaDevType jpaDevType;
     @Autowired
     private PermissionService permissionService;
     public boolean valid(String inputCode, String tep){
@@ -91,30 +92,20 @@ public class AsmService {
         }
         return page;
     }
-/*
-    public List<Assert> queryList(String type, String isDam, String search){
-        List<Assert> page;
-        String damFlag="0";
-        if(!isDam.equals("完好")){
-            damFlag="1";
+
+    public Page<Assert> queryStockPage(String type, String dtype, Pageable pageable){
+        Page<Assert> page;
+        DevType devType=null;
+        if(dtype!=null && !dtype.equals("")){
+            devType=jpaDevType.findDevTypeByDevNameAndAssetTypeName(dtype,type);
         }
-        if(search.equals("")){
-            page=jpaAssert.findAssertsBytype_to_list(type,damFlag);
+        if(devType==null){
+            page=jpaAssert.findAssertByAssetTypeWithoutDamflagWithoutBroByPage(type,pageable);
         }else {
-            search= ConvertStrForSearch.getFormatedString(search);
-            page=jpaAssert.findAssertsByAnameLikeAndDamFlagAndType_to_list(type,search,damFlag);
-            if(page.isEmpty()){
-                page=jpaAssert.findAssertsByAssestnumLikeAndDamFlagAndType_to_list(type,search,damFlag);
-                if(page.isEmpty()){
-                    page=jpaAssert.findAssertsByBorroworPingyinLikeAndDamFlag_to_list(search,damFlag);
-                    if(page.isEmpty()){
-                        page=jpaAssert.findAssertsByBorroworNameLikeAndDamFlag_to_list(search,damFlag);
-                    }
-                }
-            }
+            page=jpaAssert.findAssertsByAnameAndAssetTypeNameWithoutBro(type,dtype,pageable);
         }
         return page;
-    }*/
+    }
 
     public List<Assert> queryList(String type, String isDam, String search){
         List<Assert> list;

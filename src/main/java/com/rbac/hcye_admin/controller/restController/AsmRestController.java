@@ -791,6 +791,42 @@ public class AsmRestController {
         return map;
     }
 
+
+    @RequestMapping("/asm/queryDevTypeByAssetType")
+    public Map<String,List<DevType>> queryDevTypeByAssetType(String type) {
+
+        Map<String,List<DevType>> map=new HashMap<>();
+        List<DevType> devTypes=jpaDevType.findDevTypesByAssertType(type);
+        map.put("devs", devTypes);
+        return map;
+    }
+    @RequestMapping("/asm/queryStockList")
+    public Map<String,List<Object>> queryStockPage(String type,String dtype,String pre,String next,int pageIndex,String jumpFlag) {
+        /**
+         *
+         * 确定是否是翻页
+         *
+         * */
+
+        Map<String,List<Object>> map=new HashMap<>();
+        List<Page<Assert>> pages=new ArrayList<>();
+        Pageable pageable;
+        if(!pre.equals("")||!next.equals("")||!jumpFlag.equals("")){
+            pageIndex=pageIndex-1;
+            pageable=PageRequest.of(pageIndex,pageSize);
+            if(!pre.equals("")){
+                pageable=pageable.previousOrFirst();
+            }else if(!next.equals("")){
+                pageable=pageable.next();
+            }
+        }else {
+            pageable=PageRequest.of(0,pageSize);
+        }
+        Page<Assert> page = asmService.queryStockPage(type,dtype,pageable);
+        pages.add(page);
+        map.put("page", Collections.singletonList(pages));
+        return map;
+    }
     @RequestMapping("/asm/search_asset4db_zy")
     public Map<String,List<Object>> search4db_zy(String type,String isDam,String search){
 

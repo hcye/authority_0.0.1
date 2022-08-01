@@ -39,6 +39,9 @@
             $("#pandian").click(function () {
                 document.location.href = "/asm/asset_check";
             })
+            $("#kucun").click(function () {
+                document.location.href = "/asm/stock";
+            })
         })
 
     </script>
@@ -60,7 +63,7 @@
                 <span style="margin-left: 50px">资产入库</span>
             </div>
             <div class="layui-col-md3" shiro:hasPermission="asm:kucun:view">
-                <img id="kucun" src="/img/asset/kc.png.png" /><br/>
+                <img id="kucun" src="/img/asset/kc.png" /><br/>
                 <span style="margin-left: 50px">库存清单</span>
             </div>
 
