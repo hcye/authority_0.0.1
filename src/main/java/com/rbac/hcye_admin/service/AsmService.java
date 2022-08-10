@@ -152,22 +152,21 @@ public class AsmService {
         int max=0;
         for (Assert asset:list){
             String assestnum=asset.getAssestnum();
-            if(validDevTypeNum(asset.getAssestnum(),template)){
-                String a=assestnum.split("-")[assestnum.split("-").length-1];
-                int xuhao=Integer.parseInt(a);
-                if(xuhao>max){
-                    max=xuhao;
-                    maxNum=assestnum;
-                }
+            String a=assestnum.split("-")[assestnum.split("-").length-1];
+            int xuhao=Integer.parseInt(a);
+            if(xuhao>max){
+                max=xuhao;
+                maxNum=assestnum;
             }
+
         }
         if(!maxNum.equals("")){
-            return "编码最大值是:"+maxNum;
+
+            int length=maxNum.split("-").length;
+            return Integer.parseInt(maxNum.split("-")[length-1])+1+"";
         }else {
-            return maxNum;
+            return "1";
         }
-
-
     }
 
     public List<AssetType> getPermitAsmAssetTypes(){
@@ -189,39 +188,25 @@ public class AsmService {
             return true;
         }else if(inputCode.equals("")&&!tep.equals("")){
             return false;
-        }else if(!inputCode.contains("-")){
-            return false;
         }
-
-        int index = inputCode.lastIndexOf("-");
-
-        String prefixIn=inputCode.substring(0,index);
-        String prefixTemp=tep.substring(0,index);
-        String suffixIn=inputCode.substring(index+1);
-        String suffixTemp=tep.substring(index+1);
-        String numRegex="[0-9]+";
-        String allZero="[0]+";
-//        Pattern.matches(numRegex, input[i]);
-        /**
-         *
-         * 前导不相同的情况
-         * */
-        if((!prefixIn.equals(prefixTemp))||(suffixIn.length()!=suffixTemp.length())){
-            return false;
-        }
+//        int maxNum= Integer.parseInt(getMaxAssetNum(jpaDevType.findDevTypeByAssetNumTemplate(tep)));
+//        String numRegex="[0-9]+";
+//
+//        int input=Integer.parseInt(inputCode);
+//        if(input<maxNum){
+//            return false;
+//        }
         /**
          *
          * 尾数含有非数字的情况
          * */
-        if(!Pattern.matches(numRegex,suffixIn)){
-            return false;
-            /**
-             *
-             * 尾数全部是0的情况
-             * */
-        }else if(Pattern.matches(allZero,suffixIn)){
-            return false;
-        }
+//        if(!Pattern.matches(numRegex,inputCode)){
+//            return false;
+//            /**
+//             *
+//             * 尾数含有非数字的情况
+//             * */
+//        }
         return true;
     }
     public boolean validRepeat(String tep) {

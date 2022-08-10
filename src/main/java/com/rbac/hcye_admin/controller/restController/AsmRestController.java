@@ -28,8 +28,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.text.html.StyleSheet;
 import java.io.*;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
@@ -277,7 +280,7 @@ public class AsmRestController {
     }
 
     @PostMapping("/asm/addAssetType")
-    public Map<String, String> getDevsNames(String devType,String template,String desc){
+    public Map<String, String> getDevsNames(String devType,String desc){
         Map<String ,String> map=new HashMap<>();
         devType=devType.trim();
         AssetType type = jpaAssetType.findAssetTypeByName(devType);
@@ -288,7 +291,6 @@ public class AsmRestController {
         Timestamp ts=new Timestamp(new Date().getTime());
         String usname= (String) SecurityUtils.getSubject().getPrincipal();
         AssetType assertType=new AssetType();
-        assertType.setAssetCode(template);
         assertType.setCreateTime(ts);
         assertType.setCreator(usname);
         assertType.setRemarks(desc);
@@ -353,19 +355,20 @@ public class AsmRestController {
             map.put("error","设备类型关联有设备不能修改！");
             return map;
         }else {
-            String tem=devType.getAssetTypeByAssertTypeId().getAssetCode();
-            if(asmService.valid(input,tem)){
-                devType.setAssetNumTemplate(input);
+            List<DevType>  devTypes=jpaDevType.findAll();
+            for(DevType dtp :devTypes){
+                if(dtp.getAssetNumTemplate().equals(input.trim())){
+                    map.put("error","资产标识符重复");
+                    return map;
+                }
+            }
+                devType.setAssetNumTemplate(input.trim());
                 jpaDevType.save(devType);
                 map.put("ok","修改成功！");
-
-            }else {
-                map.put("error","输入不匹配资产类型约束！");
             }
             return map;
         }
 
-    }
     @RequiresPermissions("asm:type:edit")
     @PostMapping("/asm/saveAssetType")
     public Map<String, String> saveType(int id,String devType,String template,String desc){
@@ -402,16 +405,20 @@ public class AsmRestController {
         List<String> codes=new ArrayList<>();
         List<String> devCodes=new ArrayList<>();
         List<String> names=jpaDevType.findDevTypesNameByAssertType(TpName);
+        List<String> max=new ArrayList<>();
         if(names.size()!=0){
             DevType devType1=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(names.get(0),assetType);
-
+            max.add(asmService.getMaxAssetNum(devType1));
             devCodes.add(devType1.getAssetNumTemplate());
         }
-
+        if(max.size()==0){
+            max.add("");
+        }
         codes.add(code);
         map.put("name",names);
         map.put("code",codes);
         map.put("devCode",devCodes);
+        map.put("max",max);
         return map;
     }
     @RequiresPermissions("asm:devType:add")
@@ -419,26 +426,14 @@ public class AsmRestController {
     public Map<String, String> addDevType(String devType,String dev_name,String desc,String temp,String exc){
         Map<String,String> map=new HashMap<>();
         AssetType assertType= jpaAssetType.findAssetTypeByName(devType);
-        String assetCode=assertType.getAssetCode();
-        String[] assetCodes=assetCode.split("-");
-        int len=assetCodes.length;
-        String tail=assetCodes[len-1];
-        tail=tail.replace("0","9");
-        temp=temp+"-"+tail;
-        boolean b=asmService.valid(temp,assetCode);
-
-
-        if(!b){
-            map.put("error","设备类型编码不匹配资产类型编码");
-            return map;
-        }
         DevType dtp=jpaDevType.findDevTypeByDevNameAndAssertType(dev_name,assertType);
         if(dtp!=null){
             map.put("error","资产名称重复！请重新填写");
             return map;
         }
-        List<DevType> types=jpaDevType.findDevTypesByAssetNumTemplate(temp);
-        if(types.size()>0){
+        temp=temp+"-99999";
+        DevType types=jpaDevType.findDevTypeByAssetNumTemplate(temp);
+        if(types!=null && !temp.equals("")){
             map.put("error","编码模板重复！请重新填写");
             return map;
         }
@@ -630,15 +625,53 @@ public class AsmRestController {
     }
 
     @PostMapping("/asm/validAssetNum")
-    public Map<String,String> valid(String num,int id){
+    public Map<String,String> valid(String num,int id,String act){
+        int seq=0;
+        if(num.contains("-")){
+            String[] nums=num.split("-");
+            seq=Integer.parseInt(nums[nums.length-1]);
+        }
         Map<String,String> map=new HashMap<>();
         Assert anAssert=jpaAssert.findById(id).get();
 
         String name=anAssert.getAname();
         DevType devType=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(name,anAssert.getAssetTypeByAssertType());
         String template=devType.getAssetNumTemplate();
-        boolean flag=asmService.validDevTypeNum(num,template);
-        boolean repeatFlag=false;
+        boolean flag=asmService.validDevTypeNum(seq+"",template);
+        boolean repeatFlag;
+        if(anAssert.getAssestnum().equalsIgnoreCase(num)){
+            repeatFlag=true;
+        }else {
+            repeatFlag=asmService.validRepeat(num);
+        }
+        if(flag){
+            map.put("ok","校验正确");
+        }else {
+            map.put("error","输入的资产编码不匹配设备类型约束！");
+        }
+        if(repeatFlag){
+            map.put("ok","校验正确");
+        }else {
+            map.put("error","输入的资产编号重复！");
+        }
+        return  map;
+    }
+
+    @PostMapping("/asm/validAssetNumForEdit")
+    public Map<String,String> validForEdit(String num,int id){
+        int seq=0;
+        if(num.contains("-")){
+            String[] nums=num.split("-");
+            seq=Integer.parseInt(nums[nums.length-1]);
+        }
+        Map<String,String> map=new HashMap<>();
+        Assert anAssert=jpaAssert.findById(id).get();
+
+        String name=anAssert.getAname();
+        DevType devType=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(name,anAssert.getAssetTypeByAssertType());
+        String template=devType.getAssetNumTemplate();
+        boolean flag=asmService.validDevTypeNum(seq+"",template);
+        boolean repeatFlag;
         if(anAssert.getAssestnum().equalsIgnoreCase(num)){
             repeatFlag=true;
         }else {
@@ -712,6 +745,9 @@ public class AsmRestController {
         String max=asmService.getMaxAssetNum(devType);
         String devTypeAssetNumTemplate=devType.getAssetNumTemplate();
         map.put("code",devTypeAssetNumTemplate);
+        if(devTypeAssetNumTemplate.equals("")){
+            max="";
+        }
         map.put("max",max);
         return map;
     }
@@ -742,8 +778,14 @@ public class AsmRestController {
                 return map;
             }
         }
+        boolean validRes;
+        if(inputCode.equals("") && tep.equals("")){
+            validRes=true;
+        }else {
+            validRes=asmService.validDevTypeNum(inputCode, tep);
+        }
 
-        boolean validRes=asmService.validDevTypeNum(inputCode, tep);
+
         if(validRes){
             map.put("ok","编号校验成功");
         }else {
@@ -1023,24 +1065,26 @@ public class AsmRestController {
     @Transactional
     @RequiresPermissions("asm:inp:view")
     @PostMapping("/asm/putin")
-    public Map<String,String> putin(String type, String model, String price, String name, String encode,
+    public Map<String,String> putin(String type,String code, String model, String price, String name, String encode,
                                     String num,String supplier){
         int nu=Integer.parseInt(num);
         String loginUserName= (String) SecurityUtils.getSubject().getPrincipal();
         Map<String,String> map=new HashMap<>();
         List<Assert> list=new ArrayList<>();
-        AssetType assetType=jpaAssetType.findAssetTypeByName(type);
-        String temp=assetType.getAssetCode();
-        if(temp.equals("")&&encode.equals("")){
+        AssetType assetType=jpaAssetType.findAssetTypeByName(type.trim());
+        if(code.trim().equals("")&&encode.equals("")){
             for (int i=0;i<nu;i++){
                 Assert ast=new Assert();
                 ast.setAname(name);
                 ast.setPrice(price);
                 ast.setModel(model);
                 ast.setAssetTypeByAssertType(assetType);
-                Suppplier suppplier = jpaSupplier.findSupppliersBySupplierName(supplier).get(0);
-                ast.setSuppplierBySupplier(suppplier);
-
+                List<Suppplier> supppliers=jpaSupplier.findSupppliersBySupplierName(supplier);
+                if(supppliers.size()>0){
+                    Suppplier suppplier = supppliers.get(0);
+                    ast.setSuppplierBySupplier(suppplier);
+                }
+                list.add(ast);
                 asmRecordService.write(AsmAction.dev_in,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute(loginUserName),null,null,"");
             }
           //  jpaAssert.saveAll(list);
@@ -1052,56 +1096,32 @@ public class AsmRestController {
 
             map.put("ok","入库成功！");
             return map;
+        }else if(!code.equals("")&&encode.equals("")){
+            map.put("error","请填写资产序号！");
         }
-        String[] encodes=encode.split("-");
-        String zeroInhead="";
-        if(encodes[encodes.length-1].charAt(0)=='0'){
-            char[] chars=encodes[encodes.length-1].toCharArray();
-            for (char c:chars){
-                if(c=='0'){
-                    zeroInhead=zeroInhead+"0";
-                }else {
-                    break;
-                }
-            }
-        }
-        if(zeroInhead.equals(encodes[encodes.length-1])){
-            map.put("error","编号末尾不能全部是0");
-            return map;
-        }
-
-
-        String head="";
-        int lastIndexof=encode.lastIndexOf("-")+1;
-        head=encode.substring(0,lastIndexof);
-        int tail=Integer.parseInt(encodes[encodes.length-1]);
-        int tailLen=encodes[encodes.length-1].length();
-
+        int encode_int=Integer.parseInt(encode);
         for (int i=0;i<nu;i++){
-            String tailStr=tail+"";
+            int chars_len=(encode_int+"").length();
+
+            String zro="";
+            for(int j=0;j<5-chars_len;j++){
+                zro=zro+"0";
+            }
+
+            encode=zro+encode_int;
+            String prefix=code.substring(0,code.lastIndexOf("-"));
+            String assetNum=prefix+"-"+encode;
             Assert ast=new Assert();
             ast.setAname(name);
             ast.setPrice(price);
             ast.setModel(model);
             ast.setAssetTypeByAssertType(assetType);
-
-            if((tailStr).length()>tailLen){
-                map.put("error","编号超出限定范围，入库失败！");
-                return map;
-            }else {
-                int zeroNum = tailLen - tailStr.length();
-                for (int j = 0; j < zeroNum; j++) {
-                    tailStr = "0" + tailStr;
-                }
-            }
-            String code=head+tailStr;
-            if(jpaAssert.findAssertByAssestnum(code)!=null){
+            if(jpaAssert.findAssertByAssestnum(assetNum)!=null){
                 map.put("error","编号重复，入库失败！");
                 return map;
             }
-            ast.setAssestnum(code);
-            tail++;
-
+            ast.setAssestnum(assetNum);
+            encode_int++;
             list.add(ast);
     //        asmRecordService.write(AsmAction.dev_in,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute("user"),null,null);
         }

@@ -21,6 +21,7 @@
         //checkbox 点击事件
         form.on("select(astType)", function(data){
             $.post("/asm/getDevNames", {TpName:data.value},    //把name数据提交到ajaxRes action内，
+
                 function(dt) {
                     $("#name").find("option").remove();
                     var names=dt["name"];
@@ -29,23 +30,15 @@
                             $("#name").append("<option>"+names[key]+"</option>");
                         }
                     }
-                    $("#max").html('');
                     var devCodes;
                     if(dt["devCode"]==null){
-                        $("#encode").attr("placeholder","");
-                        $("#encode").attr("readonly","readonly");
                         return;
                     }else {
                         devCodes= dt["devCode"];
                     }
-                    if(devCodes[0]==""){
-                        $("#encode").attr("placeholder","");
-                        $("#encode").attr("readonly","readonly");
-                    }else {
-                        $("#code").val(devCodes[0]);
-                        $("#encode").attr("placeholder",'格式:'+devCodes[0]);
-                        $("#encode").removeAttr("readonly");
-                    }
+                    $("#code").val(devCodes[0]);
+                    var max=dt["max"]
+                    $("#encode").val(max[0])
                     var form = layui.form;
                     form.render('select');//修改select后需要重新渲染
                 }, "json");
@@ -56,25 +49,13 @@
         form.on("select(astName)", function(data){
             $.post("/asm/getDevNumTemplate", {devName:data.value,assetType:$("#tp").val()},    //把name数据提交到ajaxRes action内，
                 function(dt) {
-                    $("#max").html('');
+                    $("#encode").val("")
                     var temp=dt["code"];
                     var max=dt["max"];
-                    if(temp==""){
-                        $("#encode").attr("readonly","readonly");
-                        $("#max").html("");
-                    }
-                    if(temp==null){
-                        $("#encode").attr("readonly","readonly");
-                        $("#max").html('');
-
-                    }else {
+                    if(temp!=null){
                         $("#code").val(temp);
-
-                        $("#encode").attr("placeholder",'格式:'+temp);
-                        $("#max").html(max);
-                        $("#encode").removeAttr("readonly");
                     }
-
+                    $("#encode").val(max)
                 }, "json");
 
         });
@@ -133,7 +114,7 @@
                         layer.alert(data["error"]);
                     }else {
 
-                        $.post("/asm/putin", {type:$("#tp").val(),model:$("#model").val().trim(),price:$("#price").val().trim(),
+                        $.post("/asm/putin", {type:$("#tp").val(),code:$("#code").val(),model:$("#model").val().trim(),price:$("#price").val().trim(),
                                 name:$("#name").val(), encode:$("#encode").val().trim(),num:$("#num").val().trim(),
                                 supplier:$("#supplire").val().trim()},    //把name数据提交到ajaxRes action内，
                             function(data) {
@@ -198,11 +179,11 @@
                     <p style="margin-left: 10%">HS-BG是资产类型标识,不能改变,9代表数字,9999标识4位的类型序号,序号递增；</p>
                     <p style="margin-left: 10%">我们新建的资产编号就应该类似 HS-BG-0001。</p>
                     <br/>
-                    <label class="layui-form-label">资产编号</label>
+                    <label class="layui-form-label">资产序号</label>
                     <div class="layui-input-inline">
-                        <input class="layui-input" id="encode" th:placeholder="${code}" />
+                        <input class="layui-input" id="encode" th:value="${maxNum}"/>
                     </div>
-                    <span id="max" th:text="${maxNum}"></span>
+<!--                    <span id="max" th:text="${maxNum}"></span>-->
                 </div>
 <!--                <div class="layui-form-item">-->
 <!--                    <label class="layui-form-label">主体</label>-->

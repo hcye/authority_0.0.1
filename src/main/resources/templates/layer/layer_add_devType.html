@@ -20,29 +20,29 @@
         form.render();
 
 
-        form.on("select(tp)",function (data) {
-            $.post("/asm/getTypeName", {name: data.value},    //把name数据提交到ajaxRes action内，
-                function (data) {
-                    if(data["code"]==""){
-                        $('#temp').attr("placeholder", "");
-                        $('#temp').attr("readonly","readonly");
-                    }else {
-                        var temp=data["code"]
-                        var temp_prefix=""
-                        for(var i=0;i<temp.split("-").length-1;i++){
-                            if(i!=temp.split("-").length-2){
-                                temp_prefix=temp_prefix+temp.split("-")[i]+"-"
-                            }else {
-                                temp_prefix=temp_prefix+temp.split("-")[i]
-                            }
-                        }
-                        // $('#temp').attr("placeholder", "格式:" + data["code"]);
-                        $('#temp').attr("placeholder", "格式:" + temp_prefix);
-                        $('#temp').removeAttr("readonly");
-                    }
-                    form.render("select");
-                }, "json");
-        });
+        // form.on("select(tp)",function (data) {
+        //     $.post("/asm/getTypeName", {name: data.value},    //把name数据提交到ajaxRes action内，
+        //         function (data) {
+        //             if(data["code"]==""){
+        //                 $('#temp').attr("placeholder", "");
+        //                 $('#temp').attr("readonly","readonly");
+        //             }else {
+        //                 // var temp=data["code"]
+        //                 // var temp_prefix=""
+        //                 // for(var i=0;i<temp.split("-").length-1;i++){
+        //                 //     if(i!=temp.split("-").length-2){
+        //                 //         temp_prefix=temp_prefix+temp.split("-")[i]+"-"
+        //                 //     }else {
+        //                 //         temp_prefix=temp_prefix+temp.split("-")[i]
+        //                 //     }
+        //                 // }
+        //                 // $('#temp').attr("placeholder", "格式:" + data["code"]);
+        //                 // $('#temp').attr("placeholder", "格式:" + temp_prefix);
+        //                 $('#temp').removeAttr("readonly");
+        //             }
+        //             form.render("select");
+        //         }, "json");
+        // });
     });
 
 
@@ -53,7 +53,7 @@
             $.post("/asm/getTypeNames", {},    //把name数据提交到ajaxRes action内，
                 function (data) {
                     var types=data["types"]
-                    $('#temp').attr("placeholder", "格式:" + types[0].assetCode);
+                    // $('#temp').attr("placeholder", "格式:" + types[0].assetCode.split("-")[types[0].assetCode]);
                     for(var i in types){
                         $("#type_name").append("<option>"+types[i].typeName+"</option>")
                     }
@@ -114,10 +114,10 @@
                 </div>
             </div>
             <div class="layui-form-item">
-            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;不为空的模板，x代表任意字母，0代表任意数字，xxx-000，资产标识可以设置为abc-001</span>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;填写资产标识,例如资产编号是FACD-00001,则资产标识是FACD</span>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">编号模板:</label>
+                <label class="layui-form-label">编号标识:</label>
                 <div class="layui-input-block">
                     <input class="layui-input" id="temp" />
                 </div>

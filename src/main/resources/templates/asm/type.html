@@ -86,7 +86,7 @@
                     $("#role_table").find("tr").remove();
                     types=data.content;
                     for (var key in types){
-                        $("#role_table").append("<tr><td><input type='hidden' value="+types[key].id+" />"+types[key].typeName+"</td><td>"+types[key].assetCode+"</td>" +
+                        $("#role_table").append("<tr><td><input type='hidden' value="+types[key].id+" />"+types[key].typeName+"</td>" +
                             "<td>"+timeStamp2String(types[key].createTime)+"</td><td>"+types[key].permiCode+"</td>" +
                             "<td>"+transformNullStr(types[key].remarks)+"</td><td>" +
                             "<button class='layui-btn layui-btn-xs "+editflag+"' "+editDisable+"  name='edit'>编辑</button><button class='layui-btn layui-btn-xs "+deleteflag+"' "+deleteDisable+"  name='delete'>删除</button></td></tr>");
@@ -159,7 +159,6 @@
             <thead class="layui-table-header">
             <tr>
                 <td>类型名称</td>
-                <td>编码模板</td>
                 <td>创建时间</td>
                 <td>权限标识</td>
                 <td>备注</td>

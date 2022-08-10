@@ -19,7 +19,6 @@ public class AsmRecordService {
     @Autowired
     private JpaAssetAction jpaAssetAction;
     public void write(String action, Timestamp actionTime, Employee employeeByDealer, Employee employeeByAssertEmp, Assert assertByAssertAsset,String remarks){
-//        String action,Timestamp actionTime, Employee employeeByDealer,Employee employeeByAssertEmp,Assert assertByAssertAsset,String remarks
         OperatRecord op=new OperatRecord( action,  actionTime,  employeeByDealer,  employeeByAssertEmp,  assertByAssertAsset,remarks);
         jpaOperatRecord.save(op);
     }

@@ -124,6 +124,9 @@ public class AsmController {
             DevType devType=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(names.get(0),assetTypes.get(0));
             String maxNum=asmService.getMaxAssetNum(devType);
             String code=devType.getAssetNumTemplate();
+            if(maxNum.equals("")){
+                maxNum="1";
+            }
             model.addAttribute("code",code);
             model.addAttribute("maxNum",maxNum);
         }else {
@@ -718,16 +721,6 @@ public class AsmController {
                 typeList.add(type);
             }
         }
-//        for(AssetType type:typeList){
-//            List<Assert> asserts=jpaAssert.findAssertByAssetType_without_damflag(type.getTypeName());
-//            for(Assert ast:asserts){
-//                for(AssetCkRecord assetCkRecord:recordsWithRemark){
-//                    if(ast.getAssestnum().equals(assetCkRecord.getAssetCode())){
-//                        recIds+=","+ast.getId();
-//                    }
-//                }
-//            }
-//        }
         for(AssetCkRecord assetCkRecord:recordsWithRemark){
             recIds+=","+assetCkRecord.getId();
         }

@@ -35,7 +35,7 @@
             //         return;
             //     }
             // }
-            $.post("/asm/validAssetNum", {num:$("#num").val(),id:$("#id").val()},    //把name数据提交到ajaxRes action内，
+            $.post("/asm/validAssetNumForEdit", {num:$("#num").val(),id:$("#id").val()},    //把name数据提交到ajaxRes action内，
                 function(data) {
                     if(data["error"]!=null){
                         layer.alert(data["error"]);
@@ -52,7 +52,6 @@
                             +"&list_type="+$("#list_type").val().trim() +"&list_isDam="+$("#list_isDam").val().trim()
                             +"&cuindex="+$("#cuindex").val().trim()+'&new_bro='+$("#bor_emp").val().trim()
                             +'&supplier='+sup+'&zhuanyi='+$("#zhuanyi").val().trim();
-                        console.log("----123212-----")
                     }
                 }, "json");
 
