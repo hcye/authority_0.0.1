@@ -141,13 +141,25 @@ public class AsmService {
         if(devType==null){
             return "";
         }
-        String dev_name=devType.getDevName();
+//        String dev_name=devType.getDevName();
 
-        List<Assert> list=jpaAssert.findAssertsByAnameAndAssetType(dev_name,devType.getAssetTypeByAssertTypeId());
+
         String template=devType.getAssetNumTemplate();
         if(template==null||template.equals("")){
             return "";
         }
+        List<DevType> devTypes=jpaDevType.findDevTypesByAssetNumTemplate(template);
+        List<Assert> list=new ArrayList<>();
+        for(DevType dtp:devTypes){
+            String code= dtp.getAssetNumTemplate();
+            if(code==null || code.equals("")){
+                continue;
+            }
+            list.addAll(jpaAssert.findAssertsByAname(dtp.getDevName()));
+        }
+
+//        List<Assert> list=jpaAssert.findAssertsByAnameAndAssetType(dev_name,devType.getAssetTypeByAssertTypeId());
+
         String maxNum="";
         int max=0;
         for (Assert asset:list){
@@ -184,29 +196,27 @@ public class AsmService {
 
 
     public boolean validDevTypeNum(String inputCode, String tep) {
-        if(inputCode.equals("")&&tep.equals("")){
+        if(tep.equals("")){
             return true;
         }else if(inputCode.equals("")&&!tep.equals("")){
             return false;
         }
-//        int maxNum= Integer.parseInt(getMaxAssetNum(jpaDevType.findDevTypeByAssetNumTemplate(tep)));
-//        String numRegex="[0-9]+";
+        String numRegex="[0-9]+";
+        if(!Pattern.matches(numRegex,inputCode)){
+            return false;
+        }
 //
+//        int maxNum= Integer.parseInt(getMaxAssetNum(jpaDevType.findDevTypeByAssetNumTemplate(tep)));
+////        String numRegex="[0-9]+";
+////
 //        int input=Integer.parseInt(inputCode);
 //        if(input<maxNum){
 //            return false;
 //        }
-        /**
-         *
-         * 尾数含有非数字的情况
-         * */
-//        if(!Pattern.matches(numRegex,inputCode)){
-//            return false;
-//            /**
-//             *
-//             * 尾数含有非数字的情况
-//             * */
-//        }
+//        /**
+//         *
+//         * 尾数含有非数字的情况
+//         * */
         return true;
     }
     public boolean validRepeat(String tep) {

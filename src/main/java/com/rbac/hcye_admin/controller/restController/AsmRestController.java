@@ -355,13 +355,13 @@ public class AsmRestController {
             map.put("error","设备类型关联有设备不能修改！");
             return map;
         }else {
-            List<DevType>  devTypes=jpaDevType.findAll();
-            for(DevType dtp :devTypes){
-                if(dtp.getAssetNumTemplate().equals(input.trim())){
-                    map.put("error","资产标识符重复");
-                    return map;
-                }
-            }
+//            List<DevType>  devTypes=jpaDevType.findAll();
+//            for(DevType dtp :devTypes){
+//                if(dtp.getAssetNumTemplate().equals(input.trim())){
+//                    map.put("error","资产标识符重复");
+//                    return map;
+//                }
+//            }
                 devType.setAssetNumTemplate(input.trim());
                 jpaDevType.save(devType);
                 map.put("ok","修改成功！");
@@ -425,18 +425,27 @@ public class AsmRestController {
     @PostMapping("/asm/addDevType")
     public Map<String, String> addDevType(String devType,String dev_name,String desc,String temp,String exc){
         Map<String,String> map=new HashMap<>();
+        if(dev_name.trim().equals("")){
+            map.put("error","资产名称不为空!");
+            return map;
+        }
+
         AssetType assertType= jpaAssetType.findAssetTypeByName(devType);
         DevType dtp=jpaDevType.findDevTypeByDevNameAndAssertType(dev_name,assertType);
         if(dtp!=null){
             map.put("error","资产名称重复！请重新填写");
             return map;
         }
-        temp=temp+"-99999";
-        DevType types=jpaDevType.findDevTypeByAssetNumTemplate(temp);
-        if(types!=null && !temp.equals("")){
-            map.put("error","编码模板重复！请重新填写");
-            return map;
+        temp=temp.trim();
+        if(!temp.equals("")){
+            temp=temp+"-99999";
         }
+
+//        DevType types=jpaDevType.findDevTypeByAssetNumTemplate(temp);
+//        if(types!=null && !temp.equals("")){
+//            map.put("error","编码模板重复！请重新填写");
+//            return map;
+//        }
 
         DevType devType1=new DevType();
         if(exc.equals("是")){

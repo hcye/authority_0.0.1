@@ -22,4 +22,7 @@ public interface JpaAssetType extends JpaRepository<AssetType,Integer> {
 
         @Query("select atp from AssetType atp where atp.typeName like :name")
         Page<AssetType> findAssertTypesByTypeNameLike(@Param("name")String name,Pageable pageable);
+
+
+        List<AssetType> findAssetTypeByAssetCode(String code);
 }
