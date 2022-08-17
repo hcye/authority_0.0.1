@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.util.List;
 @Repository
 public interface JpaAssetType extends JpaRepository<AssetType,Integer> {
@@ -16,7 +17,7 @@ public interface JpaAssetType extends JpaRepository<AssetType,Integer> {
         @Query("select spname from AssetType spname where spname.typeName=:name")
         AssetType findAssetTypeByName(@Param("name") String name);
 
-
+        List<AssetType> findAssetTypesByDefaultLocate(int id);
         @Query("select atp from AssetType atp where atp.assetCode is not null")
         Page<AssetType> findAssertTypesAsPage(Pageable pageable);
 

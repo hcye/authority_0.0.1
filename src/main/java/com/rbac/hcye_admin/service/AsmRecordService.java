@@ -4,6 +4,7 @@ import com.rbac.hcye_admin.entity.*;
 import com.rbac.hcye_admin.jpa.JpaAssetAction;
 import com.rbac.hcye_admin.jpa.JpaAssetRecord;
 import com.rbac.hcye_admin.jpa.JpaOperatRecord;
+import com.rbac.hcye_admin.jpa.JpaStoreLocate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,9 @@ public class AsmRecordService {
     private JpaOperatRecord jpaOperatRecord;
     @Autowired
     private JpaAssetRecord jpaAssetRecord;
+
+    @Autowired
+    private JpaStoreLocate jpaStoreLocate;
     @Autowired
     private JpaAssetAction jpaAssetAction;
     public void write(String action, Timestamp actionTime, Employee employeeByDealer, Employee employeeByAssertEmp, Assert assertByAssertAsset,String remarks){
@@ -38,6 +42,9 @@ public class AsmRecordService {
         }
         if(action.equals(AssetAction.diaobo)){
             assetRecord.setActDetail("调拨到"+e.getLoginName());
+        }
+        if(action.equals(AssetAction.move)){
+            assetRecord.setActDetail("借调到:"+jpaStoreLocate.findById(ast.getLocate()).get().getLocate());
         }
         assetRecord.setStartTime(new Date(new java.util.Date().getTime()));
         jpaAssetRecord.save(assetRecord);

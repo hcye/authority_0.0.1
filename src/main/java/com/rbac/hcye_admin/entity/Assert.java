@@ -24,6 +24,8 @@ public class Assert {
     private Date damagetime=new Date(new java.util.Date().getTime());
     private Date returntime=new Date(new java.util.Date().getTime());
     private String assertPic="";
+
+    private Integer locate;
     private Employee employeeByBorrower;
     private String sysGroupName="";
     private String supplierName="";
@@ -58,6 +60,14 @@ public class Assert {
 
     public void setAname(String aname) {
         this.aname = aname;
+    }
+    @Basic
+    @Column(name = "asset_locate", nullable = true)
+    public Integer getLocate() {
+        return locate;
+    }
+    public void setLocate(Integer locate) {
+        this.locate = locate;
     }
 
     @Basic

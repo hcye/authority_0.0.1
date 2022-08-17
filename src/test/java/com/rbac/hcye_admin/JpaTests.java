@@ -1,7 +1,9 @@
 package com.rbac.hcye_admin;
 
+import com.rbac.hcye_admin.entity.AssetType;
 import com.rbac.hcye_admin.entity.Employee;
 import com.rbac.hcye_admin.entity.Role;
+import com.rbac.hcye_admin.jpa.JpaAssetType;
 import com.rbac.hcye_admin.jpa.JpaEmployee;
 import com.rbac.hcye_admin.jpa.JpaRole;
 import com.rbac.hcye_admin.jpa.JpaSwSwitch;
@@ -18,6 +20,9 @@ public class JpaTests {
     @Autowired
     JpaEmployee jpaEmployee;
     @Autowired
+    JpaAssetType jpaAssetType;
+
+    @Autowired
     JpaRole jpaRole;
     @Autowired
     JpaSwSwitch jpaSwSwitch;
@@ -25,10 +30,8 @@ public class JpaTests {
     SnmpCore snmpCore;
     @Test
     public void t1(){
-        Employee employee =jpaEmployee.findEmployeeByLoginName("yehangcheng");
-        System.out.println(employee);
-        List<Role> rols=jpaEmployee.findRoleByEmployee(employee);
-        System.out.println(rols);
+        List< AssetType> types =jpaAssetType.findAssertType();
+
         }
     }
 

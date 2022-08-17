@@ -30,6 +30,8 @@ public interface JpaAssert extends JpaRepository<Assert,Integer> {
 
     Assert  findAssertByAssestnum(String num);
 
+    List<Assert> findAssertsByLocate(int locate);
+
     List<Assert> findAssertsByAname(String name);
 
     @Query("select ast from Assert ast where ast.workless='0' and ast.aname = :name and ast.assetTypeByAssertType=:asttype")

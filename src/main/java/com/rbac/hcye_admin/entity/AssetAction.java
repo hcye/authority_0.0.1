@@ -8,11 +8,14 @@ import java.util.Collection;
 public class AssetAction {
     public static final String maintain="维修";
     public static final String putin="入库";
+
     public static final String damage="报废";
     public static final String borrow="借用";
     public static final String retrun_asset="归还";
     public static final String zhuanyi="转移";
     public static final String diaobo="调拨";
+
+    public static final String move="借调";
     private int id;
     private String assetAction;
     private String remark;

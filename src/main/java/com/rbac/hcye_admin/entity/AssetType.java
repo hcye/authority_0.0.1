@@ -15,6 +15,10 @@ public class AssetType {
     private String remarks="";
     private Timestamp createTime;
     private String creator="";
+    private Integer defaultLocate;
+
+
+
     private Collection<Assert> assertsById;
     private Collection<DevType> devTypesById;
     private String permiCode;
@@ -39,9 +43,16 @@ public class AssetType {
     public String getTypeName() {
         return typeName;
     }
-
     public void setTypeName(String typeName) {
         this.typeName = typeName;
+    }
+    @Basic
+    @Column(name = "default_locate", nullable = true)
+    public Integer getDefaultLocate() {
+        return defaultLocate;
+    }
+    public void setDefaultLocate(Integer defaultLocate) {
+        this.defaultLocate = defaultLocate;
     }
 
     @Basic

@@ -54,7 +54,7 @@
                 layer.alert("标*输入框不能为空");
                 return;
             }
-            $.post("/asm/saveAssetType", {id:$("#tp_id").val(),devType:name,template:$("#encode_template").val(),desc:$("#desc").val()},    //把name数据提交到ajaxRes action内，
+            $.post("/asm/saveAssetType", {id:$("#tp_id").val(),devType:name,repos:$("#default_repo").val(),desc:$("#desc").val()},    //把name数据提交到ajaxRes action内，
                 function(data) {
                     if(data["error"]!=null){
                         layer.alert(data["error"]);
@@ -93,12 +93,12 @@
         </div>
 
         <div class="layui-form-item">
-            <p style="margin-left: 12%">&nbsp;&nbsp;资产编码按照企业资产编码规范编写。x代表英文字符，0代表数字；例如某办公设备编码是 HS-BG-01005,则编码模板是xx-xx-00000</p>
-            <p style="margin-left: 12%">某信息化设备编码是 XXH-010,则编码模板是xxx-000。<span style="color: firebrick">英文和数字必须用‘-’隔开。</span></p>
             <br/>
-            <label class="layui-form-label">编码模板:</label>
+            <label class="layui-form-label">默认仓库:</label>
             <div class="layui-input-block">
-                <input class="layui-input" id="encode_template" th:value="${tp.getAssetCode()}" />
+                <select class="layui-form-select" id="default_repo">
+                    <option th:each="repo : ${store}" th:text="${repo.getLocate()}"></option>
+                </select>
             </div>
         </div>
 

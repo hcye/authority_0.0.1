@@ -6,35 +6,36 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AssetDownloadModel extends BaseRowModel {
-    @ExcelProperty(value = "资产编号",index = 0)
-    private String assetNum="";
-    @ExcelProperty(value = "设备名称",index = 1)
-    private String devName="";
-    @ExcelProperty(value = "型号",index=2)
-    private String model="";
-    @ExcelProperty(value = "供应商",index = 3)
-    private String provider="";
-    @ExcelProperty(value = "主体ID",index = 4)
-    private String sysGroup="";
-    @ExcelProperty(value = "SN号",index = 5)
-    private String snNum="";
-    @ExcelProperty(value = "单价",index = 6)
-    private String price="";
-    @ExcelProperty(value = "到库时间",index = 7)
-    private String putinTime="";
-    @ExcelProperty(value = "借用人",index = 8)
-    private String borrower="";
-    @ExcelProperty(value = "借用时间",index = 9)
-    private String borTime="";
-    @ExcelProperty(value = "备注",index = 10)
-    private String remarks="";
-    @ExcelProperty(value = "报废",index = 11)
-    private String workless="";
-    @ExcelProperty(value = "资产类型",index = 12)
+    @ExcelProperty(value = "资产类型",index = 0)
     private String assetType="";
+    @ExcelProperty(value = "资产编号",index = 1)
+    private String assetNum="";
 
+    @ExcelProperty(value = "设备名称",index = 2)
+    private String devName="";
+    @ExcelProperty(value = "型号",index=3)
+    private String model="";
 
-
+    @ExcelProperty(value = "存放点",index = 4)
+    private String locate="";
+    @ExcelProperty(value = "单价",index = 5)
+    private String price="";
+    @ExcelProperty(value = "到库时间",index = 6)
+    private String putinTime="";
+    @ExcelProperty(value = "领用人",index = 7)
+    private String borrower="";
+    @ExcelProperty(value = "领用时间",index = 8)
+    private String borTime="";
+    @ExcelProperty(value = "备注",index = 9)
+    private String remarks="";
+    @ExcelProperty(value = "报废",index = 10)
+    private String workless="";
+    @ExcelProperty(value = "主体ID",index = 11)
+    private String sysGroup="";
+    @ExcelProperty(value = "SN号",index = 12)
+    private String snNum="";
+    @ExcelProperty(value = "供应商",index = 13)
+    private String provider="";
 
     @Override
     public String toString() {
@@ -50,6 +51,7 @@ public class AssetDownloadModel extends BaseRowModel {
                 ", remarks='" + remarks + '\'' +
                 ", workless='" + workless + '\'' +
                 ", assetType='" + assetType + '\'' +
+                ", locate='" + locate + '\'' +
                 '}';
     }
 
@@ -157,7 +159,13 @@ public class AssetDownloadModel extends BaseRowModel {
         this.workless = workless;
     }
 
+    public String getLocate() {
+        return locate;
+    }
 
+    public void setLocate(String locate) {
+        this.locate = locate;
+    }
 
 
 }

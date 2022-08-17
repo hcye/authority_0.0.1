@@ -31,6 +31,11 @@ public class AsmController {
     private JpaAssetType jpaAssetType;
 
     @Autowired
+    private JpaStoreLocate jpaStoreLocate;
+
+
+
+    @Autowired
     private JpaAssetCheck jpaAssetCheck;
 
 
@@ -355,7 +360,7 @@ public class AsmController {
         model.addAttribute("list",list);
         return "asm/devType";
     }
-
+//-------------------------------------
     @RequiresPermissions("asm:supplier:view")
     @GetMapping("/asm/supplier")
     public String supplier(){
@@ -375,10 +380,11 @@ public class AsmController {
             jpaSupplier.deleteById(id);
         }catch (Exception e){
             model.addAttribute("err",e);
-            return "/supplier/error";
+            return "/asm/supplier/error";
         }
         return "redirect:/asm/supplier";
     }
+
     @RequiresPermissions("asm:supplier:edit")
     @GetMapping("/supplier/edit")
     public String firm_edit(int id, Model model){
@@ -387,11 +393,53 @@ public class AsmController {
         model.addAttribute("supplier",suppplier);
         return "asm/supplier/supplier_edit";
     }
+
+//    ------------------------------------------------
+
+    @RequiresPermissions("asm:locate:view")
+    @GetMapping("/asm/locate")
+    public String locate(){
+        return "asm/locate/locate";
+    }
+
+    @RequiresPermissions("asm:locate:add")
+    @GetMapping("/asm/locate_add")
+    public String locate_add(){
+        return "asm/locate/locate_add";
+    }
+
+    @RequiresPermissions("asm:locate:del")
+    @GetMapping("/locate/del")
+    public String locate_del(int id,Model model){
+        try {
+            if(jpaAssetType.findAssetTypesByDefaultLocate(id).size()!=0 || jpaAssert.findAssertsByLocate(id).size()!=0){
+                model.addAttribute("err","仓库被使用不能删除!!!");
+                return "/asm/supplier/error";
+            }
+            jpaStoreLocate.deleteById(id);
+        }catch (Exception e){
+            model.addAttribute("err",e);
+            return "/asm/supplier/error";
+        }
+        return "redirect:/asm/locate";
+    }
+
+    @RequiresPermissions("asm:locate:edit")
+    @GetMapping("/locate/edit")
+    public String locate_edit(int id, Model model){
+
+        StoreLocate storeLocate=jpaStoreLocate.findById(id).get();
+        model.addAttribute("store",storeLocate);
+        return "asm/locate/locate_edit";
+    }
+
     @RequiresPermissions("asm:type:add")
     @GetMapping("/asm/add_type")
     public String addTypePage(Model model){
     //    List<Resources> list=jpaResources.findAll();
         //model.addAttribute("list",list);
+        List<StoreLocate> storeLocates=jpaStoreLocate.findAll();
+        model.addAttribute("stores",storeLocates);
         return "asm/add_type";
     }
 
@@ -478,6 +526,7 @@ public class AsmController {
     public String editTypePage(int id,Model model){
         List<Resources> list=jpaResources.findAll();
         AssetType type= jpaAssetType.findById(id).get();
+        List<StoreLocate> storeLocates=jpaStoreLocate.findAll();
         Resources ress=null;
         for (Resources res:list){
             if(res.getPermission().equals(type.getPermiCode())){
@@ -486,9 +535,22 @@ public class AsmController {
                 break;
             }
         }
+
+        if(type.getDefaultLocate()!=null){
+            int repo_id=type.getDefaultLocate();
+            StoreLocate locate=jpaStoreLocate.findById(repo_id).get();
+            for(StoreLocate st:storeLocates){
+                if(st.getId()==repo_id){
+                    storeLocates.remove(st);
+                    break;
+                }
+            }
+            storeLocates.add(0,locate);
+        }
         list.add(0,ress);   //把已选内容前置
         model.addAttribute("tp",type);
         model.addAttribute("list",list);
+        model.addAttribute("store",storeLocates);
         return "asm/edit_type";
     }
 
@@ -513,8 +575,25 @@ public class AsmController {
             supppliers.add(0,cu_sup);
 
         }
-
-
+        List<StoreLocate> storeLocates=jpaStoreLocate.findAll();
+        List<String> str_stores=new ArrayList<>();
+        if(anAssert.getLocate()!=null){
+            int locate_id=anAssert.getLocate();
+            StoreLocate now=null;
+            for(StoreLocate storeLocate:storeLocates){
+                if(storeLocate.getId()==locate_id){
+                    now=storeLocate;
+                    continue;
+                }
+                str_stores.add(storeLocate.getLocate());
+            }
+            str_stores.add(0,now.getLocate());
+        }else {
+            for(StoreLocate storeLocate:storeLocates){
+                str_stores.add(storeLocate.getLocate());
+            }
+            str_stores.add(0,"");
+        }
         model.addAttribute("dev",anAssert);
 
         List<AssetType> assetTypes=jpaAssetType.findAll();
@@ -524,6 +603,7 @@ public class AsmController {
         model.addAttribute("isDam",isDam);
         model.addAttribute("temp",temp);
         model.addAttribute("cuindex",cuindex);
+        model.addAttribute("stores",str_stores);
         model.addAttribute("suppliers",supppliers);
         return "asm/edit_dev";
     }
@@ -708,12 +788,8 @@ public class AsmController {
         }
 
         List<AssetType> types = jpaAssetType.findAssertType();
-
-
-
         String assetIds="";
         String recIds="";
-
 
         List<AssetType> typeList=new ArrayList<>();
         for(AssetType type:types){
@@ -760,7 +836,7 @@ public class AsmController {
     @RequiresPermissions("asm:edit:btn")
     @GetMapping("/asm/save_dev")
     public String saveDev(int id,String types,String model,String price,String remarks,String sn,String num,String list_type,
-                          String list_isDam,String cuindex,String new_bro,String supplier,String zhuanyi) throws UnsupportedEncodingException {
+                          String list_isDam,String cuindex,String new_bro,String supplier,String zhuanyi,String locate,String inp_time) throws UnsupportedEncodingException, ParseException {
         String usname= (String) SecurityUtils.getSubject().getPrincipal();
         Assert anAssert=jpaAssert.findById(id).get();
         anAssert.setAssetTypeByAssertType(jpaAssetType.findAssetTypeByName(types));
@@ -769,6 +845,23 @@ public class AsmController {
         anAssert.setRemarks(remarks);
         anAssert.setSnnum(sn);
         anAssert.setAssestnum(num);
+        boolean move_flag=false;
+        if(locate!=null && !locate.equals("") ){
+            if(anAssert.getLocate()!=null){
+                if(jpaStoreLocate.findStoreLocatesByLocate(locate.trim()).get(0).getId() != anAssert.getLocate()){
+                    anAssert.setLocate(jpaStoreLocate.findStoreLocatesByLocate(locate.trim()).get(0).getId());
+                    move_flag=true;
+                }
+            }else {
+                anAssert.setLocate(jpaStoreLocate.findStoreLocatesByLocate(locate.trim()).get(0).getId());
+            }
+        }
+        if(inp_time!=null && !inp_time.equals("")){
+            SimpleDateFormat format=new SimpleDateFormat("yyyy-MM-dd");
+            Date inp_date=format.parse(inp_time);
+            anAssert.setPutintime(new java.sql.Date(inp_date.getTime()));
+        }
+
         for(Suppplier suppplier:jpaSupplier.findAll()){
             if(suppplier.getSupplierName().equals(supplier)){
                 anAssert.setSuppplierBySupplier(suppplier);
@@ -808,7 +901,10 @@ public class AsmController {
             }
         }
 //
-        jpaAssert.save(anAssert);
+        jpaAssert.saveAndFlush(anAssert);
+        if(move_flag){
+            asmRecordService.createAndSaveAssetRecord(AssetAction.move,anAssert,null,null);
+        }
         asmRecordService.write(AsmAction.dev_edit,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname),null,anAssert,"");
         String type=URLEncoder.encode(list_type,"UTF-8");
         String isDam=URLEncoder.encode(list_isDam,"UTF-8");

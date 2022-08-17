@@ -36,6 +36,8 @@ import javax.swing.text.html.StyleSheet;
 import java.io.*;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -48,7 +50,8 @@ public class AsmRestController {
     private JpaEmployee jpaEmployee;
     @Autowired
     private JpaAssert jpaAssert;
-
+    @Autowired
+    private JpaStoreLocate jpaStoreLocate;
     @Autowired
     private JpaAssetCheck jpaAssetCheck;
 
@@ -280,7 +283,7 @@ public class AsmRestController {
     }
 
     @PostMapping("/asm/addAssetType")
-    public Map<String, String> getDevsNames(String devType,String desc){
+    public Map<String, String> getDevsNames(String devType,String desc,String repo){
         Map<String ,String> map=new HashMap<>();
         devType=devType.trim();
         AssetType type = jpaAssetType.findAssetTypeByName(devType);
@@ -288,12 +291,14 @@ public class AsmRestController {
             map.put("error","类型名称重复!");
             return map;
         }
+        int repo_id=jpaStoreLocate.findStoreLocatesByLocate(repo).get(0).getId();
         Timestamp ts=new Timestamp(new Date().getTime());
         String usname= (String) SecurityUtils.getSubject().getPrincipal();
         AssetType assertType=new AssetType();
         assertType.setCreateTime(ts);
         assertType.setCreator(usname);
         assertType.setRemarks(desc);
+        assertType.setDefaultLocate(repo_id);
         assertType.setTypeName(devType);
         /*
         * 生成权限字符，
@@ -371,7 +376,7 @@ public class AsmRestController {
 
     @RequiresPermissions("asm:type:edit")
     @PostMapping("/asm/saveAssetType")
-    public Map<String, String> saveType(int id,String devType,String template,String desc){
+    public Map<String, String> saveType(int id,String devType,String repos,String desc){
         Map<String ,String> map=new HashMap<>();
         devType=devType.trim();
 //        if(authority.equals("")){
@@ -384,7 +389,8 @@ public class AsmRestController {
             map.put("error","类型名称重复,修改失败!");
             return map;
         }
-        assertTypeOld.setAssetCode(template);
+        StoreLocate storeLocate=jpaStoreLocate.findStoreLocatesByLocate(repos).get(0);
+        assertTypeOld.setDefaultLocate(storeLocate.getId());
         assertTypeOld.setRemarks(desc);
         assertTypeOld.setTypeName(devType);
         jpaAssetType.save(assertTypeOld);
@@ -590,6 +596,84 @@ public class AsmRestController {
                         supppliers=jpaSupplier.findSupppliersBySupplierNameLike(name,pageable);
                     }
         map.put("suppliers", Collections.singletonList(supppliers));
+        return map;
+    }
+
+    @RequestMapping("/locate/getAll")
+    public Map<String, List<Object>> getAllLocate(String searchFlag,String name,String pre,String next,String pageIndex){
+        Map<String,List<Object>> map=new HashMap<>();
+        int pagenow=0;
+        int pageSize=10;
+        Page<StoreLocate> storeLocates = null;
+        //初始页
+        if(pageIndex.equals("")){
+            Pageable pageable=PageRequest.of(pagenow,pageSize);
+            storeLocates =jpaStoreLocate.findAll(pageable);
+        }else
+            //搜索
+            if(!searchFlag.equals("")){
+                name=ConvertStrForSearch.getFormatedString(name);
+                Pageable pageable=PageRequest.of(pagenow,pageSize);
+                storeLocates=jpaStoreLocate.findStoreLocatesByLocateLike(name,pageable);
+            }else
+                //普通翻页
+                if(name.equals("")){
+                    Pageable pageable=PageRequest.of(Integer.parseInt(pageIndex)-1,pageSize);
+                    if(pre.equals("1")){
+                        pageable=pageable.previousOrFirst();
+                    }
+                    if (next.equals("1")){
+                        pageable=pageable.next();
+                    }
+                    storeLocates=jpaStoreLocate.findAll(pageable);
+
+                }else
+                    //带参数翻页
+                    if(!name.equals("")){
+                        name=ConvertStrForSearch.getFormatedString(name);
+                        Pageable pageable=PageRequest.of(Integer.parseInt(pageIndex)-1,pageSize);
+                        if(pre.equals("1")){
+                            pageable=pageable.previousOrFirst();
+                        }
+                        if (next.equals("1")){
+                            pageable=pageable.next();
+                        }
+                        storeLocates=jpaStoreLocate.findStoreLocatesByLocateLike(name,pageable);
+                    }
+        map.put("locates", Collections.singletonList(storeLocates));
+        return map;
+    }
+
+    @PostMapping("/locate/add_commit")
+    public Map<String,String> locate_add(String name,String remark){
+        Map<String,String> map=new HashMap<>();
+        if(!jpaStoreLocate.findStoreLocatesByLocate(name).isEmpty()){
+            map.put("ERROR","添加失败，同名仓库已存在！");
+            return map;
+        }
+        StoreLocate storeLocate=new StoreLocate ();
+        storeLocate.setLocate(name);
+        storeLocate.setRemarks(remark);
+        jpaStoreLocate.save(storeLocate);
+        map.put("SUCCESS","添加成功");
+        return map;
+    }
+
+    @PostMapping("/locate/edit_commit")
+    public Map<String,String> locate_edit(int id,String name,String remark){
+        Map<String,String> map=new HashMap<>();
+        StoreLocate storeLocate=jpaStoreLocate.findById(id).get();
+        List<StoreLocate> storeLocates=jpaStoreLocate.findStoreLocatesByLocate(name);
+
+        if(!storeLocates.isEmpty()&&storeLocates.size()>0&&storeLocates.get(0).getId()!=id){
+            map.put("ERROR","修改失败，同名品牌已存在！");
+            return map;
+        }
+
+        storeLocate.setRemarks(remark);
+        storeLocate.setLocate(name);
+        jpaStoreLocate.save(storeLocate);
+        map.put("SUCCESS","编辑成功");
         return map;
     }
 
@@ -813,6 +897,7 @@ public class AsmRestController {
 
         Map<String,List<Object>> map=new HashMap<>();
         List<Employee> bros=new ArrayList<>();
+        List<StoreLocate> stores=new ArrayList<>();
         List<Page<Assert>> pages=new ArrayList<>();
         Pageable pageable;
         if(!pre.equals("")||!next.equals("")||!jumpFlag.equals("")){
@@ -830,14 +915,21 @@ public class AsmRestController {
         List<Assert> asserts=page.getContent();
         for (Assert ast:asserts){
             Employee bro=ast.getEmployeeByBorrower();
+            if(ast.getLocate()==null){
+                stores.add(null);
+            }else {
+                stores.add(jpaStoreLocate.findById(ast.getLocate()).get());
+            }
             if(bro==null){
                 bros.add(null);
             }else {
                 bros.add(bro);
             }
         }
+
         pages.add(page);
         map.put("emp", Collections.singletonList(bros));
+        map.put("store", Collections.singletonList(stores));
         map.put("page", Collections.singletonList(pages));
         return map;
     }
@@ -1074,20 +1166,30 @@ public class AsmRestController {
     @Transactional
     @RequiresPermissions("asm:inp:view")
     @PostMapping("/asm/putin")
-    public Map<String,String> putin(String type,String code, String model, String price, String name, String encode,
-                                    String num,String supplier){
+    public Map<String,String> putin(String type,String code, String input_time,String model, String price, String name, String encode,
+                                    String num,String supplier) throws ParseException {
         int nu=Integer.parseInt(num);
         String loginUserName= (String) SecurityUtils.getSubject().getPrincipal();
+        Date input_date=null;
+        if(input_time!=null && !input_time.equals("")){
+            SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
+            input_date=simpleDateFormat.parse(input_time);
+        }
         Map<String,String> map=new HashMap<>();
         List<Assert> list=new ArrayList<>();
         AssetType assetType=jpaAssetType.findAssetTypeByName(type.trim());
+        int locate=assetType.getDefaultLocate();
         if(code.trim().equals("")&&encode.equals("")){
             for (int i=0;i<nu;i++){
                 Assert ast=new Assert();
                 ast.setAname(name);
                 ast.setPrice(price);
                 ast.setModel(model);
+                if(input_date!=null){
+                    ast.setPutintime(new java.sql.Date(input_date.getTime()));
+                }
                 ast.setAssetTypeByAssertType(assetType);
+                ast.setLocate(locate);
                 List<Suppplier> supppliers=jpaSupplier.findSupppliersBySupplierName(supplier);
                 if(supppliers.size()>0){
                     Suppplier suppplier = supppliers.get(0);
@@ -1123,7 +1225,11 @@ public class AsmRestController {
             Assert ast=new Assert();
             ast.setAname(name);
             ast.setPrice(price);
+            ast.setLocate(locate);
             ast.setModel(model);
+            if(input_date!=null){
+                ast.setPutintime(new java.sql.Date(input_date.getTime()));
+            }
             ast.setAssetTypeByAssertType(assetType);
             if(jpaAssert.findAssertByAssestnum(assetNum)!=null){
                 map.put("error","编号重复，入库失败！");
@@ -1302,6 +1408,10 @@ public class AsmRestController {
 
             if(anAssert.getAssestnum()!=null){
                 model.setAssetNum(anAssert.getAssestnum());
+            }
+            if(anAssert.getLocate()!=null){
+                String locate=jpaStoreLocate.findById(anAssert.getLocate()).get().getLocate();
+                model.setLocate(locate);
             }
             if(anAssert.getAssetTypeByAssertType().getTypeName()!=null){
                 model.setAssetType(anAssert.getAssetTypeByAssertType().getTypeName());
