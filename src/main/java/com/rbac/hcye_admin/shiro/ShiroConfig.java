@@ -12,6 +12,7 @@ import org.apache.shiro.session.mgt.eis.MemorySessionDAO;
 import org.apache.shiro.session.mgt.eis.SessionDAO;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
+import org.apache.shiro.util.ThreadContext;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.servlet.SimpleCookie;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
@@ -33,6 +34,7 @@ public class ShiroConfig {
         defaultSecurityManager.setSessionManager(sessionManager());
         userRealm.setCredentialsMatcher(myCredentialsMatcher());
         defaultSecurityManager.setRealm(userRealm);
+//        ThreadContext.bind(defaultSecurityManager);
         return defaultSecurityManager;
     }
 
