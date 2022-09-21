@@ -836,11 +836,14 @@ public class AsmController {
     @RequiresPermissions("asm:edit:btn")
     @GetMapping("/asm/save_dev")
     public String saveDev(int id,String types,String model,String price,String remarks,String sn,String num,String list_type,
-                          String list_isDam,String cuindex,String new_bro,String supplier,String zhuanyi,String locate,String inp_time) throws UnsupportedEncodingException, ParseException {
+                          String list_isDam,String cuindex,String new_bro,String supplier,String zhuanyi,String locate,String inp_time,String img) throws UnsupportedEncodingException, ParseException {
         String usname= (String) SecurityUtils.getSubject().getPrincipal();
         Assert anAssert=jpaAssert.findById(id).get();
         anAssert.setAssetTypeByAssertType(jpaAssetType.findAssetTypeByName(types));
         anAssert.setModel(model);
+        if(img.contains("http:")){
+            anAssert.setAssertPic(img);
+        }
         anAssert.setPrice(price);
         anAssert.setRemarks(remarks);
         anAssert.setSnnum(sn);

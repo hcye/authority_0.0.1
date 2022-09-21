@@ -9,43 +9,41 @@ import com.rbac.hcye_admin.entity.*;
 import com.rbac.hcye_admin.jpa.*;
 import com.rbac.hcye_admin.service.*;
 import com.rbac.hcye_admin.tool.ConvertStrForSearch;
-import org.apache.commons.collections.IteratorUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-
+import org.apache.commons.io.FilenameUtils;
 
 import org.apache.shiro.session.Session;
-import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.text.html.StyleSheet;
 import java.io.*;
 import java.net.URLEncoder;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+
 
 @RestController
 public class AsmRestController {
     private static final int pageSize=15;
+    private static String storageBasePath="/usr/local/src/images/";
+    private static String nginxBaseUrl="http://192.168.8.40:8080";
     @Autowired
     private JpaEmployee jpaEmployee;
     @Autowired
@@ -1166,7 +1164,7 @@ public class AsmRestController {
     @Transactional
     @RequiresPermissions("asm:inp:view")
     @PostMapping("/asm/putin")
-    public Map<String,String> putin(String type,String code, String input_time,String model, String price, String name, String encode,
+    public Map<String,String> putin(String type,String code, String img,String input_time,String model, String price, String name, String encode,
                                     String num,String supplier) throws ParseException {
         int nu=Integer.parseInt(num);
         String loginUserName= (String) SecurityUtils.getSubject().getPrincipal();
@@ -1185,6 +1183,7 @@ public class AsmRestController {
                 ast.setAname(name);
                 ast.setPrice(price);
                 ast.setModel(model);
+                ast.setAssertPic(img);
                 if(input_date!=null){
                     ast.setPutintime(new java.sql.Date(input_date.getTime()));
                 }
@@ -1204,7 +1203,6 @@ public class AsmRestController {
                 asmRecordService.createAndSaveAssetRecord(AssetAction.putin,anAssert,null,null);
 
             }
-
             map.put("ok","入库成功！");
             return map;
         }else if(!code.equals("")&&encode.equals("")){
@@ -1225,6 +1223,7 @@ public class AsmRestController {
             Assert ast=new Assert();
             ast.setAname(name);
             ast.setPrice(price);
+            ast.setAssertPic(img);
             ast.setLocate(locate);
             ast.setModel(model);
             if(input_date!=null){
@@ -1257,6 +1256,93 @@ public class AsmRestController {
 
     @PostMapping("asm/input")
     public Map<String,String> upload(HttpServletRequest request) throws UnsupportedEncodingException {
+        Map<String, String> json = new HashMap<>();
+        request.setCharacterEncoding("UTF-8");
+        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+        /** 页面控件的文件流* */
+        MultipartFile multipartFile = null;
+        Map map = multipartRequest.getFileMap();
+        Set set = map.keySet();
+        Iterator<String> iterator = set.iterator();
+        while (iterator.hasNext()) {
+            multipartFile = (MultipartFile) map.get(iterator.next());
+        }
+        String filename = multipartFile.getOriginalFilename();
+        if (!filename.contains("xlsx")) {
+            json.put("error", "文件类型错误");
+            return json;
+        }
+        InputStream inputStream;
+        ExcelReader reader = null;
+        try {
+
+            inputStream = multipartFile.getInputStream();
+            /**
+             *
+             * 使用easyExcel读上传的表格
+             *
+             * */
+
+
+            try {
+                reader = EasyExcel.read(inputStream, AssetDownloadModel.class, new ReadAssetEventListener(asmRecordService,jpaAssetRecord,jpaSupplier,jpaAssert, jpaEmployee, jpaAssetType, asmService, jpaOperatRecord,jpaDevType,jpaGroup)).excelType(ExcelTypeEnum.XLSX).build();
+                ReadSheet readSheet = EasyExcel.readSheet(0).build();
+                reader.read(readSheet);
+            } catch (Exception e) {
+                json.put("error", e.toString());
+                return json;
+            }
+
+            /**
+             *
+             * */
+
+            inputStream.close();
+        } catch (Exception e) {
+            json.put("error", e.toString());
+            return json;
+        } finally {
+            if (reader != null) {
+                // 这里千万别忘记关闭，读的时候会创建临时文件，到时磁盘会崩的
+                reader.finish();
+            }
+
+        }
+        json.put("ok", "上传成功");
+        return json;
+    }
+
+
+    @PostMapping("/upload")
+    public Map<String,String> upload_img(HttpServletRequest request) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
+        Map<String,String> res_map=new HashMap<>();
+        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+        /** 页面控件的文件流* */
+        MultipartFile multipartFile = null;
+        Map map = multipartRequest.getFileMap();
+        Set set = map.keySet();
+        Iterator<String> iterator = set.iterator();
+        while (iterator.hasNext()) {
+            multipartFile = (MultipartFile) map.get(iterator.next());
+        }
+        String extend=FilenameUtils.getExtension(multipartFile.getOriginalFilename());
+        String fileName=FilenameUtils.getBaseName(multipartFile.getOriginalFilename())+ Math.random()*100;
+        String fullFileName=fileName+"."+extend;
+        try {
+            InputStream in=multipartFile.getInputStream();
+            OutputStream out=new FileOutputStream(storageBasePath+fullFileName);
+            IOUtils.copy(in,out);
+            in.close();
+            out.close();
+        }catch (Exception e){
+            res_map.put("error",e.toString());
+        }
+        res_map.put("ok",nginxBaseUrl+"/"+fullFileName);
+        return res_map;
+    }
+
+    @PostMapping("asm/img_upload")
+    public Map<String,String> img_upload(HttpServletRequest request) throws UnsupportedEncodingException {
         Map<String, String> json = new HashMap<>();
         request.setCharacterEncoding("UTF-8");
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;

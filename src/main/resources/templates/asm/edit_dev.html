@@ -32,6 +32,35 @@
             });
         });
 
+
+        layui.use('upload', function () {
+            var upload = layui.upload; //得到 upload 对象
+
+            //创建一个上传组件
+            upload.render({
+                elem: '#up_btn'
+                , url: '/upload'
+                , done: function (res, index, upload) { //上传后的回调
+                    if (res["ok"] != null) {
+                        $("#preview").attr("src",res["ok"]);
+                        layer.alert(res["ok"]);
+                    } else if (res["error"] != null) {
+                        layer.alert(res["error"]);
+                    } else {
+                        layer.alert(res["error"]);
+                    }
+                }
+                , error: function () {
+                    layer.alert("上传错误");
+                }
+                ,acceptMime: 'file/images'
+                , accept: 'file' //允许上传的文件类型
+                , size: 10000
+                //,size: 50 //最大允许上传的文件大小
+                //,……
+            });
+        });
+
     });
 
     $(function () {
@@ -64,7 +93,8 @@
                             +"&remarks="+$("#remarks").val().trim()+ "&sn="+$("#sn_num").val().trim()+"&num="+$("#num").val().trim()
                             +"&list_type="+$("#list_type").val().trim() +"&list_isDam="+$("#list_isDam").val().trim()
                             +"&cuindex="+$("#cuindex").val().trim()+'&new_bro='+$("#bor_emp").val().trim()
-                            +'&supplier='+sup+'&zhuanyi='+$("#zhuanyi").val().trim()+"&inp_time="+$("#inp_time").val()+"&locate="+$("#locate").val();
+                            +'&supplier='+sup+'&zhuanyi='+$("#zhuanyi").val().trim()+"&inp_time="+$("#inp_time").val()
+                            +"&locate="+$("#locate").val()+"&img="+$("#preview").attr('src');
                     }
                 }, "json");
 
@@ -82,6 +112,10 @@
                 //回调函数，用于向弹出层frame传值,获得弹出层body 的jq对象。
                 //实现弹出层间不同frame的传值
             });
+        })
+
+        $("#preview").click(function (){
+         window.open($("#preview").attr("src"),'_blank')
         })
 
         $("#sysGroup").click(function () {
@@ -187,7 +221,15 @@
                             <input  class="layui-input" id="num" th:value="${dev.getAssestnum()}"/>
                         </div>
                     </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">资产照片:</label>
+                        <div class="layui-input-inline" >
+                            <img id="preview" width="150px"  height="200px" th:src="${dev.getAssertPic() ?:'/img/shangchuang.png'}" src="/img/shangchuang.png"><br/>
+                            <button class="layui-btn" lay-filter="upload"  type="button" style="margin-left: 37px" id="up_btn">upload</button>
+                        </div>
 
+
+                    </div>
                     <div class="layui-form-item">
                         <label class="layui-form-label">sn编号:</label>
                         <div class="layui-input-block">
