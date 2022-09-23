@@ -147,8 +147,9 @@ public class EmployeeRestController {
     }
     @PostMapping("/user/doAdd")
 //    id:$("#id").val(),email:$("#email").val(),sex:$("#sex").val(),status:$("#status"),group:$("#group"),pwd:$("#pwd"),roles:$("#roles").val()
-    public Map<String,String> addUser(String name,String lname,String email,String sex,String status,String group,String pwd,String roles){
+    public Map<String,String> addUser(String name,String email,String sex,String status,String group,String pwd,String roles){
         Map<String,String> map=new HashMap<>();
+        String lname=Chinese2Eng.convertHanzi2Pinyin(name,true);
         Employee employeec=jpaEmployee.findEmployeeByLoginName(lname);
 
         if(employeec!=null&&employeec.getId()!=0){

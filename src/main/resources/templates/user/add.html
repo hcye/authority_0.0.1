@@ -28,10 +28,6 @@
                     layer.alert("用户名不能为空");
                     return;
                 }
-                if($("#loginname").val().trim().length==0){
-                    layer.alert("登录名不能为空");
-                    return;
-                }
                 var checkboxs=$("#role").find("input:checkbox:checked");
                 var i=0;
                 var ids="";
@@ -40,7 +36,7 @@
                     ids=ids+key+",";
                     i++;
                 }
-                $.post("/user/doAdd", {name:$("#name").val(),lname:$("#loginname").val(),email:$("#email").val(),sex:$("#usex").val(),status:$("#status").val(),group:$("#group").val(),pwd:$("#pwd").val().trim(),roles:ids},    //把name数据提交到ajaxRes action内，
+                $.post("/user/doAdd", {name:$("#name").val(),email:$("#email").val(),sex:$("#usex").val(),status:$("#status").val(),group:$("#group").val(),pwd:$("#pwd").val().trim(),roles:ids},    //把name数据提交到ajaxRes action内，
                     function (data) {
                         if (data["error"] != null) {
                             layer.alert(data["error"]);
@@ -71,12 +67,6 @@
             <label class="layui-form-label">用户名</label>
             <div class="layui-input-block">
                 <input class="layui-input" id="name"   />
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">登录名</label>
-            <div class="layui-input-block">
-                <input class="layui-input" id="loginname"   />
             </div>
         </div>
 
