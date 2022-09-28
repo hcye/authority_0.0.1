@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>增加设备类型</title>
+</head>
+<link rel="stylesheet" href="/layui/css/layui.css">
+<link rel="stylesheet" href="/layui_ext/dtree/dtree.css">
+<link rel="stylesheet" href="/layui_ext/dtree/font/dtreefont.css">
+<script type="text/javascript" src="/layui/jquery-3.5.1.min.js"></script>
+<script type="text/javascript" src="/layui/layui.js"></script>
+<!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+<!--[if lt IE 9]>-->
+<script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+<script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+<script type="text/javascript">
+    layui.use('form', function(){
+        var form = layui.form;
+        form.render();
+
+
+        // form.on("select(tp)",function (data) {
+        //     $.post("/asm/getTypeName", {name: data.value},    //把name数据提交到ajaxRes action内，
+        //         function (data) {
+        //             if(data["code"]==""){
+        //                 $('#temp').attr("placeholder", "");
+        //                 $('#temp').attr("readonly","readonly");
+        //             }else {
+        //                 // var temp=data["code"]
+        //                 // var temp_prefix=""
+        //                 // for(var i=0;i<temp.split("-").length-1;i++){
+        //                 //     if(i!=temp.split("-").length-2){
+        //                 //         temp_prefix=temp_prefix+temp.split("-")[i]+"-"
+        //                 //     }else {
+        //                 //         temp_prefix=temp_prefix+temp.split("-")[i]
+        //                 //     }
+        //                 // }
+        //                 // $('#temp').attr("placeholder", "格式:" + data["code"]);
+        //                 // $('#temp').attr("placeholder", "格式:" + temp_prefix);
+        //                 $('#temp').removeAttr("readonly");
+        //             }
+        //             form.render("select");
+        //         }, "json");
+        // });
+    });
+
+
+
+    $(function () {
+
+        $("#conform").click(function () {
+
+            $.post("/asm/addDevType", {devType:$("#type_name").val(),dev_name:$("#dev_name").val(),desc:$("#desc").val(),temp:$("#temp").val(),exc:$("#exc").val()},    //把name数据提交到ajaxRes action内，
+                function(data) {
+                    if(data["error"]!=null){
+                        layer.alert(data["error"]);
+                    }else {
+                        layer.confirm(data["ok"], {
+                            btn: ['确定'] //可以无限个按钮
+                        }, function(index, layero){
+                            window.history.back()
+
+                        });
+                    }
+                }, "json");
+        });
+        $("#cancel").click(function () {
+            //关闭弹出层
+            window.history.back()
+        })
+    });
+
+
+</script>
+<body>
+<div class="layui-container" style="margin-top: 5%">
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">设备名称:</label>
+            <div class="layui-input-block">
+                <input class="layui-input" id="dev_name" />
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">所属类型:</label>
+            <div class="layui-input-block">
+                <select class="layui-form-select"  id="type_name" lay-filter="tp">
+                    <option th:each="tp : ${types}"  th:text="${tp.typeName}"></option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;填写资产标识,例如资产编号是FACD-00001,则资产标识是FACD</span>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">编号标识:</label>
+            <div class="layui-input-block">
+                <input class="layui-input" id="temp" />
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">是否流转:</label>
+            <div class="layui-input-block">
+                <select class="layui-form-select" id="exc">
+                    <option>否</option>
+                    <option>是</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">描述:</label>
+            <div class="layui-input-block">
+                <input class="layui-input" id="desc" />
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-row">
+                <div class="layui-col-md-offset5">
+                    <button class="layui-btn" id="conform">确定</button>
+                    <button class="layui-btn" id="cancel">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

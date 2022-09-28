@@ -101,8 +101,8 @@
                         editflag = "layui-btn-disabled";
                     }
                     $("#tb").append("<tr><td><input type='hidden' value='" + astList[key].id + "' />" + astList[key].aname + "" +
-                        "</td><td>" + astList[key].model + "</td><td>" + assetNum + "" +
-                        "</td><td>" + browser + "</td><td>" + sn + "</td><td>" + astList[key].price + "</td><td>" + astList[key].putintime +
+                        "</td><td>" + sn + "</td><td>" + astList[key].model + "</td><td>" + assetNum + "" +
+                        "</td><td>" + browser + "</td><td>" + astList[key].price + "</td><td>" + astList[key].putintime +
                         "</td><td>"+locate+"</td><td>" + astList[key].remarks + "</td><td>" +
                         "<button class='layui-btn layui-btn-xs " + editflag + "' " + editDisable + "  name='edit'>编辑</button>" +
                         "<button class='layui-btn layui-btn-xs " + maintainflag + "' " + maintainDisable + " "+btn_color+"  name="+whname+">"+wh+"</button>" +
@@ -375,11 +375,11 @@
                 <table class="layui-table">
                     <thead>
                         <tr>
+                            <td>类型</td>
                             <td>名称</td>
                             <td>型号</td>
                             <td>编号</td>
                             <td>使用人</td>
-                            <td>sn号</td>
                             <td>价格</td>
                             <td>入库时间</td>
                             <td>存放点</td>

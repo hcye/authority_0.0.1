@@ -3,6 +3,7 @@ import com.rbac.hcye_admin.entity.*;
 import com.rbac.hcye_admin.jpa.*;
 import com.rbac.hcye_admin.service.AsmRecordService;
 import com.rbac.hcye_admin.service.AsmService;
+import com.rbac.hcye_admin.service.PermissionService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,8 @@ public class AsmController {
     @Autowired
     private JpaStoreLocate jpaStoreLocate;
 
-
+    @Autowired
+    private PermissionService permissionService;
 
     @Autowired
     private JpaAssetCheck jpaAssetCheck;
@@ -609,6 +611,19 @@ public class AsmController {
     }
 
 
+
+    @GetMapping("/asm/add_dev_type")
+    public String add_dev_view(Model model){
+        List<AssetType> types=jpaAssetType.findAll();
+        List<AssetType> permitTypes=new ArrayList<>();
+        for (AssetType type:types){
+            if(permissionService.isPermit(type.getPermiCode())){
+                permitTypes.add(type);
+            }
+        }
+        model.addAttribute("types",permitTypes);
+        return "asm/add_devtype";
+    }
     @GetMapping("/asm/record_view")
     public String record_view(int id,String recAct,Model model){
         Assert anAssert= jpaAssert.findById(id).get();

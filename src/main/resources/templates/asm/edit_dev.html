@@ -196,13 +196,26 @@
 
 
             <fieldset class="layui-elem-field">
+
+
+
                 <div class="layui-field-box">
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">设备名称:</label>
+                        <div class="layui-input-block">
+                            <input  class="layui-input" id="sn_num" th:value="${dev.getSnnum()}" />
+                        </div>
+                    </div>
+
                     <div class="layui-form-item">
                         <label class="layui-form-label">从属类型:</label>
                         <div class="layui-input-block">
                             <input class="layui-input" id="types" th:value="${dev.getAssetTypeByAssertType().getTypeName()}" readonly="readonly" />
                         </div>
                     </div>
+
+
 
                     <div class="layui-form-item">
                         <label class="layui-form-label">设备型号:</label>
@@ -230,12 +243,7 @@
 
 
                     </div>
-                    <div class="layui-form-item">
-                        <label class="layui-form-label">sn编号:</label>
-                        <div class="layui-input-block">
-                            <input  class="layui-input" id="sn_num" th:value="${dev.getSnnum()}" />
-                        </div>
-                    </div>
+
 
                     <div class="layui-form-item">
                         <label class="layui-form-label">设备价格:</label>
