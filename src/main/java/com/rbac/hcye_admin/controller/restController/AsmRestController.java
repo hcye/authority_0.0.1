@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
 public class AsmRestController {
     private static final int pageSize=15;
     private static String storageBasePath="/usr/local/src/images/";
-    private static String nginxBaseUrl="http://192.168.8.40:8080";
+    private static String nginxBaseUrl="https://asset.synsense.ai:8080";
     @Autowired
     private JpaEmployee jpaEmployee;
     @Autowired
@@ -52,7 +52,6 @@ public class AsmRestController {
     private JpaStoreLocate jpaStoreLocate;
     @Autowired
     private JpaAssetCheck jpaAssetCheck;
-
     @Autowired
     private JpaAssetCkRecord jpaAssetCkRecord;
     @Autowired
@@ -60,11 +59,7 @@ public class AsmRestController {
     @Autowired
     private JpaGroup jpaGroup;
     @Autowired
-    private WriteLog writeLog;
-    @Autowired
     private JpaDevType jpaDevType;
-    @Autowired
-    private JpaRtcBug jpaRtcBug;
     @Autowired
     private JpaOperatRecord jpaOperatRecord;
     @Autowired

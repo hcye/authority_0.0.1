@@ -856,7 +856,7 @@ public class AsmController {
         Assert anAssert=jpaAssert.findById(id).get();
         anAssert.setAssetTypeByAssertType(jpaAssetType.findAssetTypeByName(types));
         anAssert.setModel(model);
-        if(img.contains("http:")){
+        if(img.contains("http")){
             anAssert.setAssertPic(img);
         }
         anAssert.setPrice(price);
