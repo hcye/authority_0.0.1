@@ -142,7 +142,7 @@ public class AsmService {
             return "";
         }
 //        String dev_name=devType.getDevName();
-
+        AssetType assetType=devType.getAssetTypeByAssertTypeId();
 
         String template=devType.getAssetNumTemplate();
         if(template==null||template.equals("")){
@@ -155,7 +155,7 @@ public class AsmService {
             if(code==null || code.equals("")){
                 continue;
             }
-            list.addAll(jpaAssert.findAssertsByAname(dtp.getDevName()));
+            list.addAll(jpaAssert.findAssertsByAnameAndAssetType(dtp.getDevName(),assetType));
         }
 
 //        List<Assert> list=jpaAssert.findAssertsByAnameAndAssetType(dev_name,devType.getAssetTypeByAssertTypeId());
