@@ -3,14 +3,14 @@ kind: Deployment
 metadata:
   generation: 2
   labels:
-    app: eladmin
-  name: eladmin
-  namespace: eladmin
+    app: asm
+  name: asm
+  namespace: asm
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: eladmin
+      app: asm
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -20,22 +20,13 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        app: eladmin
+        app: asm
     spec:
       containers:
-      - env:
-        - name: DB_HOST
-          value: db
-        - name: DB_USER
-          value: root
-        - name: DB_PWD
-          value: Admin@123.
-        - name: REDIS_HOST
-          value: redis
-        image: {{ELADMIN-IMAGE}}
+        image: {{ASM-IMAGE}}
         imagePullPolicy: IfNotPresent
-        name: eladmin-api
+        name: asm-api
         ports:
-        - containerPort: 8000
+        - containerPort: 80
           protocol: TCP
         resources: {}
