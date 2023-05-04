@@ -77,9 +77,9 @@ pipeline {
             steps {
                 container('ci-tools') {
                     timeout(time: 1, unit: 'MINUTES') {
-                        sh "sed -i 's#{{ELADMIN-IMAGE}}#${IMAGE_REPO}:${GIT_COMMIT}#g' ci/*"  // 修改pod yaml文件
-			sh 'kubectl get ns'
-                        sh "kubectl apply -f ci/asm.yml"   // 发布 pod
+                      //  sh "sed -i 's#{{ELADMIN-IMAGE}}#${IMAGE_REPO}:${GIT_COMMIT}#g' ci/*"  // 修改pod yaml文件
+		//	sh 'kubectl get ns'
+                        sh "kubectl -n asm create deployment asm --image=${IMAGE_REPO}:${GIT_COMMIT} --port 80"   // 发布 pod
                     }
                 }
                 updateGitlabCommitStatus(name: env.STAGE_NAME, state: 'success')
