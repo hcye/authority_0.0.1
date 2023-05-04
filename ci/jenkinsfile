@@ -77,7 +77,7 @@ pipeline {
             steps {
                 container('ci-tools') {
                     timeout(time: 1, unit: 'MINUTES') {
-                        sh "sed -i 's#{{ELADMIN-IMAGE}}#${IMAGE_REPO}:${GIT_COMMIT}#g' manifest/*"  // 修改pod yaml文件
+                        sh "sed -i 's#{{ELADMIN-IMAGE}}#${IMAGE_REPO}:${GIT_COMMIT}#g' ci/*"  // 修改pod yaml文件
                         sh "kubectl apply -f manifest/"   // 发布 pod
                     }
                 }
