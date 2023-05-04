@@ -1,0 +1,130 @@
+pipeline {
+    agent { label 'asm-builder'}
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()           //不允许并行构建
+        timeout(time: 20, unit: 'MINUTES')  //超时时间
+        gitLabConnection('jenkins')          //gitlab插件连接器
+    }
+
+
+    environment {
+        REGISTRY = "https://harbor.synsense-neuromorphic.com"
+        IMAGE_REPO = "harbor.synsense-neuromorphic.com/local/asm"
+ //       DINGTALK_CREDS = credentials('dingTalk')
+        REGISTRY_CREDS = credentials('docker-user-pwd')
+        TAB_STR = "\n                  \n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+    }
+
+    stages {
+        stage('gitlog') {
+            steps {
+                script{
+                    sh "git log --oneline -n 1 > gitlog.file"
+                    env.GIT_LOG = readFile("gitlog.file").trim()
+                }
+                sh 'printenv'
+            }
+        }
+        stage('checkout') {
+            steps {  //在默认的 jnlp ,inbound-agent 容器执行
+                checkout scm   // checkout 代码
+                updateGitlabCommitStatus(name: env.STAGE_NAME, state: 'success')
+                script{
+                    env.BUILD_TASKS = env.STAGE_NAME + "√..." + env.TAB_STR
+                }
+            }
+        }
+        stage('mvn package') {
+            steps {
+                container('ci-tools') {   //指定在 ci-tools 容器里执行
+                    sh 'mvn clean package'  // mvn 编译
+                }
+                updateGitlabCommitStatus(name: env.STAGE_NAME, state: 'success')
+                script{
+                    env.BUILD_TASKS += env.STAGE_NAME + "√..." + env.TAB_STR
+                }
+            }
+        }
+        stage('build-image') {
+            steps {
+                container('ci-tools') {  //指定在 ci-tools 容器里执行
+                    retry(2) { sh 'docker build . -t ${IMAGE_REPO}:${GIT_COMMIT}'}   //docker build
+                }
+                updateGitlabCommitStatus(name: env.STAGE_NAME, state: 'success')
+                script{
+                    env.BUILD_TASKS += env.STAGE_NAME + "√..." + env.TAB_STR
+                }
+            }
+        }
+        stage('push-image') {
+            steps {
+                container('ci-tools') { //指定在 ci-tools 容器里执行
+                        retry(2) {
+                            sh('docker login ${REGISTRY} -u ${REGISTRY_CREDS_USR} -p ${REGISTRY_CREDS_PSW}')
+                            sh('docker push ${IMAGE_REPO}:${GIT_COMMIT}')
+
+                        }
+                }
+                updateGitlabCommitStatus(name: env.STAGE_NAME, state: 'success')
+                script{
+                    env.BUILD_TASKS += env.STAGE_NAME + "√..." + env.TAB_STR
+                }
+            }
+        }
+        stage('deploy') {
+            steps {
+                container('ci-tools') {
+                    timeout(time: 1, unit: 'MINUTES') {
+                        sh "sed -i 's#{{ELADMIN-IMAGE}}#${IMAGE_REPO}:${GIT_COMMIT}#g' manifest/*"  // 修改pod yaml文件
+                        sh "kubectl apply -f manifest/"   // 发布 pod
+                    }
+                }
+                updateGitlabCommitStatus(name: env.STAGE_NAME, state: 'success')
+                script{
+                    env.BUILD_TASKS += env.STAGE_NAME + "√..." + env.TAB_STR
+                }
+            }
+        }
+    }
+    post {
+        success {
+            container('ci-tools') {
+                echo 'Congratulations!'
+                sh """
+           //         curl 'https://oapi.dingtalk.com/robot/send?access_token=${DINGTALK_CREDS_PSW}' \
+           //             -H 'Content-Type: application/json' \
+            //            -d '{
+            //                "msgtype": "markdown",
+            //                "markdown": {
+           //                     "title":"myblog",
+           //                     "text": "😄👍 构建成功 👍😄  \n**项目名称**: luffy  \n**Git log**: ${GIT_LOG}   \n**构建分支**: ${GIT_BRANCH}   \n**构建地址**: ${RUN_DISPLAY_URL}  \n**构建任务**: ${BUILD_TASKS}"
+            //                }
+            //            }'
+                """
+            }
+
+        }
+        failure {
+            container('ci-tools') {
+                echo 'Oh no!'
+                sh """
+                  //  curl 'https://oapi.dingtalk.com/robot/send?access_token=${DINGTALK_CREDS_PSW}' \
+                   //     -H 'Content-Type: application/json' \
+                    //    -d '{
+                     //       "msgtype": "markdown",
+                      //      "markdown": {
+                       //         "title":"myblog",
+                        //        "text": "😖❌ 构建失败 ❌😖  \n**项目名称**: luffy  \n**Git log**: ${GIT_LOG}   \n**构建分支**: ${GIT_BRANCH}  \n**构建地址**: ${RUN_DISPLAY_URL}  \n**构建任务**: ${BUILD_TASKS}"
+                    //   }
+                       // }'
+                """
+            }
+
+        }
+        always {
+            echo 'I will always say Hello again!'
+        }
+    }
+}
