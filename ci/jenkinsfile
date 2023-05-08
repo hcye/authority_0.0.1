@@ -39,7 +39,8 @@ pipeline {
         stage('mvn package') {
             steps {
                 container('ci-tools') {   //指定在 ci-tools 容器里执行
-                    sh 'mvn clean package -Dmaven.test.skip=true'  // mvn 编译,跳过测试
+//                     sh 'mvn clean package -Dmaven.test.skip=true'  // mvn 编译,跳过测试
+                    sh 'mvn clean package'  // mvn 编译,跳过测试
                 }
                 updateGitlabCommitStatus(name: env.STAGE_NAME, state: 'success')
                 script{
