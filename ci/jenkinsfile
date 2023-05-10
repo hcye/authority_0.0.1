@@ -125,6 +125,7 @@ pipeline {
             container('ci-tools') {
                 echo 'Congratulations!'
                 sh """
+                    ls /
                 """
             }
 
