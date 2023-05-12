@@ -85,15 +85,12 @@ pipeline {
 
         stage('robot') {
                 steps {
-                    container('ci-tools') {
-                        when {
-                                    expression { BRANCH_NAME ==~ "develop" }
-                                }
-                                steps {
-                                    script {
-                                          devops.robot('hello world').start()
-                                                        }
-                                     echo 'Deploying to develop env'
+                      when {
+                         expression { BRANCH_NAME ==~ "develop" }  }
+                           steps {
+                             container('ci-tools') {
+                               script {
+                                     devops.robot('hello world').start() }
                         }
                     }
                 }
