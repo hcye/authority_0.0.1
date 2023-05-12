@@ -1,3 +1,4 @@
+@Library('helloworld') _
 pipeline {
     agent { label 'asm-builder'}
 
@@ -18,13 +19,11 @@ pipeline {
     }
 
     stages {
-        stage('gitlog') {
+        stage('env') {
             steps {
                 script{
-                    sh "git log --oneline -n 1 > gitlog.file"
-                    env.GIT_LOG = readFile("gitlog.file").trim()
+                    sh 'printenv'
                 }
-                sh 'printenv'
             }
         }
         stage('checkout') {
@@ -39,16 +38,13 @@ pipeline {
         stage('mvn package') {
             steps {
                 container('ci-tools') {   //指定在 ci-tools 容器里执行
-                    sh 'mvn clean package -Dmaven.test.skip=true'  // mvn 编译,跳过测试
-//                     sh 'mvn clean package'  // mvn 编译,跳过测试
-                }
-                updateGitlabCommitStatus(name: env.STAGE_NAME, state: 'success')
                 script{
-                    env.BUILD_TASKS += env.STAGE_NAME + "√..." + env.TAB_STR
+                    sh 'mvn clean package -Dmaven.test.skip=true'  // mvn 编译,跳过测试
+                   }
                 }
             }
         }
-         stage('CI'){
+         stage('sonar'){
                     failFast true
                     parallel {
                         stage('Unit Test') {
@@ -59,17 +55,8 @@ pipeline {
                         stage('Code Scan') {
                             steps {
                                 container('ci-tools') {
-                                    withSonarQubeEnv('sonarqube') {
-                                        sh 'sonar-scanner -X'
-                                        sleep 3
-                                    }
-                                    script {
-                                        timeout(1) {
-                                            def qg = waitForQualityGate('sonarqube')
-                                            if (qg.status != 'OK') {
-                                                error "未通过Sonarqube的代码质量阈检查，请及时修改！failure: ${qg.status}"
-                                            }
-                                        }
+                                    script{
+                                        devops.scan().start()
                                     }
                                 }
                             }
@@ -79,44 +66,20 @@ pipeline {
         stage('build-image') {
             steps {
                 container('ci-tools') {  //指定在 ci-tools 容器里执行
-                    retry(2) { sh 'docker build . -t ${IMAGE_REPO}:${GIT_COMMIT}'}   //docker build
-                }
-                updateGitlabCommitStatus(name: env.STAGE_NAME, state: 'success')
-                script{
-                    env.BUILD_TASKS += env.STAGE_NAME + "√..." + env.TAB_STR
-                }
-            }
-        }
-        stage('push-image') {
-            steps {
-                container('ci-tools') { //指定在 ci-tools 容器里执行
-                        retry(2) {
-                            sh('docker login ${REGISTRY} -u ${REGISTRY_CREDS_USR} -p ${REGISTRY_CREDS_PSW}')
-                            sh('docker push ${IMAGE_REPO}:${GIT_COMMIT}')
-
-                        }
-                }
-                updateGitlabCommitStatus(name: env.STAGE_NAME, state: 'success')
-                script{
-                    env.BUILD_TASKS += env.STAGE_NAME + "√..." + env.TAB_STR
+                    script{
+                        devops.docker(env.IMAGE_REPO,env.GIT_COMMIT,env.REGISTRY_CREDS).build().push()
+                    }
                 }
             }
         }
         stage('deploy') {
             steps {
                 container('ci-tools') {
-                    timeout(time: 1, unit: 'MINUTES') {
-                      //  sh "sed -i 's#{{ELADMIN-IMAGE}}#${IMAGE_REPO}:${GIT_COMMIT}#g' ci/*"  // 修改pod yaml文件
-		//	sh 'kubectl get ns'
-                        sh "kubectl -n asm create deployment asm --image=${IMAGE_REPO}:${GIT_COMMIT} --port 80"   // 发布 pod
-		                sh "kubectl -n asm create svc clusterip asm"
-
+                    script {
+                        devops.deploy("manifest")
                     }
                 }
-                updateGitlabCommitStatus(name: env.STAGE_NAME, state: 'success')
-                script{
-                    env.BUILD_TASKS += env.STAGE_NAME + "√..." + env.TAB_STR
-                }
+
             }
         }
     }
