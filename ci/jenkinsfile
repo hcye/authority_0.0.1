@@ -77,10 +77,9 @@ pipeline {
             steps {
                 container('ci-tools') {
                     script {
-                        devops.deploy("manifest")
+                        devops.deploy("manifest").start()
                     }
                 }
-
             }
         }
     }
@@ -89,7 +88,6 @@ pipeline {
             container('ci-tools') {
                 echo 'Congratulations!'
                 sh """
-                    ls /
                 """
             }
 
