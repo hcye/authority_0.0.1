@@ -14,7 +14,8 @@ pipeline {
         REGISTRY = "https://harbor.synsense-neuromorphic.com"
         IMAGE_REPO = "harbor.synsense-neuromorphic.com/local/asm"
  //       DINGTALK_CREDS = credentials('dingTalk')
-        REGISTRY_CREDS = credentials('docker-user-pwd')
+//         REGISTRY_CREDS = credentials('docker-user-pwd')
+        REGISTRY_CREDS = 'docker-user-pwd'
         TAB_STR = "\n                  \n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
     }
 
