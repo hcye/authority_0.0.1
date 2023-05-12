@@ -83,18 +83,19 @@ pipeline {
             }
         }
 
-        stage('robot') {
-                steps {
-                      when {
-                         expression { BRANCH_NAME ==~ "develop" }  }
-                           steps {
-                             container('ci-tools') {
-                               script {
-                                     devops.robot('hello world').start() }
-                        }
+  stage('robot') {
+            when {
+                expression { BRANCH_NAME ==~ /v.*/ }
+            }
+            steps {
+                container('tools') {
+                    script{
+                        devops.robot('hello world').start()
                     }
                 }
             }
+        }
+
     }
     post {
         success {
