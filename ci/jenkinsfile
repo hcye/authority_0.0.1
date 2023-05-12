@@ -82,6 +82,22 @@ pipeline {
                 }
             }
         }
+
+        stage('robot') {
+                steps {
+                    container('ci-tools') {
+                        when {
+                                    expression { BRANCH_NAME ==~ "develop" }
+                                }
+                                steps {
+                                    script {
+                                          devops.robot('hello world').start()
+                                                        }
+                                     echo 'Deploying to develop env'
+                        }
+                    }
+                }
+            }
     }
     post {
         success {
