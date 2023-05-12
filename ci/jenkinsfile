@@ -90,7 +90,7 @@ pipeline {
             steps {
                 container('ci-tools') {
                     script{
-                        devops.robot('hello world').helloworld()
+                        devops.robot('hello world').start()
                     }
                 }
             }
