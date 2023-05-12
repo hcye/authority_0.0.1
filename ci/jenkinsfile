@@ -109,7 +109,7 @@ pipeline {
                       //  sh "sed -i 's#{{ELADMIN-IMAGE}}#${IMAGE_REPO}:${GIT_COMMIT}#g' ci/*"  // 修改pod yaml文件
 		//	sh 'kubectl get ns'
                         sh "kubectl -n asm create deployment asm --image=${IMAGE_REPO}:${GIT_COMMIT} --port 80"   // 发布 pod
-		                sh "kubectl -n asm create svc asm"
+		                sh "kubectl -n asm create svc clusterip asm"
 
                     }
                 }
