@@ -31,7 +31,6 @@ public class JpaTests {
     @Test
     public void t1(){
         List< AssetType> types =jpaAssetType.findAssertType();
-
         }
     }
 
