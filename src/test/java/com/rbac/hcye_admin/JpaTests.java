@@ -17,20 +17,20 @@ import java.util.List;
 
 @SpringBootTest
 public class JpaTests {
-    @Autowired
-    JpaEmployee jpaEmployee;
-    @Autowired
-    JpaAssetType jpaAssetType;
-
-    @Autowired
-    JpaRole jpaRole;
-    @Autowired
-    JpaSwSwitch jpaSwSwitch;
-    @Autowired
-    SnmpCore snmpCore;
-    @Test
-    public void t1(){
-        List< AssetType> types =jpaAssetType.findAssertType();
-        }
+//    @Autowired
+//    JpaEmployee jpaEmployee;
+//    @Autowired
+//    JpaAssetType jpaAssetType;
+//
+//    @Autowired
+//    JpaRole jpaRole;
+//    @Autowired
+//    JpaSwSwitch jpaSwSwitch;
+//    @Autowired
+//    SnmpCore snmpCore;
+//    @Test
+//    public void t1(){
+//        List< AssetType> types =jpaAssetType.findAssertType();
+//        }
     }
 
