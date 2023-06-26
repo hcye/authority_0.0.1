@@ -1,7 +1,7 @@
 @Library('helloworld') _
 pipeline {
     agent {
-        node any
+        label "asm-builder"
     }
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
