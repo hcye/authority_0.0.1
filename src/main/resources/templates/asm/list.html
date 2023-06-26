@@ -114,7 +114,7 @@
                 // 添加编辑按钮点击事件
                 $("#tb").find("button[name='edit']").click(function () {
                     document.location.href = "/asm/edit_dev?id=" + $(this).parent().parent().find("input")[0].value+"&type="+$("#dev_type").val()+
-                        "&isDam=" + $("#is_damage").val()+"&cuindex=" + $("#pageInput").val();
+                        "&isDam=" + $("#is_damage").val()+"&cuindex=" + $("#pageInput").val()+"&keyword="+$("#keywords").val();
 
                     //获得操作角色id
                 });
@@ -284,7 +284,7 @@
     $(function () {
         $(document).ready(function () {
             // type,search,pre,next,pageIndex,jumpFlag,isDam
-            queryPage($("#dev_type").val(), "", "", "", $("#pageInput").val(), "jump", $("#is_damage").val());
+            queryPage($("#dev_type").val(), $("#keywords").val(), "", "", $("#pageInput").val(), "jump", $("#is_damage").val());
         });
 
 //导出表格
@@ -361,7 +361,7 @@
 
                 <div class="layui-inline">
                     <div class="layui-input-inline">
-                        <input class="layui-input"   placeholder="按编号、借用人、设备名检索" id="keywords"/>
+                        <input class="layui-input"  th:value="${keyword}"  placeholder="按编号、借用人、设备名检索" id="keywords"/>
                     </div>
                     <button class="layui-btn " id="search"> <i class="layui-icon">&#xe615;</i> 查找</button>
                     <div class="layui-btn-group">

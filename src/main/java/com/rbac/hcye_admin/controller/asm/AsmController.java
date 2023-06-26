@@ -149,7 +149,7 @@ public class AsmController {
 
     @RequiresPermissions("asm:list:view")
     @GetMapping("/asm/list")
-    public String listPage(Model model,String type,String isDam,String cuindex) throws UnsupportedEncodingException {
+    public String listPage(Model model,String type,String isDam,String cuindex,String keyword) throws UnsupportedEncodingException {
         List<AssetType> types= jpaAssetType.findAssertType();
         List<String> dam=new ArrayList<>();
         dam.add("完好");
@@ -177,6 +177,7 @@ public class AsmController {
         model.addAttribute("types",types);
         model.addAttribute("dam",dam);
         model.addAttribute("cuindex",cuindex);
+        model.addAttribute("keyword",keyword);
         return "asm/list";
     }
 
@@ -560,7 +561,7 @@ public class AsmController {
 
     @RequiresPermissions("asm:edit:btn")
     @GetMapping("/asm/edit_dev")
-    public String editDev(int id,String type,String isDam,String cuindex,Model model){
+    public String editDev(int id,String type,String isDam,String cuindex,String keyword,Model model){
         Assert anAssert= jpaAssert.findById(id).get();
         String name=anAssert.getAname();
         DevType devType=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(name,anAssert.getAssetTypeByAssertType());
@@ -601,6 +602,7 @@ public class AsmController {
         List<AssetType> assetTypes=jpaAssetType.findAll();
         assetTypes.remove(type);
         model.addAttribute("type",type);
+        model.addAttribute("keyword",keyword);
         model.addAttribute("all_types",assetTypes);
         model.addAttribute("isDam",isDam);
         model.addAttribute("temp",temp);
@@ -851,7 +853,7 @@ public class AsmController {
     @RequiresPermissions("asm:edit:btn")
     @GetMapping("/asm/save_dev")
     public String saveDev(int id,String types,String model,String price,String remarks,String sn,String num,String list_type,
-                          String list_isDam,String cuindex,String new_bro,String supplier,String zhuanyi,String locate,String inp_time,String img) throws UnsupportedEncodingException, ParseException {
+                          String list_isDam,String cuindex,String new_bro,String supplier,String zhuanyi,String locate,String inp_time,String img,String keyword) throws UnsupportedEncodingException, ParseException {
         String usname= (String) SecurityUtils.getSubject().getPrincipal();
         Assert anAssert=jpaAssert.findById(id).get();
         anAssert.setAssetTypeByAssertType(jpaAssetType.findAssetTypeByName(types));
@@ -926,7 +928,7 @@ public class AsmController {
         asmRecordService.write(AsmAction.dev_edit,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname),null,anAssert,"");
         String type=URLEncoder.encode(list_type,"UTF-8");
         String isDam=URLEncoder.encode(list_isDam,"UTF-8");
-        return "redirect:/asm/list?type="+type+"&isDam="+isDam+"&cuindex="+cuindex;
+        return "redirect:/asm/list?type="+type+"&isDam="+isDam+"&cuindex="+cuindex+"&keyword="+keyword;
 //        String type,String isDam,String search,String pre,String next,int pageIndex,String jumpFlag
     }
 
