@@ -1,6 +1,8 @@
 @Library('helloworld') _
 pipeline {
-    agent any
+    agent {
+        node any
+    }
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
         disableConcurrentBuilds()           //不允许并行构建
