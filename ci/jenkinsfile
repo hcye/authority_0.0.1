@@ -1,7 +1,6 @@
 @Library('helloworld') _
 pipeline {
     agent { label 'asm-builder'}
-
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
         disableConcurrentBuilds()           //不允许并行构建
