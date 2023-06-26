@@ -1,7 +1,7 @@
 @Library('helloworld') _
 pipeline {
     agent {
-        label "asm-builder"
+        label "java-builder"
     }
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
