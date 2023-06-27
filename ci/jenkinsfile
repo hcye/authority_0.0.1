@@ -79,7 +79,7 @@ pipeline {
             steps {
                 container('ci-tools') {
                     script {
-                        devops.deploy("manifest").start().check()
+                        devops.apply("manifest").start().check()
                     }
                 }
             }
