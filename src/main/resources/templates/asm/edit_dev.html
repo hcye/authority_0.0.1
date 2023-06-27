@@ -81,7 +81,7 @@
                             +"&list_type="+$("#list_type").val().trim() +"&list_isDam="+$("#list_isDam").val().trim()
                             +"&cuindex="+$("#cuindex").val().trim()+'&new_bro='+$("#bor_emp").val().trim()
                             +'&supplier='+sup+'&zhuanyi='+$("#zhuanyi").val().trim()+"&inp_time="+$("#inp_time").val()
-                            +"&locate="+$("#locate").val()+"&img="+$("#preview").attr('src')+"&keyword="+$("#keyword").val();
+                            +"&locate="+$("#locate").val()+"&img="+$("#preview").attr('src')+"&keyword="+$("#keyword").val().trim();
                     }
                 }, "json");
 
@@ -122,7 +122,7 @@
         })*/
 
         $("#cancel").click(function () {
-            document.location.href="/asm/list";
+            document.location.href="/asm/list?type="+$("#list_type").val()+"&isDam="+$("#list_isDam").val()+"&cuindex="+$("#cuindex").val()+"&keyword="+$("#keyword").val();
         })
     })
 </script>

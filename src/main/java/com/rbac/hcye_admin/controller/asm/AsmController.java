@@ -4,6 +4,7 @@ import com.rbac.hcye_admin.jpa.*;
 import com.rbac.hcye_admin.service.AsmRecordService;
 import com.rbac.hcye_admin.service.AsmService;
 import com.rbac.hcye_admin.service.PermissionService;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -928,7 +929,10 @@ public class AsmController {
         asmRecordService.write(AsmAction.dev_edit,new Timestamp(new java.util.Date().getTime()), (Employee) SecurityUtils.getSubject().getSession().getAttribute(usname),null,anAssert,"");
         String type=URLEncoder.encode(list_type,"UTF-8");
         String isDam=URLEncoder.encode(list_isDam,"UTF-8");
-        return "redirect:/asm/list?type="+type+"&isDam="+isDam+"&cuindex="+cuindex+"&keyword="+keyword;
+        String kw=URLEncoder.encode(keyword,"UTF-8");
+
+
+        return "redirect:/asm/list?type="+type+"&isDam="+isDam+"&cuindex="+cuindex+"&keyword="+kw;
 //        String type,String isDam,String search,String pre,String next,int pageIndex,String jumpFlag
     }
 
