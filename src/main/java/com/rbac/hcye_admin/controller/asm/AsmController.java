@@ -565,8 +565,8 @@ public class AsmController {
     public String editDev(int id,String type,String isDam,String cuindex,String keyword,Model model){
         Assert anAssert= jpaAssert.findById(id).get();
         String name=anAssert.getAname();
-//        DevType devType=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(name,anAssert.getAssetTypeByAssertType());
-//        String temp=devType.getAssetNumTemplate();
+        DevType devType=jpaDevType.findDevTypeByDevNameAndAssetTypeByAssertTypeId(name,anAssert.getAssetTypeByAssertType());
+        String temp=devType.getAssetNumTemplate();
         List<Suppplier> supppliers=jpaSupplier.findAll();
         Suppplier cu_sup=anAssert.getSuppplierBySupplier();
         if(cu_sup!=null){
@@ -606,7 +606,7 @@ public class AsmController {
         model.addAttribute("keyword",keyword);
         model.addAttribute("all_types",assetTypes);
         model.addAttribute("isDam",isDam);
-//        model.addAttribute("temp",temp);
+        model.addAttribute("temp",temp);
         model.addAttribute("cuindex",cuindex);
         model.addAttribute("stores",str_stores);
         model.addAttribute("suppliers",supppliers);
