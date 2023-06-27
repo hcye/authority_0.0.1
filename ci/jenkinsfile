@@ -17,6 +17,9 @@ pipeline {
  //       DINGTALK_CREDS = credentials('dingTalk')
 //         REGISTRY_CREDS = credentials('docker-user-pwd')
         REGISTRY_CREDS = 'docker-user-pwd'
+        DEPLOY_NS= 'asm'
+        DEV_NS = 'asm-dev'
+        DEPLOY_DOMAIN = 'asm.synsense.ai'
         TAB_STR = "\n                  \n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
     }
 
@@ -79,7 +82,7 @@ pipeline {
             steps {
                 container('ci-tools') {
                     script {
-                        devops.apply("manifest").start().check()
+                        devops.apply("manifest").start(env.DEPLOY_NS,env.DEV_NS,env.DEPLOY_DOMAIN).check()
                     }
                 }
             }
