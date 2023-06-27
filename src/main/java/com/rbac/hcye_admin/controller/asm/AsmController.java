@@ -938,13 +938,16 @@ public class AsmController {
      *
      * */
     @GetMapping("asm/outputTemplate")
-    public void exportAssetModel(HttpServletResponse response) throws FileNotFoundException {
+    public void exportAssetModel(HttpServletResponse response) throws IOException {
         OutputStream stream = null;
         try {
             stream =new BufferedOutputStream(response.getOutputStream()) ;
 
         } catch (IOException e) {
             e.printStackTrace();
+        }finally {
+            stream.flush();
+            stream.close();
         }
         String path= ClassUtils.getDefaultClassLoader().getResource("static/excel").getPath();   //上传资源到项目路径的路径获得
 
@@ -967,23 +970,27 @@ public class AsmController {
                 stream.write(bytes,0,i);
             }
             inputStream.close();
-            stream.flush();
-            stream.close();
         } catch (FileNotFoundException e) {
             return;
         } catch (IOException e) {
             return;
+        }finally {
+            stream.flush();
+            stream.close();
         }
     }
 
     @GetMapping("asm/outputUserTemplate")
-    public void exportUserModel(HttpServletResponse response) throws FileNotFoundException {
+    public void exportUserModel(HttpServletResponse response) throws IOException {
         OutputStream stream = null;
         try {
             stream =new BufferedOutputStream(response.getOutputStream()) ;
 
         } catch (IOException e) {
             e.printStackTrace();
+        }finally {
+            stream.flush();
+            stream.close();
         }
         String path= ClassUtils.getDefaultClassLoader().getResource("static/excel").getPath();   //上传资源到项目路径的路径获得
 
@@ -1006,12 +1013,13 @@ public class AsmController {
                 stream.write(bytes,0,i);
             }
             inputStream.close();
-            stream.flush();
-            stream.close();
         } catch (FileNotFoundException e) {
             return;
         } catch (IOException e) {
             return;
+        }finally {
+            stream.flush();
+            stream.close();
         }
     }
 }

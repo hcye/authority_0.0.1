@@ -444,13 +444,16 @@ public class StateCodeRestController {
     }
 
     @GetMapping("/stateCode/export_zip")
-    public void exportModel(HttpServletResponse response,String path) throws FileNotFoundException {
+    public void exportModel(HttpServletResponse response,String path) throws IOException {
         OutputStream stream = null;
         try {
             stream =new BufferedOutputStream(response.getOutputStream()) ;
 
         } catch (IOException e) {
             e.printStackTrace();
+        }finally {
+            stream.flush();
+            stream.close();
         }
 //        InputStream inputStream =new FileInputStream(file);
         File file=new File(path);
@@ -467,9 +470,7 @@ public class StateCodeRestController {
             while(((i=inputStream.read(bytes))!=-1)){
                 stream.write(bytes,0,i);
             }
-            inputStream.close();
-            stream.flush();
-            stream.close();
+
             // 清理输出目录
             String res=ExecShell.execCommand("python3 /opt/bin/task.py clean");
             System.out.println(res);
@@ -477,6 +478,10 @@ public class StateCodeRestController {
             return;
         } catch (IOException e) {
             return;
+        }finally {
+            stream.flush();
+            stream.close();
+            inputStream.close();
         }
     }
    //$.post("/stateCode/getRepo_url", {repoName:$("#r_repo_name").val()},
