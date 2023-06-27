@@ -948,13 +948,11 @@ public class AsmController {
         }finally {
             if (stream != null){
                 stream.flush();
+                stream.close();
             }
-            stream.close();
-        }
-        String path= ClassUtils.getDefaultClassLoader().getResource("static/excel").getPath();   //上传资源到项目路径的路径获得
 
-        File file=new File(path+"/"+"moban1.xlsx");
-//        InputStream inputStream =new FileInputStream(file);
+        }
+
         InputStream inputStream =this.getClass().getClassLoader().getResourceAsStream("static/excel/moban1.xlsx");
         response.setHeader("Content-disposition", "attachment; filename=" + "template.xlsx");
         response.setContentType("application/octet-stream;charset=UTF-8");//设置类型
@@ -979,8 +977,9 @@ public class AsmController {
         }finally {
             if (stream != null){
                 stream.flush();
+                stream.close();
             }
-            stream.close();
+
         }
     }
 
@@ -993,13 +992,13 @@ public class AsmController {
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
-            stream.flush();
-            stream.close();
-        }
-        String path= ClassUtils.getDefaultClassLoader().getResource("static/excel").getPath();   //上传资源到项目路径的路径获得
+            if(stream != null){
+                stream.flush();
+                stream.close();
+            }
 
-        File file=new File(path+"/"+"user_mb.xlsx");
-//        InputStream inputStream =new FileInputStream(file);
+        }
+
         InputStream inputStream =this.getClass().getClassLoader().getResourceAsStream("static/excel/user_mb.xlsx");
         response.setHeader("Content-disposition", "attachment; filename=" + "template.xlsx");
         response.setContentType("application/octet-stream;charset=UTF-8");//设置类型
@@ -1024,8 +1023,8 @@ public class AsmController {
         }finally {
             if (stream != null){
                 stream.flush();
+                stream.close();
             }
-            stream.close();
         }
     }
 }
