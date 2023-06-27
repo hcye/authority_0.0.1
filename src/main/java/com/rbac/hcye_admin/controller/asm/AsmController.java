@@ -946,7 +946,9 @@ public class AsmController {
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
-            stream.flush();
+            if (stream != null){
+                stream.flush();
+            }
             stream.close();
         }
         String path= ClassUtils.getDefaultClassLoader().getResource("static/excel").getPath();   //上传资源到项目路径的路径获得
@@ -975,7 +977,9 @@ public class AsmController {
         } catch (IOException e) {
             return;
         }finally {
-            stream.flush();
+            if (stream != null){
+                stream.flush();
+            }
             stream.close();
         }
     }
@@ -1018,7 +1022,9 @@ public class AsmController {
         } catch (IOException e) {
             return;
         }finally {
-            stream.flush();
+            if (stream != null){
+                stream.flush();
+            }
             stream.close();
         }
     }
