@@ -16,7 +16,7 @@ pipeline {
         IMAGE_REPO = "harbor.synsense-neuromorphic.com/local/asm"
  //       DINGTALK_CREDS = credentials('dingTalk')
 //         REGISTRY_CREDS = credentials('docker-user-pwd')
-        REGISTRY_CREDS = 'docker-user-pwd'
+        REGISTRY_CREDS = 'harbor'
         DEPLOY_NS= 'asm'
         DEV_NS = 'asm-dev'
         DEPLOY_DOMAIN = 'asm.synsense.ai'
