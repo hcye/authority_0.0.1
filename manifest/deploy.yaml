@@ -27,6 +27,17 @@ spec:
         - image: {{IMAGE}}
           imagePullPolicy: IfNotPresent
           name: asm
+          env:
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: asm-db-sec
+                  key: DB-USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: asm-db-sec
+                  key: DB-PSW
           ports:
             - containerPort: 80
               protocol: TCP
