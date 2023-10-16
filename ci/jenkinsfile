@@ -90,7 +90,7 @@ pipeline {
 
   stage('robot') {
             when {
-                expression { BRANCH_NAME ==~ /v.*/ }
+                expression { GIT_BRANCH ==~ /v.*/ }
             }
             steps {
                 container('ci-tools') {
